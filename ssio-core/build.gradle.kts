@@ -1,0 +1,116 @@
+/*
+ * Copyright 2025 Karma Krafts
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
+
+import com.android.build.api.dsl.KotlinMultiplatformAndroidCompilation
+import dev.karmakrafts.conventions.asAAR
+import dev.karmakrafts.conventions.configureJava
+import dev.karmakrafts.conventions.defaultDokkaConfig
+import dev.karmakrafts.conventions.setProjectInfo
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+
+plugins {
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.dokka)
+    signing
+    `maven-publish`
+}
+
+configureJava(libs.versions.java)
+defaultDokkaConfig()
+
+kotlin {
+    jvm()
+    androidLibrary {
+        namespace = "$group.${rootProject.name}"
+        compileSdk = libs.versions.androidCompileSDK.get().toInt()
+        minSdk = libs.versions.androidMinimalSDK.get().toInt()
+    }
+    androidNativeX64()
+    androidNativeX86()
+    androidNativeArm32()
+    androidNativeArm64()
+    mingwX64()
+    linuxX64()
+    linuxArm64()
+    macosX64()
+    macosArm64()
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+    watchosArm32()
+    watchosArm64()
+    watchosX64()
+    watchosSimulatorArm64()
+    tvosX64()
+    tvosArm64()
+    tvosSimulatorArm64()
+    applyDefaultHierarchyTemplate {
+        common {
+            group("jvmAndAndroid") {
+                withJvm()
+                withCompilations { it is KotlinMultiplatformAndroidCompilation }
+            }
+            group("native") {
+                group("posix") { // All non-Windows OSs can use mmap no problem
+                    withAndroidNative()
+                    withLinux()
+                    withMacos()
+                    withIos()
+                    withWatchos()
+                    withTvos()
+                }
+            }
+        }
+    }
+    sourceSets {
+        commonMain {
+            dependencies {
+                api(libs.kotlinx.io.bytestring)
+                api(libs.kotlinx.io.core)
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
+        }
+        androidMain {
+            dependencies {
+                api(libs.jna.asAAR())
+            }
+        }
+    }
+}
+
+tasks {
+    withType<JavaCompile> {
+        options.compilerArgs.add("--enable-preview")
+    }
+    withType<JavaExec> {
+        jvmArgs("--enable-preview")
+    }
+}
+
+publishing {
+    setProjectInfo(
+        name = "SSIO Core",
+        description = "Async IO extension for kotlinx.io",
+        url = "https://git.karmakrafts.dev/kk/SSIO"
+    )
+}
