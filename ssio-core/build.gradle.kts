@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Karma Krafts
+ * Copyright 2026 Karma Krafts
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,16 @@
 
 @file:OptIn(ExperimentalKotlinGradlePluginApi::class)
 
-import com.android.build.api.dsl.KotlinMultiplatformAndroidCompilation
 import dev.karmakrafts.conventions.asAAR
 import dev.karmakrafts.conventions.configureJava
 import dev.karmakrafts.conventions.defaultDokkaConfig
+import dev.karmakrafts.conventions.kotlin.defaultCompilerOptions
+import dev.karmakrafts.conventions.kotlin.withAndroidLibrary
+import dev.karmakrafts.conventions.kotlin.withBrowser
+import dev.karmakrafts.conventions.kotlin.withJvm
+import dev.karmakrafts.conventions.kotlin.withNative
+import dev.karmakrafts.conventions.kotlin.withNodeJs
+import dev.karmakrafts.conventions.kotlin.withWeb
 import dev.karmakrafts.conventions.setProjectInfo
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
@@ -35,36 +41,20 @@ configureJava(libs.versions.java)
 defaultDokkaConfig()
 
 kotlin {
-    jvm()
-    androidLibrary {
-        namespace = "$group.${rootProject.name}"
-        compileSdk = libs.versions.androidCompileSDK.get().toInt()
-        minSdk = libs.versions.androidMinimalSDK.get().toInt()
+    defaultCompilerOptions()
+    withSourcesJar()
+    withJvm()
+    withAndroidLibrary("$group.core")
+    withNative()
+    withWeb {
+        withBrowser()
+        withNodeJs()
     }
-    androidNativeX64()
-    androidNativeX86()
-    androidNativeArm32()
-    androidNativeArm64()
-    mingwX64()
-    linuxX64()
-    linuxArm64()
-    macosX64()
-    macosArm64()
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
-    watchosArm32()
-    watchosArm64()
-    watchosX64()
-    watchosSimulatorArm64()
-    tvosX64()
-    tvosArm64()
-    tvosSimulatorArm64()
     applyDefaultHierarchyTemplate {
         common {
             group("jvmAndAndroid") {
                 withJvm()
-                withCompilations { it is KotlinMultiplatformAndroidCompilation }
+                withAndroidLibrary()
             }
             group("native") {
                 group("posix") { // All non-Windows OSs can use mmap no problem
