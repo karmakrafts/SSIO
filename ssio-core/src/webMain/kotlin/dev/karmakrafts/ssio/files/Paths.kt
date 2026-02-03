@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio
+package dev.karmakrafts.ssio.files
 
-actual typealias Path = kotlinx.io.files.Path
-
-actual fun Path(path: String): Path = kotlinx.io.files.Path(path)
+actual object Paths {
+    actual val separator: String = "/"
+}

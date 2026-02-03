@@ -16,9 +16,29 @@
 
 package dev.karmakrafts.ssio
 
+import dev.karmakrafts.ssio.files.Path
+import kotlinx.io.files.FileMetadata
+
 private object AsyncFileSystemImpl : AbstractAsyncFileSystem() {
-    override val workingDirectory: Path
-        get() = TODO("Not yet implemented")
+    override suspend fun getWorkingDirectory(): Path {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getTempDirectory(): Path {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun metadataOrNull(path: Path): FileMetadata? {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun list(path: Path): List<Path> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun createDirectories(path: Path, mustCreate: Boolean) {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun source(path: Path): AsyncRawSource {
         TODO("Not yet implemented")

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio
+package dev.karmakrafts.ssio.files
 
 import kotlinx.io.files.Path as KxioPath
 
@@ -24,7 +24,12 @@ expect class Path {
     val name: String
 
     override fun toString(): String
+    override fun equals(other: Any?): Boolean
+    override fun hashCode(): Int
 }
+
+expect fun Path.toKxio(): KxioPath
+expect fun KxioPath.toSsio(): Path
 
 expect fun Path(path: String): Path
 
@@ -38,10 +43,7 @@ fun Path(base: Path, vararg segments: String): Path {
 
 fun Path(base: String, vararg segments: String): Path = Path(Path(base), *segments)
 
-fun Path.getSegments(): List<String> = toString().split(Paths.separator)
-
-fun Path.toKxio(): KxioPath = KxioPath(toString())
-fun KxioPath.toSsio(): Path = Path(toString())
+fun Path.getSegments(): List<String> = toString().split(Paths.separator).filterNot(String::isEmpty)
 
 operator fun Path.div(other: String): Path = Path(this, other)
 operator fun Path.div(other: Path): Path = Path(this, *other.getSegments().toTypedArray())

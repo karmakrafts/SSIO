@@ -16,8 +16,6 @@
 
 package dev.karmakrafts.ssio
 
-import java.io.File
-
-actual object Paths {
-    actual val separator: String get() = File.separator
-}
+@RequiresOptIn(message = "The SSIO API you are trying to use can be brittle or dangerous")
+@Retention(AnnotationRetention.BINARY)
+annotation class DelicateSsioApi

@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio
+package dev.karmakrafts.ssio.files
 
-import kotlin.experimental.ExperimentalNativeApi
-
-@OptIn(ExperimentalNativeApi::class)
-actual object Paths {
-    actual val separator: String by lazy {
-        when (Platform.osFamily) {
-            OsFamily.WINDOWS -> "\\"
-            else -> "/"
-        }
-    }
+expect object Paths {
+    val separator: String
 }

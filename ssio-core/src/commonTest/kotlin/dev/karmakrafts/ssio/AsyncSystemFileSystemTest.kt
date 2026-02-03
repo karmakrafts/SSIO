@@ -16,8 +16,10 @@
 
 package dev.karmakrafts.ssio
 
+import dev.karmakrafts.ssio.files.Path
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class AsyncSystemFileSystemTest {
@@ -38,7 +40,30 @@ class AsyncSystemFileSystemTest {
     }
 
     @Test
-    fun `Resolve absolute path`() {
+    fun `Create file`() = runTest {
+        val path = Path("test.txt")
+        AsyncSystemFileSystem.sink(path).use {}
+        AsyncSystemFileSystem.delete(path)
+    }
 
+    @Test
+    fun `Check if file exists`() = runTest {
+        val path = Path("test.txt")
+        AsyncSystemFileSystem.delete(path)
+        assertFalse(AsyncSystemFileSystem.exists(path))
+        AsyncSystemFileSystem.sink(path).use {}
+        assertTrue(AsyncSystemFileSystem.exists(path))
+        AsyncSystemFileSystem.delete(path)
+    }
+
+    @Test
+    fun `List files`() = runTest {
+        val path = Path("test.txt")
+        var entries = AsyncSystemFileSystem.list(Path(""))
+        assertTrue(entries.isEmpty())
+        AsyncSystemFileSystem.sink(path).use {}
+        entries = AsyncSystemFileSystem.list(Path(""))
+        assertTrue(path in entries)
+        AsyncSystemFileSystem.delete(path)
     }
 }

@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio
+package dev.karmakrafts.ssio.files
 
-expect object Paths {
-    val separator: String
+import kotlinx.io.files.SystemPathSeparator
+
+actual object Paths {
+    actual val separator: String = SystemPathSeparator.toString()
 }

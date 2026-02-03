@@ -14,29 +14,51 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalWasmJsInterop::class)
+
 package dev.karmakrafts.ssio.opfs
 
 import dev.karmakrafts.ssio.AsyncRawSink
-import dev.karmakrafts.ssio.Path
+import js.typedarrays.toInt8Array
 import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
+import web.fs.FileSystemWritableFileStream
+import web.fs.write
+import web.streams.close
+import kotlin.js.ExperimentalWasmJsInterop
+import kotlin.math.min
 
 internal class OPFSFileSink( // @formatter:off
-    private val path: Path,
-    private val append: Boolean
+    private val stream: FileSystemWritableFileStream
 ) : AsyncRawSink { // @formatter:on
-    override suspend fun write(source: Buffer, byteCount: Long) {
+    private var isClosed: Boolean = false
 
+    override suspend fun write(source: Buffer, byteCount: Long) {
+        check(!isClosed) { "OPFSFileSink is already closed" }
+        var remaining = byteCount
+        while (remaining > 0) {
+            val toWrite = min(remaining, Int.MAX_VALUE.toLong()).toInt()
+            val data = source.readByteArray(toWrite).toInt8Array()
+            stream.write(data)
+            remaining -= toWrite
+        }
     }
 
     override suspend fun flush() {
-        TODO("Not yet implemented")
+        check(!isClosed) { "OPFSFileSink is already closed" }
+        // Flush is a NOOP for OPFS sinks
     }
 
     override suspend fun close() {
-        TODO("Not yet implemented")
+        check(!isClosed) { "OPFSFileSink is already closed" }
+        stream.close()
+        isClosed = true
     }
 
     override fun closeAbruptly() {
-        TODO("Not yet implemented")
+        check(!isClosed) { "OPFSFileSink is already closed" }
+        stream.closeAsync().finally {
+            isClosed = true
+        }
     }
 }

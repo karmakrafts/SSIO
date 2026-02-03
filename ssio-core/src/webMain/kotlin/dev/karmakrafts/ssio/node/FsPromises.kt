@@ -18,15 +18,12 @@
 
 package dev.karmakrafts.ssio.node
 
+import js.import.import
 import js.promise.Promise
 import js.promise.await
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
 import kotlin.js.definedExternally
-import kotlin.js.js
-
-@Suppress("UNUSED_PARAMETER")
-private fun <I : JsAny> import(name: String): Promise<I> = js("""import(name)""")
 
 internal external interface ReadResult<B : JsAny> : JsAny {
     val bytesRead: Int
@@ -62,7 +59,7 @@ private external interface FsPromisesApi : JsAny {
 
 internal object FsPromises {
     suspend fun open(path: String, mode: String): FileHandle {
-        val fs = import<FsPromisesApi>("fs/promises").await()
+        val fs = import<FsPromisesApi>("fs/promises")
         return fs.open(path, mode).await()
     }
 }

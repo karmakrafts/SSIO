@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio
+package dev.karmakrafts.ssio.files
+
+import dev.karmakrafts.ssio.DelicateSsioApi
+import kotlinx.io.files.Path as KxioPath
 
 actual class Path {
     var value: String = ""
@@ -35,8 +38,16 @@ actual class Path {
         }
 
     actual override fun toString(): String = value
+    actual override fun equals(other: Any?): Boolean = other is Path && value == other.value
+    actual override fun hashCode(): Int = value.hashCode()
 }
 
 actual fun Path(path: String): Path = Path().apply {
     value = path
 }
+
+@DelicateSsioApi
+actual fun Path.toKxio(): KxioPath = KxioPath(toString())
+
+@DelicateSsioApi
+actual fun KxioPath.toSsio(): Path = Path(toString())

@@ -16,15 +16,23 @@
 
 package dev.karmakrafts.ssio
 
-interface AsyncFileSystem {
-    val workingDirectory: Path
+import dev.karmakrafts.ssio.files.Path
+import kotlinx.io.files.FileMetadata
 
-    suspend fun source(path: Path): AsyncRawSource
-    suspend fun sink(path: Path, append: Boolean = false): AsyncRawSink
+interface AsyncFileSystem {
+    suspend fun getWorkingDirectory(): Path
+    suspend fun getTempDirectory(): Path
+
     suspend fun exists(path: Path): Boolean
     suspend fun move(oldPath: Path, newPath: Path)
     suspend fun delete(path: Path)
-    suspend fun resolve(path: Path): Path // TODO: investigate if this really has to be suspend
+    suspend fun resolve(path: Path): Path
+    suspend fun metadataOrNull(path: Path): FileMetadata?
+    suspend fun list(path: Path): List<Path>
+    suspend fun createDirectories(path: Path, mustCreate: Boolean = false)
+
+    suspend fun source(path: Path): AsyncRawSource
+    suspend fun sink(path: Path, append: Boolean = false): AsyncRawSink
 }
 
 expect val AsyncSystemFileSystem: AsyncFileSystem

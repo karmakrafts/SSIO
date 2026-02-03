@@ -17,21 +17,48 @@
 package dev.karmakrafts.ssio.opfs
 
 import dev.karmakrafts.ssio.AsyncRawSource
-import dev.karmakrafts.ssio.Path
+import js.buffer.ArrayBuffer
+import js.typedarrays.Uint8Array
+import js.typedarrays.toByteArray
 import kotlinx.io.Buffer
+import web.streams.ReadableStreamDefaultReader
+import web.streams.cancel
+import web.streams.read
+import kotlin.math.min
 
-internal class OPFSFileSource(
-    private val path: Path
-) : AsyncRawSource {
+internal class OPFSFileSource( // @formatter:off
+    private val reader: ReadableStreamDefaultReader<Uint8Array<ArrayBuffer>>,
+    private val size: Long
+) : AsyncRawSource { // @formatter:on
+    private var isClosed: Boolean = false
+
     override suspend fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
-        TODO("Not yet implemented")
+        check(!isClosed) { "OPFSFileSource is already closed" }
+        var remaining = min(this.size, byteCount)
+        if (remaining == 0L) return -1L
+        var readTotal = 0L
+        while (remaining > 0) {
+            val result = reader.read()
+            if (result.done) break
+            val data = result.value?.toByteArray() ?: break
+            sink.write(data)
+            val dataSize = data.size.toLong()
+            remaining -= dataSize
+            readTotal += dataSize
+        }
+        return readTotal
     }
 
     override suspend fun close() {
-        TODO("Not yet implemented")
+        check(!isClosed) { "OPFSFileSource is already closed" }
+        reader.cancel()
+        isClosed = true
     }
 
     override fun closeAbruptly() {
-        TODO("Not yet implemented")
+        check(!isClosed) { "OPFSFileSource is already closed" }
+        reader.cancelAsync().finally {
+            isClosed = true
+        }
     }
 }

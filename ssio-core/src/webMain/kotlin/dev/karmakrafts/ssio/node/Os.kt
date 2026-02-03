@@ -14,8 +14,18 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio
+@file:OptIn(ExperimentalWasmJsInterop::class)
 
-actual object Paths {
-    actual val separator: String = "/"
+package dev.karmakrafts.ssio.node
+
+import js.import.import
+import kotlin.js.ExperimentalWasmJsInterop
+import kotlin.js.JsAny
+
+private external interface OsApi : JsAny {
+    fun tmpdir(): String
+}
+
+internal object Os {
+    suspend fun tmpdir(): String = import<OsApi>("os").tmpdir()
 }
