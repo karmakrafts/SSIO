@@ -24,6 +24,7 @@ import dev.karmakrafts.ssio.AsyncRawSource
 import dev.karmakrafts.ssio.files.Path
 import dev.karmakrafts.ssio.files.getSegments
 import js.disposable.use
+import js.iterable.IteratorReturnResult
 import js.promise.await
 import kotlinx.io.files.FileMetadata
 import web.fs.FileSystemDirectoryHandle
@@ -41,13 +42,7 @@ import web.fs.write
 import web.navigator.navigator
 import web.storage.getDirectory
 import kotlin.js.ExperimentalWasmJsInterop
-import kotlin.js.JsAny
 import kotlin.js.unsafeCast
-
-private external interface IteratorResult<T : JsAny> : JsAny {
-    val done: Boolean
-    val value: T
-}
 
 /**
  * Async filesystem for JS/WASM using OPFS APIs.
@@ -88,7 +83,7 @@ internal object OPFSFileSystem : AbstractAsyncFileSystem() {
         val iterator = handle.values()
         val entries = ArrayList<Path>()
         while (true) {
-            val result = iterator.next().await().unsafeCast<IteratorResult<FileSystemHandle>>()
+            val result = iterator.next().await().unsafeCast<IteratorReturnResult<FileSystemHandle>>()
             if (result.done) break
             entries += Path(result.value.name)
         }
