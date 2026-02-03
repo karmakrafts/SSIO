@@ -47,7 +47,9 @@ kotlin {
     withAndroidLibrary("$group.core")
     withNative()
     withWeb {
-        withBrowser()
+        withBrowser {
+            useEsModules()
+        }
         withNodeJs()
     }
     applyDefaultHierarchyTemplate {
@@ -73,11 +75,18 @@ kotlin {
             dependencies {
                 api(libs.kotlinx.io.bytestring)
                 api(libs.kotlinx.io.core)
+                api(libs.kotlinx.coroutines.core)
             }
         }
         commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
+                implementation(libs.kotlinx.coroutines.test)
+            }
+        }
+        webMain {
+            dependencies {
+                api(libs.kotlin.wrappers.browser)
             }
         }
         androidMain {

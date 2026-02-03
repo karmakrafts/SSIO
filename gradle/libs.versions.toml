@@ -9,7 +9,9 @@ androidMinimalSDK = "28"
 ssio = "1.0.0"
 karmaConventions = "1.10.17" # https://github.com/karmakrafts/karma-conventions/tags
 kotlin = "2.3.20-Beta2" # https://github.com/JetBrains/kotlin/releases
+kotlinWrappers = "2026.2.2" # https://github.com/JetBrains/kotlin-wrappers/releases
 kotlinxIo = "0.8.2" # https://github.com/Kotlin/kotlinx-io/releases
+kotlinxCoroutines = "1.10.2" # https://github.com/Kotlin/kotlinx.coroutines/releases
 dokka = "2.2.0-Beta" # https://github.com/Kotlin/dokka/releases
 gradleNexus = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
 jna = "5.18.1" # https://github.com/java-native-access/jna/tags
@@ -17,8 +19,11 @@ jna = "5.18.1" # https://github.com/java-native-access/jna/tags
 [libraries]
 
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-wrappers-browser = { module = "org.jetbrains.kotlin-wrappers:kotlin-browser", version.ref = "kotlinWrappers" }
 kotlinx-io-bytestring = { module = "org.jetbrains.kotlinx:kotlinx-io-bytestring", version.ref = "kotlinxIo" }
 kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinxIo" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 
 [plugins]

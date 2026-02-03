@@ -16,10 +16,17 @@
 
 package dev.karmakrafts.ssio
 
-import kotlinx.io.Buffer
-import kotlinx.io.InternalIoApi
-
-sealed interface AsyncSink : AsyncRawSink {
-    @InternalIoApi
-    val buffer: Buffer
+interface AsyncSink : AsyncRawSink {
+    suspend fun writeByte(value: Byte)
+    suspend fun writeShort(value: Short)
+    suspend fun writeInt(value: Int)
+    suspend fun writeLong(value: Long)
 }
+
+suspend fun AsyncSink.writeUByte(value: UByte) = writeByte(value.toByte())
+suspend fun AsyncSink.writeUShort(value: UShort) = writeShort(value.toShort())
+suspend fun AsyncSink.writeUInt(value: UInt) = writeInt(value.toInt())
+suspend fun AsyncSink.writeULong(value: ULong) = writeLong(value.toLong())
+
+suspend fun AsyncSink.writeFloat(value: Float) = writeInt(value.toBits())
+suspend fun AsyncSink.writeDouble(value: Double) = writeLong(value.toBits())

@@ -16,13 +16,20 @@
 
 package dev.karmakrafts.ssio
 
-import kotlinx.io.Buffer
-import kotlinx.io.InternalIoApi
-
-sealed interface AsyncSource : AsyncRawSource {
-    @InternalIoApi
-    val buffer: Buffer
-
+interface AsyncSource : AsyncRawSource {
     suspend fun await(predicate: AwaitPredicate): Result<Boolean>
     suspend fun awaitOrThrow(predicate: AwaitPredicate) = await(predicate).getOrThrow()
+
+    suspend fun readByte(): Byte
+    suspend fun readShort(): Short
+    suspend fun readInt(): Int
+    suspend fun readLong(): Long
 }
+
+suspend fun AsyncSource.readUByte(): UByte = readByte().toUByte()
+suspend fun AsyncSource.readUShort(): UShort = readShort().toUShort()
+suspend fun AsyncSource.readUInt(): UInt = readInt().toUInt()
+suspend fun AsyncSource.readULong(): ULong = readLong().toULong()
+
+suspend fun AsyncSource.readFloat(): Float = Float.fromBits(readInt())
+suspend fun AsyncSource.readDouble(): Double = Double.fromBits(readLong())
