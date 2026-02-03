@@ -91,7 +91,11 @@ internal object OPFSFileSystem : AbstractAsyncFileSystem() {
     }
 
     override suspend fun createDirectories(path: Path, mustCreate: Boolean) {
-        TODO("Not yet implemented")
+        if (exists(path)) {
+            if (mustCreate) error("Cannot create directory at $path")
+            else return
+        }
+        getDirectoryHandle(path, create = true)
     }
 
     override suspend fun metadataOrNull(path: Path): FileMetadata? {
