@@ -19,10 +19,10 @@ package dev.karmakrafts.ssio.opfs
 import dev.karmakrafts.ssio.AbstractAsyncFileSystem
 import dev.karmakrafts.ssio.AsyncRawSink
 import dev.karmakrafts.ssio.AsyncRawSource
+import dev.karmakrafts.ssio.Path
 import js.disposable.use
 import js.promise.await
 import js.promise.catch
-import kotlinx.io.files.Path
 import web.fs.createWritable
 import web.fs.getFileHandle
 import web.fs.removeEntry

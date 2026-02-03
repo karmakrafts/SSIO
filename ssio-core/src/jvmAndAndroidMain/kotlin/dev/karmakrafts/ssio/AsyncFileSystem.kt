@@ -16,9 +16,10 @@
 
 package dev.karmakrafts.ssio
 
-import kotlinx.io.files.Path
+private object AsyncFileSystemImpl : AbstractAsyncFileSystem() {
+    override val workingDirectory: Path
+        get() = TODO("Not yet implemented")
 
-private object AsyncFileSystemImpl : AsyncFileSystem {
     override suspend fun source(path: Path): AsyncRawSource {
         TODO("Not yet implemented")
     }

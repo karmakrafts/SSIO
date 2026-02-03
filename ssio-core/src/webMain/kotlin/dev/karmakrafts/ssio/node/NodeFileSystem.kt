@@ -19,7 +19,7 @@ package dev.karmakrafts.ssio.node
 import dev.karmakrafts.ssio.AbstractAsyncFileSystem
 import dev.karmakrafts.ssio.AsyncRawSink
 import dev.karmakrafts.ssio.AsyncRawSource
-import kotlinx.io.files.Path
+import dev.karmakrafts.ssio.Path
 
 internal object NodeFileSystem : AbstractAsyncFileSystem() {
     override val workingDirectory: Path = Path(process.cwd())

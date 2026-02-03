@@ -47,9 +47,7 @@ kotlin {
     withAndroidLibrary("$group.core")
     withNative()
     withWeb {
-        withBrowser {
-            useEsModules()
-        }
+        withBrowser()
         withNodeJs()
     }
     applyDefaultHierarchyTemplate {
@@ -72,13 +70,8 @@ kotlin {
                 }
             }
             group("nonWeb") {
-                withJvm()
-                withAndroidNative()
-                withLinux()
-                withMacos()
-                group("ios")
-                group("tvos")
-                group("watchos")
+                group("jvmAndAndroid")
+                group("native")
             }
         }
     }

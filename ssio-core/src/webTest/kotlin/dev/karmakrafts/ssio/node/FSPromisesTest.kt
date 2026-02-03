@@ -36,7 +36,7 @@ class FSPromisesTest {
             println()
             return@runTest
         }
-        val handle = FsPromises.open("test_file.txt", "w").await()
+        val handle = FsPromises.open("test_file.txt", "w")
         handle.close().await()
     }
 
@@ -50,12 +50,12 @@ class FSPromisesTest {
 
         val expectedValue = "Hello, World!"
 
-        var handle = FsPromises.open("test_file.txt", "w").await()
+        var handle = FsPromises.open("test_file.txt", "w")
         val writeResult = handle.write(expectedValue.toJsString()).await()
         assertEquals(expectedValue.length, writeResult.bytesWritten)
         handle.close().await()
 
-        handle = FsPromises.open("test_file.txt", "r").await()
+        handle = FsPromises.open("test_file.txt", "r")
         val readResult = handle.read(ArrayBuffer(128)).await()
         assertEquals(expectedValue.length, readResult.bytesRead)
 

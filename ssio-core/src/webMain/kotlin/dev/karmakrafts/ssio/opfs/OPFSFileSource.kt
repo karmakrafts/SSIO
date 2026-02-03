@@ -17,8 +17,8 @@
 package dev.karmakrafts.ssio.opfs
 
 import dev.karmakrafts.ssio.AsyncRawSource
+import dev.karmakrafts.ssio.Path
 import kotlinx.io.Buffer
-import kotlinx.io.files.Path
 
 internal class OPFSFileSource(
     private val path: Path

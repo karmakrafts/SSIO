@@ -16,15 +16,27 @@
 
 package dev.karmakrafts.ssio
 
-interface AsyncFileSystem {
-    val workingDirectory: Path
+actual class Path {
+    var value: String = ""
 
-    suspend fun source(path: Path): AsyncRawSource
-    suspend fun sink(path: Path, append: Boolean = false): AsyncRawSink
-    suspend fun exists(path: Path): Boolean
-    suspend fun move(oldPath: Path, newPath: Path)
-    suspend fun delete(path: Path)
-    suspend fun resolve(path: Path): Path // TODO: investigate if this really has to be suspend
+    actual val isAbsolute: Boolean
+        get() = value.startsWith(Paths.separator)
+
+    actual val parent: Path?
+        get() {
+            if (Paths.separator !in value) return null
+            return Path(value.substringBeforeLast(Paths.separator))
+        }
+
+    actual val name: String
+        get() {
+            return if (Paths.separator in value) value.substringAfterLast(Paths.separator)
+            else value
+        }
+
+    actual override fun toString(): String = value
 }
 
-expect val AsyncSystemFileSystem: AsyncFileSystem
+actual fun Path(path: String): Path = Path().apply {
+    value = path
+}

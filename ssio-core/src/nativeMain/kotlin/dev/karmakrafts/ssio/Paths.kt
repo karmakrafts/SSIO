@@ -14,29 +14,16 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio.opfs
+package dev.karmakrafts.ssio
 
-import dev.karmakrafts.ssio.AsyncRawSink
-import dev.karmakrafts.ssio.Path
-import kotlinx.io.Buffer
+import kotlin.experimental.ExperimentalNativeApi
 
-internal class OPFSFileSink( // @formatter:off
-    private val path: Path,
-    private val append: Boolean
-) : AsyncRawSink { // @formatter:on
-    override suspend fun write(source: Buffer, byteCount: Long) {
-
-    }
-
-    override suspend fun flush() {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun close() {
-        TODO("Not yet implemented")
-    }
-
-    override fun closeAbruptly() {
-        TODO("Not yet implemented")
+@OptIn(ExperimentalNativeApi::class)
+actual object Paths {
+    actual val separator: String by lazy {
+        when (Platform.osFamily) {
+            OsFamily.WINDOWS -> "\\"
+            else -> "/"
+        }
     }
 }

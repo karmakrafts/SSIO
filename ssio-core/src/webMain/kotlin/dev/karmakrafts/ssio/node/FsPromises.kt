@@ -61,8 +61,8 @@ private external interface FsPromisesApi : JsAny {
 }
 
 internal object FsPromises {
-    suspend fun open(path: String, mode: String): Promise<FileHandle> {
+    suspend fun open(path: String, mode: String): FileHandle {
         val fs = import<FsPromisesApi>("fs/promises").await()
-        return fs.open(path, mode)
+        return fs.open(path, mode).await()
     }
 }

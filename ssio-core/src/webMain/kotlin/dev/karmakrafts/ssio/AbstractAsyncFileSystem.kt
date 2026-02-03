@@ -16,8 +16,6 @@
 
 package dev.karmakrafts.ssio
 
-import kotlinx.io.files.Path
-
 internal abstract class AbstractAsyncFileSystem : AsyncFileSystem {
     companion object {
         private fun normalize(path: Path): Path {
@@ -30,7 +28,7 @@ internal abstract class AbstractAsyncFileSystem : AsyncFileSystem {
                     else -> normalized += segment
                 }
             }
-            return Path(normalized.joinToString("/"))
+            return Path("/${normalized.joinToString("/")}")
         }
     }
 

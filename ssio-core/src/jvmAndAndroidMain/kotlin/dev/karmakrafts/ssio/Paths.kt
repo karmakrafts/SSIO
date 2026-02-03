@@ -16,11 +16,8 @@
 
 package dev.karmakrafts.ssio
 
-import kotlinx.io.files.Path
+import java.io.File
 
-operator fun Path.div(other: String): Path = Path(this, other)
-
-operator fun Path.div(other: Path): Path {
-    val otherSegments = other.toString().split("/")
-    return Path(this, *otherSegments.toTypedArray())
+actual object Paths {
+    actual val separator: String get() = File.separator
 }
