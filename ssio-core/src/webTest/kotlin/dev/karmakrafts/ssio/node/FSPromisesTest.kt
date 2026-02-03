@@ -17,9 +17,15 @@
 package dev.karmakrafts.ssio.node
 
 import dev.karmakrafts.ssio.isNode
+import js.buffer.ArrayBuffer
+import js.buffer.toByteArray
+import js.promise.await
 import kotlinx.coroutines.test.runTest
 import kotlin.js.ExperimentalWasmJsInterop
+import kotlin.js.toJsString
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalWasmJsInterop::class)
 class FSPromisesTest {
@@ -27,9 +33,41 @@ class FSPromisesTest {
     fun `Open and close FileHandle`() = runTest {
         if (!isNode) {
             println("This is not NodeJS, skipping test")
+            println()
             return@runTest
         }
-        val handle = FsPromises.open("test_file.txt", "w")
-        handle.close()
+        val handle = FsPromises.open("test_file.txt", "w").await()
+        handle.close().await()
+    }
+
+    @Test
+    fun `Write to and read from file`() = runTest {
+        if (!isNode) {
+            println("This is not NodeJS, skipping test")
+            println()
+            return@runTest
+        }
+
+        val expectedValue = "Hello, World!"
+
+        var handle = FsPromises.open("test_file.txt", "w").await()
+        val writeResult = handle.write(expectedValue.toJsString()).await()
+        assertEquals(expectedValue.length, writeResult.bytesWritten)
+        handle.close().await()
+
+        handle = FsPromises.open("test_file.txt", "r").await()
+        val readResult = handle.read(ArrayBuffer(128)).await()
+        assertEquals(expectedValue.length, readResult.bytesRead)
+
+        val expectedData = "Hello, World!".encodeToByteArray()
+        for (b in expectedData) print("0x${b.toHexString()} ")
+        println()
+
+        val actualData = readResult.buffer.toByteArray().sliceArray(expectedData.indices)
+        for (b in actualData) print("0x${b.toHexString()} ")
+        println()
+
+        assertTrue(expectedData.contentEquals(actualData))
+        handle.close().await()
     }
 }

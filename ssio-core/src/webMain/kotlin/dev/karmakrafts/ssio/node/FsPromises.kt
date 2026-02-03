@@ -18,21 +18,51 @@
 
 package dev.karmakrafts.ssio.node
 
-import dev.karmakrafts.ssio.awaitSuspend
+import js.promise.Promise
+import js.promise.await
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
-import kotlin.js.JsName
-import kotlin.js.Promise
+import kotlin.js.definedExternally
+import kotlin.js.js
+
+@Suppress("UNUSED_PARAMETER")
+private fun <I : JsAny> import(name: String): Promise<I> = js("""import(name)""")
+
+internal external interface ReadResult<B : JsAny> : JsAny {
+    val bytesRead: Int
+    val buffer: B
+}
+
+internal external interface WriteResult<B : JsAny> : JsAny {
+    val bytesWritten: Int
+    val buffer: B
+}
 
 internal external interface FileHandle : JsAny {
-    @JsName("close")
-    fun closeAsync(): Promise<Nothing?>
+    fun <B : JsAny> read( // @formatter:off
+        buffer: B,
+        offset: Int = definedExternally,
+        length: Int = definedExternally,
+        position: Int = definedExternally
+    ): Promise<ReadResult<B>> // @formatter:on
+
+    fun <B : JsAny> write( // @formatter:off
+        buffer: B,
+        offset: Int = definedExternally,
+        length: Int = definedExternally,
+        position: Int = definedExternally
+    ): Promise<WriteResult<B>> // @formatter:on
+
+    fun close(): Promise<Nothing?>
 }
 
-internal suspend fun FileHandle.close() {
-    closeAsync().awaitSuspend()
+private external interface FsPromisesApi : JsAny {
+    fun open(path: String, mode: String): Promise<FileHandle>
 }
 
-internal expect object FsPromises {
-    suspend fun open(path: String, mode: String): FileHandle
+internal object FsPromises {
+    suspend fun open(path: String, mode: String): Promise<FileHandle> {
+        val fs = import<FsPromisesApi>("fs/promises").await()
+        return fs.open(path, mode)
+    }
 }

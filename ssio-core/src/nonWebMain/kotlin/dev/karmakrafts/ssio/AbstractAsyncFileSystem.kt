@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalWasmJsInterop::class)
-
 package dev.karmakrafts.ssio
 
-import kotlinx.coroutines.await
-import kotlin.js.Promise
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 
-internal actual suspend fun <T : JsAny?> Promise<T>.awaitSuspend(): T = await()
+internal abstract class AbstractAsyncFileSystem : AsyncFileSystem {
+    override suspend fun resolve(path: Path): Path = SystemFileSystem.resolve(path)
+}

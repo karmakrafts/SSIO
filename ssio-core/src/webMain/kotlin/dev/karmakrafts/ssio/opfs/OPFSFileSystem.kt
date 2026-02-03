@@ -16,7 +16,7 @@
 
 package dev.karmakrafts.ssio.opfs
 
-import dev.karmakrafts.ssio.AsyncFileSystem
+import dev.karmakrafts.ssio.AbstractAsyncFileSystem
 import dev.karmakrafts.ssio.AsyncRawSink
 import dev.karmakrafts.ssio.AsyncRawSource
 import js.disposable.use
@@ -37,7 +37,9 @@ import kotlin.js.toJsBoolean
  * Async filesystem for JS/WASM using OPFS APIs.
  */
 @OptIn(ExperimentalWasmJsInterop::class)
-internal object OPFSFileSystem : AsyncFileSystem {
+internal object OPFSFileSystem : AbstractAsyncFileSystem() {
+    override val workingDirectory: Path = Path("") // Working directory is always the OPFS root
+
     override suspend fun source(path: Path): AsyncRawSource = OPFSFileSource(path)
     override suspend fun sink(path: Path, append: Boolean): AsyncRawSink = OPFSFileSink(path, append)
 
@@ -50,7 +52,7 @@ internal object OPFSFileSystem : AsyncFileSystem {
             .toBoolean()
     }
 
-    override suspend fun atomicMove(oldPath: Path, newPath: Path) {
+    override suspend fun move(oldPath: Path, newPath: Path) {
         if (oldPath == newPath) return
         val root = navigator.storage.getDirectory()
         val oldHandle = root.getFileHandle(oldPath.toString())

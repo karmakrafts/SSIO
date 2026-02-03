@@ -31,7 +31,7 @@ private object AsyncFileSystemImpl : AsyncFileSystem {
         TODO("Not yet implemented")
     }
 
-    override suspend fun atomicMove(oldPath: Path, newPath: Path) {
+    override suspend fun move(oldPath: Path, newPath: Path) {
         TODO("Not yet implemented")
     }
 

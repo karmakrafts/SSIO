@@ -58,15 +58,27 @@ kotlin {
                 withJvm()
                 withAndroidLibrary()
             }
+            group("ios") { withIos() }
+            group("tvos") { withTvos() }
+            group("watchos") { withWatchos() }
             group("native") {
                 group("posix") { // All non-Windows OSs can use mmap no problem
                     withAndroidNative()
                     withLinux()
                     withMacos()
-                    withIos()
-                    withWatchos()
-                    withTvos()
+                    group("ios")
+                    group("tvos")
+                    group("watchos")
                 }
+            }
+            group("nonWeb") {
+                withJvm()
+                withAndroidNative()
+                withLinux()
+                withMacos()
+                group("ios")
+                group("tvos")
+                group("watchos")
             }
         }
     }

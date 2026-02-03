@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalWasmJsInterop::class)
-
 package dev.karmakrafts.ssio.node
 
-import kotlinx.coroutines.await
-import kotlin.js.Promise
-
-@JsModule("fs/promises")
-private external object FsPromisesApi {
-    fun open(path: String, mode: String): Promise<FileHandle>
+internal external interface Process {
+    fun cwd(): String
 }
 
-internal actual object FsPromises {
-    actual suspend fun open(path: String, mode: String): FileHandle = FsPromisesApi.open(path, mode).await()
-}
+internal external val process: Process

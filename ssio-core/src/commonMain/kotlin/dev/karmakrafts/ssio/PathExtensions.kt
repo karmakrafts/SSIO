@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio.node
+package dev.karmakrafts.ssio
 
-import kotlinx.coroutines.await
-import kotlin.js.Promise
+import kotlinx.io.files.Path
 
-@JsModule("fs/promises")
-@JsNonModule
-private external object FsPromisesApi {
-    fun open(path: String, mode: String): Promise<FileHandle>
-}
+operator fun Path.div(other: String): Path = Path(this, other)
 
-internal actual object FsPromises {
-    actual suspend fun open(path: String, mode: String): FileHandle = FsPromisesApi.open(path, mode).await()
+operator fun Path.div(other: Path): Path {
+    val otherSegments = other.toString().split("/")
+    return Path(this, *otherSegments.toTypedArray())
 }

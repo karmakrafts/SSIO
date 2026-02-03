@@ -16,12 +16,14 @@
 
 package dev.karmakrafts.ssio.node
 
-import dev.karmakrafts.ssio.AsyncFileSystem
+import dev.karmakrafts.ssio.AbstractAsyncFileSystem
 import dev.karmakrafts.ssio.AsyncRawSink
 import dev.karmakrafts.ssio.AsyncRawSource
 import kotlinx.io.files.Path
 
-object NodeFileSystem : AsyncFileSystem {
+internal object NodeFileSystem : AbstractAsyncFileSystem() {
+    override val workingDirectory: Path = Path(process.cwd())
+
     override suspend fun source(path: Path): AsyncRawSource {
         TODO("Not yet implemented")
     }
@@ -34,7 +36,7 @@ object NodeFileSystem : AsyncFileSystem {
         TODO("Not yet implemented")
     }
 
-    override suspend fun atomicMove(oldPath: Path, newPath: Path) {
+    override suspend fun move(oldPath: Path, newPath: Path) {
         TODO("Not yet implemented")
     }
 

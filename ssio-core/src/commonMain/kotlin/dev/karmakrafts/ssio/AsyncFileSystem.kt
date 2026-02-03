@@ -19,11 +19,14 @@ package dev.karmakrafts.ssio
 import kotlinx.io.files.Path
 
 interface AsyncFileSystem {
+    val workingDirectory: Path
+
     suspend fun source(path: Path): AsyncRawSource
     suspend fun sink(path: Path, append: Boolean = false): AsyncRawSink
     suspend fun exists(path: Path): Boolean
-    suspend fun atomicMove(oldPath: Path, newPath: Path)
+    suspend fun move(oldPath: Path, newPath: Path)
     suspend fun delete(path: Path)
+    suspend fun resolve(path: Path): Path // TODO: investigate if this really has to be suspend
 }
 
 expect val AsyncSystemFileSystem: AsyncFileSystem

@@ -19,13 +19,9 @@
 package dev.karmakrafts.ssio
 
 import kotlin.js.ExperimentalWasmJsInterop
-import kotlin.js.JsAny
-import kotlin.js.Promise
 import kotlin.js.js
 
 @OptIn(ExperimentalWasmJsInterop::class)
 private fun checkIsNode(): Boolean = js("""typeof process !== 'undefined' && process.release.name === 'node'""")
 
 internal val isNode: Boolean = checkIsNode()
-
-internal expect suspend fun <T : JsAny?> Promise<T>.awaitSuspend(): T
