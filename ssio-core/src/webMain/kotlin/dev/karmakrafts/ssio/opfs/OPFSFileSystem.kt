@@ -25,12 +25,11 @@ import dev.karmakrafts.ssio.files.Path
 import dev.karmakrafts.ssio.files.getSegments
 import js.disposable.use
 import js.iterable.IteratorReturnResult
+import js.objects.unsafeJso
 import js.promise.await
 import kotlinx.io.files.FileMetadata
 import web.fs.FileSystemDirectoryHandle
 import web.fs.FileSystemFileHandle
-import web.fs.FileSystemGetDirectoryOptions
-import web.fs.FileSystemGetFileOptions
 import web.fs.FileSystemHandle
 import web.fs.createWritable
 import web.fs.getDirectoryHandle
@@ -61,8 +60,8 @@ internal object OPFSFileSystem : AbstractAsyncFileSystem() {
         else {
             var handle = root
             for (segment in path.getSegments()) {
-                handle = handle.getDirectoryHandle(segment, object : FileSystemGetDirectoryOptions {
-                    override var create: Boolean? = create
+                handle = handle.getDirectoryHandle(segment, unsafeJso {
+                    this.create = create
                 })
             }
             handle
@@ -73,8 +72,8 @@ internal object OPFSFileSystem : AbstractAsyncFileSystem() {
         val resolvedPath = resolve(path)
         val parentPath = resolvedPath.parent ?: return navigator.storage.getDirectory().getFileHandle(path.name)
         val directoryHandle = getDirectoryHandle(parentPath, create)
-        return directoryHandle.getFileHandle(path.name, object : FileSystemGetFileOptions {
-            override var create: Boolean? = create
+        return directoryHandle.getFileHandle(path.name, unsafeJso {
+            this.create = create
         })
     }
 
