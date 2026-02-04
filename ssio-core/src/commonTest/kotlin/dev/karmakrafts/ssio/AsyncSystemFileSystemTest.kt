@@ -25,6 +25,19 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class AsyncSystemFileSystemTest {
+    companion object {
+        private val testData: String = """
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, 
+            no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        """.trimIndent()
+    }
+
     @Test
     fun `Resolve simple relative path`() = runTest {
         val relativePath = Path("./foo/bar/test.txt")
@@ -74,10 +87,10 @@ class AsyncSystemFileSystemTest {
     fun `Read and write file`() = runTest {
         val path = Path("baz") / "test2.bin"
         AsyncSystemFileSystem.sink(path).buffered().use { sink ->
-            sink.writeInt(42)
+            sink.writePrefixedString(testData)
         }
         AsyncSystemFileSystem.source(path).buffered().use { source ->
-            assertEquals(42, source.readInt())
+            assertEquals(testData, source.readPrefixedString())
         }
         AsyncSystemFileSystem.delete(path)
     }

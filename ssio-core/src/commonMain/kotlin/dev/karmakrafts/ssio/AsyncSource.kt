@@ -16,6 +16,9 @@
 
 package dev.karmakrafts.ssio
 
+import kotlinx.io.bytestring.ByteString
+import kotlinx.io.bytestring.decodeToString
+
 interface AsyncSource : AsyncRawSource {
     suspend fun await(predicate: AwaitPredicate): Result<Boolean>
     suspend fun awaitOrThrow(predicate: AwaitPredicate) = await(predicate).getOrThrow()
@@ -24,6 +27,9 @@ interface AsyncSource : AsyncRawSource {
     suspend fun readShort(): Short
     suspend fun readInt(): Int
     suspend fun readLong(): Long
+
+    suspend fun readByteString(byteCount: Int): ByteString
+    suspend fun readByteString(): ByteString
 }
 
 suspend fun AsyncSource.readUByte(): UByte = readByte().toUByte()
@@ -33,3 +39,6 @@ suspend fun AsyncSource.readULong(): ULong = readLong().toULong()
 
 suspend fun AsyncSource.readFloat(): Float = Float.fromBits(readInt())
 suspend fun AsyncSource.readDouble(): Double = Double.fromBits(readLong())
+
+suspend fun AsyncSource.readString(): String = readByteString().decodeToString()
+suspend fun AsyncSource.readPrefixedString(): String = readByteString(readInt()).decodeToString()

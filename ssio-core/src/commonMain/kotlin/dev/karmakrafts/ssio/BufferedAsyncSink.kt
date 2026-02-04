@@ -19,6 +19,8 @@ package dev.karmakrafts.ssio
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.io.Buffer
+import kotlinx.io.bytestring.ByteString
+import kotlinx.io.write
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.math.min
 
@@ -28,6 +30,12 @@ private open class BufferedAsyncSink( // @formatter:off
 ) : AsyncSink { // @formatter:on
     protected val isClosed: AtomicBoolean = AtomicBoolean(false)
     protected val buffer: Buffer = Buffer()
+
+    override suspend fun writeByteString(value: ByteString, startIndex: Int, endIndex: Int) {
+        check(!isClosed.load()) { "AsyncSink is closed" }
+        buffer.write(value, startIndex, endIndex)
+        if (buffer.size >= bufferSize) flush()
+    }
 
     override suspend fun writeByte(value: Byte) {
         check(!isClosed.load()) { "AsyncSink is closed" }
@@ -93,6 +101,10 @@ private class SynchronizedBufferedAsyncSink(
     rawSink: AsyncRawSink, bufferSize: Long
 ) : BufferedAsyncSink(rawSink, bufferSize) {
     private val mutex: Mutex = Mutex()
+
+    override suspend fun writeByteString(value: ByteString, startIndex: Int, endIndex: Int) = mutex.withLock {
+        super.writeByteString(value, startIndex, endIndex)
+    }
 
     override suspend fun writeByte(value: Byte) = mutex.withLock {
         super.writeByte(value)
