@@ -18,12 +18,12 @@ package dev.karmakrafts.ssio
 
 import kotlinx.io.Sink
 
-inline fun <T> Sink.writeList(list: List<T>, writer: (T) -> Unit) {
+inline fun <T> Sink.writeList(list: List<T>, writer: Sink.(T) -> Unit) {
     writeInt(list.size)
-    list.forEach(writer)
+    for (value in list) writer(value)
 }
 
-inline fun <K, V> Sink.writeMap(map: Map<K, V>, keyWriter: (K) -> Unit, valueWriter: (V) -> Unit) {
+inline fun <K, V> Sink.writeMap(map: Map<K, V>, keyWriter: Sink.(K) -> Unit, valueWriter: Sink.(V) -> Unit) {
     writeInt(map.size)
     for ((key, value) in map) {
         keyWriter(key)

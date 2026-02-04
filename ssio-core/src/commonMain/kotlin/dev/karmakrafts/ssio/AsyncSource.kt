@@ -42,3 +42,17 @@ suspend fun AsyncSource.readDouble(): Double = Double.fromBits(readLong())
 
 suspend fun AsyncSource.readString(): String = readByteString().decodeToString()
 suspend fun AsyncSource.readPrefixedString(): String = readByteString(readInt()).decodeToString()
+
+suspend inline fun <T> AsyncSource.readList(reader: AsyncSource.() -> T): List<T> {
+    val size = readInt()
+    return if (size == 0) emptyList()
+    else (0..<size).map { reader() }
+}
+
+suspend inline fun <K, V> AsyncSource.readMap(
+    keyReader: AsyncSource.() -> K, valueReader: AsyncSource.() -> V
+): Map<K, V> {
+    val size = readInt()
+    return if (size == 0) emptyMap()
+    else (0..<size).associate { keyReader() to valueReader() }
+}

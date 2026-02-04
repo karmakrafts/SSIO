@@ -44,3 +44,18 @@ suspend fun AsyncSink.writePrefixedString(value: String) {
     writeInt(value.length)
     writeByteString(value.encodeToByteString())
 }
+
+suspend inline fun <T> AsyncSink.writeList(list: List<T>, writer: AsyncSink.(T) -> Unit) {
+    writeInt(list.size)
+    for (value in list) writer(value)
+}
+
+suspend inline fun <K, V> AsyncSink.writeMap(
+    map: Map<K, V>, keyWriter: AsyncSink.(K) -> Unit, valueWriter: AsyncSink.(V) -> Unit
+) {
+    writeInt(map.size)
+    for ((key, value) in map) {
+        keyWriter(key)
+        valueWriter(value)
+    }
+}
