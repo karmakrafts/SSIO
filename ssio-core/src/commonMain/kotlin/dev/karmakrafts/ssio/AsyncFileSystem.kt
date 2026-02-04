@@ -17,7 +17,6 @@
 package dev.karmakrafts.ssio
 
 import dev.karmakrafts.ssio.files.Path
-import kotlinx.io.files.FileMetadata
 
 interface AsyncFileSystem : AsyncReadOnlyFileSystem {
     suspend fun getWorkingDirectory(): Path

@@ -62,7 +62,7 @@ internal class OpfsFileSource( // @formatter:off
                     val toRead = missingTotal - read
                     sink.write(data.sliceArray(0..<toRead.toInt()))
                     // If we overfetched some data, we need to write it back to the buffer
-                    val toWrite = dataSize - toRead
+                    dataSize - toRead
                     buffer.write(data.sliceArray(toRead.toInt()..<dataSize.toInt()))
                 }
 
