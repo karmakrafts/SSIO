@@ -22,6 +22,7 @@ import dev.karmakrafts.ssio.AbstractAsyncFileSystem
 import dev.karmakrafts.ssio.AsyncRawSink
 import dev.karmakrafts.ssio.AsyncRawSource
 import dev.karmakrafts.ssio.files.Path
+import dev.karmakrafts.ssio.files.div
 import dev.karmakrafts.ssio.files.getSegments
 import js.disposable.use
 import js.iterable.IteratorReturnResult
@@ -47,44 +48,59 @@ import kotlin.js.unsafeCast
  * Async filesystem for JS/WASM using OPFS APIs.
  */
 @OptIn(ExperimentalWasmJsInterop::class)
-internal object OPFSFileSystem : AbstractAsyncFileSystem() {
+internal object OpfsFileSystem : AbstractAsyncFileSystem() {
     override suspend fun getWorkingDirectory(): Path = Path("")
     override suspend fun getTempDirectory(): Path = Path("temp")
 
-    private suspend fun getDirectoryHandle(path: Path, create: Boolean = false): FileSystemDirectoryHandle {
+    private suspend fun getDirectoryHandle(path: Path, create: Boolean = false): Result<FileSystemDirectoryHandle> {
         val resolvedPath = resolve(path)
         val root = navigator.storage.getDirectory()
         return if (resolvedPath.toString().isEmpty() || (resolvedPath.isAbsolute && resolvedPath.getSegments()
                 .isEmpty())
-        ) root
+        ) Result.success(root)
         else {
             var handle = root
             for (segment in path.getSegments()) {
-                handle = handle.getDirectoryHandle(segment, unsafeJso {
-                    this.create = create
-                })
+                try {
+                    handle = handle.getDirectoryHandle(segment, unsafeJso {
+                        this.create = create
+                    })
+                } catch (error: Throwable) {
+                    return Result.failure(error)
+                }
             }
-            handle
+            Result.success(handle)
         }
     }
 
-    private suspend fun getFileHandle(path: Path, create: Boolean = true): FileSystemFileHandle {
+    private suspend fun getFileHandle(path: Path, create: Boolean = true): Result<FileSystemFileHandle> {
         val resolvedPath = resolve(path)
-        val parentPath = resolvedPath.parent ?: return navigator.storage.getDirectory().getFileHandle(path.name)
-        val directoryHandle = getDirectoryHandle(parentPath, create)
-        return directoryHandle.getFileHandle(path.name, unsafeJso {
-            this.create = create
-        })
+        val parentPath = resolvedPath.parent ?: return try {
+            Result.success(navigator.storage.getDirectory().getFileHandle(path.name, unsafeJso {
+                this.create = create
+            }))
+        } catch (error: Throwable) {
+            Result.failure(error)
+        }
+        return try {
+            val directoryHandle = getDirectoryHandle(parentPath, create).getOrThrow()
+            Result.success(directoryHandle.getFileHandle(path.name, unsafeJso {
+                this.create = create
+            }))
+        } catch (error: Throwable) {
+            Result.failure(error)
+        }
     }
 
     override suspend fun list(path: Path): List<Path> {
         val handle = getDirectoryHandle(path)
-        val iterator = handle.values()
+        if (handle.isFailure) return emptyList()
+        val iterator = handle.getOrThrow().values()
         val entries = ArrayList<Path>()
         while (true) {
             val result = iterator.next().await().unsafeCast<IteratorReturnResult<FileSystemHandle>>()
             if (result.done) break
-            entries += Path(result.value.name)
+            entries += resolve(path / result.value.name)
         }
         return entries
     }
@@ -97,76 +113,57 @@ internal object OPFSFileSystem : AbstractAsyncFileSystem() {
         getDirectoryHandle(path, create = true)
     }
 
-    override suspend fun metadataOrNull(path: Path): FileMetadata? {
-        return try {
-            val fileHandle = getFileHandle(path)
+    override suspend fun metadataOrNull(path: Path): FileMetadata? =
+        getFileHandle(path, create = false).fold({ fileHandle ->
             FileMetadata( // @formatter:off
-                isRegularFile = true,
-                isDirectory = false,
-                size = fileHandle.getFile().size.toLong()
-            ) // @formatter:on
-        } catch (_: Throwable) {
-            try {
-                getDirectoryHandle(path)
+            isRegularFile = true,
+            isDirectory = false,
+            size = fileHandle.getFile().size.toLong()
+        ) // @formatter:on
+        }) {
+            getDirectoryHandle(path).fold({
                 FileMetadata( // @formatter:off
-                    isRegularFile = false,
-                    isDirectory = true,
-                    size = 0L
-                ) // @formatter:on
-            } catch (_: Throwable) {
-                null
-            }
+                isRegularFile = false,
+                isDirectory = true,
+                size = 0L
+            ) // @formatter:on
+            }) { null }
         }
-    }
 
     override suspend fun source(path: Path): AsyncRawSource {
-        val handle = getFileHandle(path)
-        val file = handle.getFile()
-        return OPFSFileSource( // @formatter:off
-            reader = file.stream().getReader(),
-            size = file.size.toLong()
-        ) // @formatter:on
+        return OpfsFileSource(getFileHandle(path, create = false).getOrThrow().getFile().stream().getReader())
     }
 
     override suspend fun sink(path: Path, append: Boolean): AsyncRawSink {
-        val handle = getFileHandle(path, create = !exists(path))
+        val handle = getFileHandle(path, create = !exists(path)).getOrThrow()
         val stream = handle.createWritable()
         if (append) { // If we append, seek to the tail of the file
             val file = handle.getFile()
             stream.seek(file.size)
         }
-        return OPFSFileSink(stream)
+        return OpfsFileSink(stream)
     }
 
-    override suspend fun exists(path: Path): Boolean = try {
-        getFileHandle(path, create = false)
-        true
-    } catch (_: Throwable) {
-        try {
-            getDirectoryHandle(path)
-            true
-        } catch (_: Throwable) {
-            false
-        }
+    override suspend fun exists(path: Path): Boolean = getFileHandle(path, create = false).fold({ true }) {
+        getDirectoryHandle(path).fold({ true }) { false }
     }
 
     override suspend fun move(oldPath: Path, newPath: Path) {
         if (oldPath == newPath) return
-        val oldHandle = getFileHandle(oldPath)
-        val newHandle = getFileHandle(newPath)
-        newHandle.createWritable().use { writable ->
-            writable.write(oldHandle)
+        getFileHandle(oldPath, create = false).onSuccess { oldFileHandle ->
+            val newFileHandle = getFileHandle(newPath).getOrThrow()
+            newFileHandle.createWritable().use { writable ->
+                writable.write(oldFileHandle)
+            }
+            delete(oldPath)
         }
-        delete(oldPath)
     }
 
     override suspend fun delete(path: Path) {
         val resolvedPath = resolve(path)
         val parentPath = resolvedPath.parent ?: Path("")
-        try {
-            val dirHandle = getDirectoryHandle(parentPath)
-            dirHandle.removeEntry(path.name)
-        } catch (_: Throwable) {/* SWALLOW */
+        getDirectoryHandle(parentPath).onSuccess { directoryHandle ->
+            directoryHandle.removeEntry(path.name)
         }
     }
 }

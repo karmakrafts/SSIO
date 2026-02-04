@@ -18,4 +18,5 @@ package dev.karmakrafts.ssio.files
 
 expect object Paths {
     val separator: String
+    val root: Path
 }

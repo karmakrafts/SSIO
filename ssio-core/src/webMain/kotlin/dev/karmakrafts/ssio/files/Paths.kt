@@ -18,4 +18,5 @@ package dev.karmakrafts.ssio.files
 
 actual object Paths {
     actual val separator: String = "/"
+    actual val root: Path = Path(separator)
 }

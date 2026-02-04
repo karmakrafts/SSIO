@@ -32,7 +32,7 @@ private class BufferedAsyncSource( // @formatter:off
     override suspend fun await(predicate: AwaitPredicate): Result<Boolean> {
         check(!isClosed.load()) { "AsyncSource is closed" }
         return try {
-            while (!isClosed.load()) {
+            while (true) {
                 if (predicate(buffer) { rawSource.readAtMostTo(buffer, bufferSize) != -1L }) return Result.success(true)
                 if (rawSource.readAtMostTo(buffer, bufferSize) == -1L) return Result.success(false)
             }
@@ -75,11 +75,13 @@ private class BufferedAsyncSource( // @formatter:off
     override suspend fun close() {
         check(isClosed.compareAndSet(expectedValue = false, newValue = true)) { "AsyncSource is closed" }
         buffer.clear()
+        rawSource.close()
     }
 
     override fun closeAbruptly() {
         check(isClosed.compareAndSet(expectedValue = false, newValue = true)) { "AsyncSource is closed" }
         buffer.clear()
+        rawSource.closeAbruptly()
     }
 }
 
@@ -153,10 +155,12 @@ private class SynchronizedBufferedAsyncSource( // @formatter:off
         mutex.withLock {
             buffer.clear()
         }
+        rawSource.close()
     }
 
     override fun closeAbruptly() {
         check(isClosed.compareAndSet(expectedValue = false, newValue = true)) { "AsyncSource is closed" }
+        rawSource.closeAbruptly()
     }
 }
 

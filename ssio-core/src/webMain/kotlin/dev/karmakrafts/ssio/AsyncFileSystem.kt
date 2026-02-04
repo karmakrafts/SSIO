@@ -17,6 +17,6 @@
 package dev.karmakrafts.ssio
 
 import dev.karmakrafts.ssio.node.NodeFileSystem
-import dev.karmakrafts.ssio.opfs.OPFSFileSystem
+import dev.karmakrafts.ssio.opfs.OpfsFileSystem
 
-actual val AsyncSystemFileSystem: AsyncFileSystem = if (isNode) NodeFileSystem else OPFSFileSystem
+actual val AsyncSystemFileSystem: AsyncFileSystem = if (isNode) NodeFileSystem else OpfsFileSystem

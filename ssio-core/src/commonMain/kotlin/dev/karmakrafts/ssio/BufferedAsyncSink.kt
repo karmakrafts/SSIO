@@ -23,7 +23,7 @@ import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.math.min
 
 private open class BufferedAsyncSink( // @formatter:off
-    private val rawSink: AsyncRawSink,
+    protected val rawSink: AsyncRawSink,
     private val bufferSize: Long
 ) : AsyncSink { // @formatter:on
     protected val isClosed: AtomicBoolean = AtomicBoolean(false)
@@ -55,7 +55,7 @@ private open class BufferedAsyncSink( // @formatter:off
 
     override suspend fun write(source: Buffer, byteCount: Long) {
         check(!isClosed.load()) { "AsyncSink is closed" }
-        var remaining = byteCount
+        var remaining = min(source.size, byteCount)
         while (remaining > 0) {
             val toWrite = min(remaining, Int.MAX_VALUE.toLong())
             buffer.write(source, toWrite)
@@ -75,12 +75,17 @@ private open class BufferedAsyncSink( // @formatter:off
 
     override suspend fun close() {
         check(isClosed.compareAndSet(expectedValue = false, newValue = true)) { "AsyncSink is already closed" }
-        buffer.clear()
+        if (buffer.size > 0) {
+            rawSink.write(buffer, buffer.size)
+            buffer.clear()
+        }
+        rawSink.close()
     }
 
     override fun closeAbruptly() {
         check(isClosed.compareAndSet(expectedValue = false, newValue = true)) { "AsyncSink is already closed" }
         buffer.clear()
+        rawSink.closeAbruptly()
     }
 }
 
@@ -116,12 +121,18 @@ private class SynchronizedBufferedAsyncSink(
     override suspend fun close() {
         check(isClosed.compareAndSet(expectedValue = false, newValue = true)) { "AsyncSink is already closed" }
         mutex.withLock {
-            buffer.clear()
+            if (buffer.size > 0) {
+                rawSink.write(buffer, buffer.size)
+                buffer.clear()
+            }
         }
+        rawSink.flush()
+        rawSink.close()
     }
 
     override fun closeAbruptly() {
         check(isClosed.compareAndSet(expectedValue = false, newValue = true)) { "AsyncSink is already closed" }
+        rawSink.closeAbruptly()
     }
 }
 

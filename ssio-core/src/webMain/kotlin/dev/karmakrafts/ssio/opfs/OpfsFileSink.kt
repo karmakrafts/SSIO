@@ -28,14 +28,15 @@ import web.streams.close
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.math.min
 
-internal class OPFSFileSink( // @formatter:off
+internal class OpfsFileSink( // @formatter:off
     private val stream: FileSystemWritableFileStream
 ) : AsyncRawSink { // @formatter:on
+    private var isClosing: Boolean = false
     private var isClosed: Boolean = false
 
     override suspend fun write(source: Buffer, byteCount: Long) {
         check(!isClosed) { "OPFSFileSink is already closed" }
-        var remaining = byteCount
+        var remaining = min(source.size, byteCount)
         while (remaining > 0) {
             val toWrite = min(remaining, Int.MAX_VALUE.toLong()).toInt()
             val data = source.readByteArray(toWrite).toInt8Array()
@@ -45,20 +46,22 @@ internal class OPFSFileSink( // @formatter:off
     }
 
     override suspend fun flush() {
-        check(!isClosed) { "OPFSFileSink is already closed" }
+        check(!isClosed) { "OpfsFileSink is already closed" }
         // Flush is a NOOP for OPFS sinks
     }
 
     override suspend fun close() {
-        check(!isClosed) { "OPFSFileSink is already closed" }
+        check(!isClosed) { "OpfsFileSink is already closed" }
         stream.close()
         isClosed = true
     }
 
     override fun closeAbruptly() {
-        check(!isClosed) { "OPFSFileSink is already closed" }
+        check(!isClosed) { "OpfsFileSink is already closed" }
+        check(!isClosing) { "OpfsFileSink is already closing" }
         stream.closeAsync().finally {
             isClosed = true
         }
+        isClosing = true
     }
 }

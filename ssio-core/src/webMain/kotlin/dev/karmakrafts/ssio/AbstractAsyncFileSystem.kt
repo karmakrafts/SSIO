@@ -24,7 +24,7 @@ internal abstract class AbstractAsyncFileSystem : AsyncFileSystem {
     companion object {
         private fun normalize(path: Path): Path {
             val normalized = ArrayDeque<String>()
-            val segments = path.toString().split(Paths.separator)
+            val segments = path.toString().split(Paths.separator).filterNot(String::isEmpty)
             for (segment in segments) {
                 when (segment) {
                     "." -> {} // Ignore this

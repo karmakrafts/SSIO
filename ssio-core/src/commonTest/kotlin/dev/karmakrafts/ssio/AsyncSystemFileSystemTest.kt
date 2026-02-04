@@ -17,8 +17,10 @@
 package dev.karmakrafts.ssio
 
 import dev.karmakrafts.ssio.files.Path
+import dev.karmakrafts.ssio.files.div
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -41,14 +43,14 @@ class AsyncSystemFileSystemTest {
 
     @Test
     fun `Create file`() = runTest {
-        val path = Path("test.txt")
+        val path = Path("baz") / "test.txt"
         AsyncSystemFileSystem.sink(path).use {}
         AsyncSystemFileSystem.delete(path)
     }
 
     @Test
     fun `Check if file exists`() = runTest {
-        val path = Path("test.txt")
+        val path = Path("foo") / "test.txt"
         AsyncSystemFileSystem.delete(path)
         assertFalse(AsyncSystemFileSystem.exists(path))
         AsyncSystemFileSystem.sink(path).use {}
@@ -58,12 +60,25 @@ class AsyncSystemFileSystemTest {
 
     @Test
     fun `List files`() = runTest {
-        val path = Path("test.txt")
-        var entries = AsyncSystemFileSystem.list(Path(""))
+        val dir = Path("foo") / "bar"
+        val path = dir / "test.txt"
+        var entries = AsyncSystemFileSystem.list(dir)
         assertTrue(entries.isEmpty())
         AsyncSystemFileSystem.sink(path).use {}
-        entries = AsyncSystemFileSystem.list(Path(""))
-        assertTrue(path in entries)
+        entries = AsyncSystemFileSystem.list(dir)
+        assertTrue(AsyncSystemFileSystem.resolve(path) in entries)
+        AsyncSystemFileSystem.delete(path)
+    }
+
+    @Test
+    fun `Read and write file`() = runTest {
+        val path = Path("baz") / "test2.bin"
+        AsyncSystemFileSystem.sink(path).buffered().use { sink ->
+            sink.writeInt(42)
+        }
+        AsyncSystemFileSystem.source(path).buffered().use { source ->
+            assertEquals(42, source.readInt())
+        }
         AsyncSystemFileSystem.delete(path)
     }
 }
