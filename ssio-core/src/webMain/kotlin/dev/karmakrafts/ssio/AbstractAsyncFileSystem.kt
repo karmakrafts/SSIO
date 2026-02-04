@@ -17,27 +17,12 @@
 package dev.karmakrafts.ssio
 
 import dev.karmakrafts.ssio.files.Path
-import dev.karmakrafts.ssio.files.Paths
 import dev.karmakrafts.ssio.files.div
+import dev.karmakrafts.ssio.files.normalize
 
 internal abstract class AbstractAsyncFileSystem : AsyncFileSystem {
-    companion object {
-        private fun normalize(path: Path): Path {
-            val normalized = ArrayDeque<String>()
-            val segments = path.toString().split(Paths.separator).filterNot(String::isEmpty)
-            for (segment in segments) {
-                when (segment) {
-                    "." -> {} // Ignore this
-                    ".." -> normalized.removeLast()
-                    else -> normalized += segment
-                }
-            }
-            return Path("${Paths.separator}${normalized.joinToString(Paths.separator)}")
-        }
-    }
-
     override suspend fun resolve(path: Path): Path {
-        return if (path.isAbsolute) normalize(path)
-        else normalize(getWorkingDirectory() / path)
+        return if (path.isAbsolute) path.normalize()
+        else getWorkingDirectory() / path.normalize()
     }
 }

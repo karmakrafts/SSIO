@@ -40,7 +40,7 @@ class AsyncSystemFileSystemTest {
 
     @Test
     fun `Resolve simple relative path`() = runTest {
-        val relativePath = Path("./foo/bar/test.txt")
+        val relativePath = Path("foo/bar/test.txt")
         val absolutePath = AsyncSystemFileSystem.resolve(relativePath)
         assertTrue(absolutePath.isAbsolute)
         assertTrue(absolutePath.toString().endsWith("foo/bar/test.txt"))
@@ -48,7 +48,7 @@ class AsyncSystemFileSystemTest {
 
     @Test
     fun `Resolve complex relative path`() = runTest {
-        val relativePath = Path("./foo/bar/../test.txt")
+        val relativePath = Path("foo/bar/../test.txt")
         val absolutePath = AsyncSystemFileSystem.resolve(relativePath)
         assertTrue(absolutePath.isAbsolute)
         assertTrue(absolutePath.toString().endsWith("foo/test.txt"))

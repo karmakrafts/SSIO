@@ -1,0 +1,63 @@
+/*
+ * Copyright 2026 Karma Krafts
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package dev.karmakrafts.ssio
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.io.Buffer
+import java.nio.ByteBuffer
+import java.nio.channels.AsynchronousFileChannel
+import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.math.min
+import java.nio.file.Path as NioPath
+
+internal class NioFileSource(
+    path: NioPath
+) : AsyncRawSource {
+    companion object {
+        private const val CHUNK_SIZE: Long = 4096
+    }
+
+    private val isClosed: AtomicBoolean = AtomicBoolean(false)
+    private val channel: AsynchronousFileChannel = AsynchronousFileChannel.open(path)
+
+    override suspend fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
+        val data = ByteArray(CHUNK_SIZE.toInt())
+        val fileSize = withContext(Dispatchers.IO) { channel.size() }
+        val toRead = min(fileSize, byteCount)
+        var readTotal = 0L
+        while (readTotal < toRead) {
+            val bytesRead = channel.read(ByteBuffer.wrap(data), 0).await()
+            if (bytesRead == -1) break
+            sink.write(data, 0, bytesRead)
+            readTotal += bytesRead
+        }
+        return readTotal
+    }
+
+    override suspend fun close() {
+        check(isClosed.compareAndSet(expectedValue = false, newValue = true)) { "AsyncRawSink is already closed" }
+        withContext(Dispatchers.IO) {
+            channel.close()
+        }
+    }
+
+    override fun closeAbruptly() {
+        check(isClosed.compareAndSet(expectedValue = false, newValue = true)) { "AsyncRawSink is already closed" }
+        channel.close()
+    }
+}

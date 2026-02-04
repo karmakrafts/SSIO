@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+@file:JvmName("PathsImpl")
+
 package dev.karmakrafts.ssio.files
 
 import kotlinx.io.files.SystemPathSeparator
+import kotlin.jvm.JvmName
 
 actual object Paths {
     actual val separator: String = SystemPathSeparator.toString()

@@ -16,17 +16,27 @@
 
 package dev.karmakrafts.ssio
 
+import dev.karmakrafts.ssio.files.div
+import dev.karmakrafts.ssio.files.normalize
 import kotlinx.io.files.FileMetadata
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 
 internal abstract class AbstractAsyncFileSystem : AsyncFileSystem {
-    override suspend fun resolve(path: Path): Path = SystemFileSystem.resolve(path)
+    override suspend fun resolve(path: Path): Path {
+        return if (path.isAbsolute) path.normalize()
+        else getWorkingDirectory() / path.normalize()
+    }
+
     override suspend fun exists(path: Path): Boolean = SystemFileSystem.exists(path)
     override suspend fun move(oldPath: Path, newPath: Path) = SystemFileSystem.atomicMove(oldPath, newPath)
     override suspend fun delete(path: Path, mustExist: Boolean) = SystemFileSystem.delete(path, mustExist)
     override suspend fun metadataOrNull(path: Path): FileMetadata? = SystemFileSystem.metadataOrNull(path)
-    override suspend fun list(path: Path): List<Path> = SystemFileSystem.list(path).toList()
+
+    override suspend fun list(path: Path): List<Path> {
+        return if (!exists(path)) emptyList()
+        else SystemFileSystem.list(resolve(path)).toList()
+    }
 
     override suspend fun createDirectories(path: Path, mustCreate: Boolean) {
         SystemFileSystem.createDirectories(path, mustCreate)

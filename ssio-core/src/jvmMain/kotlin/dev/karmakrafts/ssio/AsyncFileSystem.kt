@@ -23,14 +23,9 @@ import java.nio.file.Path as NioPath
 private object AsyncFileSystemImpl : AbstractAsyncFileSystem() {
     override suspend fun getWorkingDirectory(): Path = NioPath.of("").absolute().toSsioPath()
     override suspend fun getTempDirectory(): Path = Path(System.getProperty("java.io.tmpdir"))
-
-    override suspend fun source(path: Path): AsyncRawSource {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun sink(path: Path, append: Boolean): AsyncRawSink {
-        TODO("Not yet implemented")
-    }
+    override suspend fun source(path: Path): AsyncRawSource = NioFileSource(path.toNioPath().normalize().absolute())
+    override suspend fun sink(path: Path, append: Boolean): AsyncRawSink =
+        NioFileSink(path.toNioPath().normalize().absolute())
 }
 
 actual val AsyncSystemFileSystem: AsyncFileSystem = AsyncFileSystemImpl

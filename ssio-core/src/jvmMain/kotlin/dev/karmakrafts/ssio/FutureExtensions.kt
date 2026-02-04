@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-@file:JvmName("PathImpl")
+package dev.karmakrafts.ssio
 
-package dev.karmakrafts.ssio.files
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
+import java.util.concurrent.Future
 
-import kotlin.jvm.JvmName
-import kotlinx.io.files.Path as KxioPath
-
-actual typealias Path = KxioPath
-
-actual fun Path(path: String): Path = KxioPath(path)
-
-actual fun Path.toKxio(): KxioPath = this
-actual fun KxioPath.toSsio(): Path = this
+internal suspend fun <T> Future<T>.await(): T {
+    while (!isDone) yield()
+    return withContext(Dispatchers.IO) { get() }
+}

@@ -45,5 +45,21 @@ fun Path(base: String, vararg segments: String): Path = Path(Path(base), *segmen
 
 fun Path.getSegments(): List<String> = toString().split(Paths.separator).filterNot(String::isEmpty)
 
+fun Path.normalize(): Path {
+    val normalized = ArrayDeque<String>()
+    val segments = toString().split(Paths.separator).filterNot(String::isEmpty)
+    for (segment in segments) {
+        when (segment) {
+            "." -> {} // Ignore this
+            ".." -> normalized.removeLast()
+            else -> normalized += segment
+        }
+    }
+    return Path("${Paths.separator}${normalized.joinToString(Paths.separator)}")
+}
+
 operator fun Path.div(other: String): Path = Path(this, other)
 operator fun Path.div(other: Path): Path = Path(this, *other.getSegments().toTypedArray())
+
+fun Path.getFileNameWithoutExtension(): String = name.substringAfterLast('.')
+fun Path.getExtension(): String = name.substringBeforeLast('.')

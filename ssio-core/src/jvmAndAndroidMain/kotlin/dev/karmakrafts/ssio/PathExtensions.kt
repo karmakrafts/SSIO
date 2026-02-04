@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:JvmName("LegacyPathExtensions")
+
 package dev.karmakrafts.ssio
 
 import dev.karmakrafts.ssio.files.Path
