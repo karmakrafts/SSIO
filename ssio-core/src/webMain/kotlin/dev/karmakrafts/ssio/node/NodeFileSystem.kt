@@ -54,7 +54,7 @@ internal object NodeFileSystem : AbstractAsyncFileSystem() {
         TODO("Not yet implemented")
     }
 
-    override suspend fun delete(path: Path) {
+    override suspend fun delete(path: Path, mustExist: Boolean) {
         TODO("Not yet implemented")
     }
 }

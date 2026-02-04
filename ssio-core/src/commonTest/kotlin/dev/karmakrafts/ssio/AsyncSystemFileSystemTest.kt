@@ -64,7 +64,7 @@ class AsyncSystemFileSystemTest {
     @Test
     fun `Check if file exists`() = runTest {
         val path = Path("foo") / "test.txt"
-        AsyncSystemFileSystem.delete(path)
+        AsyncSystemFileSystem.delete(path, mustExist = false)
         assertFalse(AsyncSystemFileSystem.exists(path))
         AsyncSystemFileSystem.sink(path).use {}
         assertTrue(AsyncSystemFileSystem.exists(path))

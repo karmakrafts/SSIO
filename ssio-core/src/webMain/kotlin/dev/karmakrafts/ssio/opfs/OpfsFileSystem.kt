@@ -155,15 +155,17 @@ internal object OpfsFileSystem : AbstractAsyncFileSystem() {
             newFileHandle.createWritable().use { writable ->
                 writable.write(oldFileHandle)
             }
-            delete(oldPath)
+            delete(oldPath, false)
         }
     }
 
-    override suspend fun delete(path: Path) {
+    override suspend fun delete(path: Path, mustExist: Boolean) {
         val resolvedPath = resolve(path)
         val parentPath = resolvedPath.parent ?: Path("")
         getDirectoryHandle(parentPath).onSuccess { directoryHandle ->
             directoryHandle.removeEntry(path.name)
+        }.onFailure {
+            check(!mustExist) { "Cannot delete file $path as it does not exist" }
         }
     }
 }

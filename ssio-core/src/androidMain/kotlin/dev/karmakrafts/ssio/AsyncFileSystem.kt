@@ -18,15 +18,22 @@ package dev.karmakrafts.ssio
 
 import dev.karmakrafts.ssio.files.Path
 
-interface AsyncFileSystem : AsyncReadOnlyFileSystem {
-    suspend fun getWorkingDirectory(): Path
-    suspend fun getTempDirectory(): Path
+private object AsyncFileSystemImpl : AbstractAsyncFileSystem() {
+    override suspend fun getWorkingDirectory(): Path {
+        TODO("Not yet implemented")
+    }
 
-    suspend fun move(oldPath: Path, newPath: Path)
-    suspend fun delete(path: Path, mustExist: Boolean = true)
-    suspend fun createDirectories(path: Path, mustCreate: Boolean = false)
+    override suspend fun getTempDirectory(): Path {
+        TODO("Not yet implemented")
+    }
 
-    suspend fun sink(path: Path, append: Boolean = false): AsyncRawSink
+    override suspend fun sink(path: Path, append: Boolean): AsyncRawSink {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun source(path: Path): AsyncRawSource {
+        TODO("Not yet implemented")
+    }
 }
 
-expect val AsyncSystemFileSystem: AsyncFileSystem
+actual val AsyncSystemFileSystem: AsyncFileSystem = AsyncFileSystemImpl
