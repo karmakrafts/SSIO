@@ -44,7 +44,7 @@ kotlin {
     defaultCompilerOptions()
     withSourcesJar()
     withJvm()
-    withAndroidLibrary("$group.core")
+    withAndroidLibrary("$group.core", minSdk = libs.versions.androidMinSdk)
     withNative()
     withWeb {
         withBrowser()

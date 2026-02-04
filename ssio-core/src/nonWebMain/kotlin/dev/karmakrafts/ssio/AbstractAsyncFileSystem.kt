@@ -22,7 +22,7 @@ import kotlinx.io.files.FileMetadata
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 
-internal abstract class AbstractAsyncFileSystem : AsyncFileSystem {
+abstract class AbstractAsyncFileSystem : AsyncFileSystem {
     override suspend fun resolve(path: Path): Path {
         return if (path.isAbsolute) path.normalize()
         else getWorkingDirectory() / path.normalize()

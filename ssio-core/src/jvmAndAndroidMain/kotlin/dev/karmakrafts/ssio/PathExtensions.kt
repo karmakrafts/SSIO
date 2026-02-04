@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-@file:JvmName("LegacyPathExtensions")
-
 package dev.karmakrafts.ssio
 
 import dev.karmakrafts.ssio.files.Path
 import java.io.File
+import kotlin.io.path.absolutePathString
+import java.nio.file.Path as NioPath
+import java.nio.file.Paths as NioPaths
 
 fun Path.toFile(): File = File(toString())
-
 fun File.toSsioPath(): Path = Path(absolutePath)
+
+fun Path.toNioPath(): NioPath = NioPaths.get(toString())
+fun NioPath.toSsioPath(): Path = Path(absolutePathString())
