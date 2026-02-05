@@ -16,52 +16,47 @@
 
 package dev.karmakrafts.ssio.node
 
-import dev.karmakrafts.ssio.AsyncRawSink
+import dev.karmakrafts.ssio.AsyncRawSource
+import js.buffer.ArrayBuffer
+import js.buffer.toByteArray
 import js.promise.await
-import js.typedarrays.toInt8Array
 import kotlinx.io.Buffer
-import kotlinx.io.readByteArray
-import kotlin.math.min
 
-internal class FsFileSink(
+internal class FsFileSource(
     private val handle: FileHandle
-) : AsyncRawSink {
+) : AsyncRawSource {
     companion object {
         private const val CHUNK_SIZE: Int = 4096
     }
 
-    private var isClosing: Boolean = false
     private var isClosed: Boolean = false
+    private var isClosing: Boolean = false
 
-    override suspend fun write(source: Buffer, byteCount: Long) {
-        val toWrite = min(source.size, byteCount)
-        var remaining = toWrite
+    override suspend fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
+        check(!isClosed) { "AsyncRawSource is already closed" }
+        var remaining = byteCount
+        var transferredTotal = 0L
         while (remaining > 0) {
-            val chunkSize = min(CHUNK_SIZE.toLong(), remaining).toInt()
-            val chunk = source.readByteArray(chunkSize)
-            handle.write(chunk.toInt8Array()).await()
-            remaining -= chunkSize
+            val result = handle.read(ArrayBuffer(CHUNK_SIZE)).await()
+            val bytesRead = result.bytesRead
+            if (bytesRead == 0) break
+            sink.write(result.buffer.slice(0, bytesRead).toByteArray())
+            remaining -= bytesRead
+            transferredTotal += transferredTotal
         }
-    }
-
-    override suspend fun flush() {
-        handle.sync().await()
+        return transferredTotal
     }
 
     override suspend fun close() {
-        check(!isClosed) { "FsFileSink is already closed" }
-        handle.sync().await()
+        check(!isClosed) { "AsyncRawSource is already closed" }
         handle.close().await()
-        isClosed = true
     }
 
     override fun closeAbruptly() {
-        check(!isClosed) { "FsFileSink is already closed" }
-        check(!isClosing) { "FsFileSink is already closing" }
-        handle.sync().finally {
-            handle.close().finally {
-                isClosed = false
-            }
+        check(!isClosing) { "AsyncRawSource is already closing" }
+        check(!isClosed) { "AsyncRawSource is already closed" }
+        handle.close().finally {
+            isClosed = true
         }
         isClosing = true
     }

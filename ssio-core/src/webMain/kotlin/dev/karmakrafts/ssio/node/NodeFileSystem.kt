@@ -27,34 +27,60 @@ internal object NodeFileSystem : AbstractAsyncFileSystem() {
     override suspend fun getTempDirectory(): Path = Path(Os.tmpdir())
 
     override suspend fun list(path: Path): List<Path> {
-        TODO("Not yet implemented")
+        val entries = FsPromises.readdir(path.toString())
+        return entries.map(::Path)
     }
 
     override suspend fun createDirectories(path: Path, mustCreate: Boolean) {
-        TODO("Not yet implemented")
+        if (exists(path)) {
+            if (mustCreate) error("Cannot create directory at $path as it already exists")
+            else return
+        }
+        FsPromises.mkdir(path.toString())
     }
 
     override suspend fun metadataOrNull(path: Path): FileMetadata? {
-        TODO()
+        if (!exists(path)) return null
+        val stats = FsPromises.stat(path.toString())
+        return when {
+            stats.isFile -> FileMetadata( // @formatter:off
+                isRegularFile = true,
+                isDirectory = false,
+                size = stats.size
+            ) // @formatter:on
+            stats.isDirectory -> FileMetadata( // @formatter:off
+                isRegularFile = false,
+                isDirectory = true,
+                size = 0L
+            ) // @formatter:on
+            else -> null
+        }
     }
 
     override suspend fun source(path: Path): AsyncRawSource {
-        TODO("Not yet implemented")
+        val handle = FsPromises.open(path.toString(), "r")
+        return FsFileSource(handle)
     }
 
     override suspend fun sink(path: Path, append: Boolean): AsyncRawSink {
-        TODO("Not yet implemented")
+        val mode = if (append) "a+" else "w+"
+        path.parent?.let { parent -> createDirectories(parent) }
+        val handle = FsPromises.open(path.toString(), mode)
+        return FsFileSink(handle)
     }
 
-    override suspend fun exists(path: Path): Boolean {
-        TODO("Not yet implemented")
-    }
+    override suspend fun exists(path: Path): Boolean = FsPromises.access(path.toString())
 
     override suspend fun move(oldPath: Path, newPath: Path) {
-        TODO("Not yet implemented")
+        if (oldPath == newPath) return
+        FsPromises.rename(oldPath.toString(), newPath.toString())
     }
 
     override suspend fun delete(path: Path, mustExist: Boolean) {
-        TODO("Not yet implemented")
+        if (!exists(path)) {
+            if (mustExist) error("Cannot delete file $path as it does not exist")
+            else return
+        }
+        FsPromises.rm(path.toString())
     }
 }

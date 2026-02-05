@@ -18,12 +18,24 @@
 
 package dev.karmakrafts.ssio.node
 
+import dev.karmakrafts.ssio.files.Paths
+import js.core.JsPrimitives.toKotlinString
 import js.import.import
+import js.objects.unsafeJso
 import js.promise.Promise
 import js.promise.await
+import js.promise.catch
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
+import kotlin.js.JsArray
+import kotlin.js.JsString
 import kotlin.js.definedExternally
+import kotlin.js.toArray
+import kotlin.js.toBoolean
+import kotlin.js.toJsArray
+import kotlin.js.toJsBoolean
+import kotlin.js.toJsString
+import kotlin.js.unsafeCast
 
 internal external interface ReadResult<B : JsAny> : JsAny {
     val bytesRead: Int
@@ -50,16 +62,138 @@ internal external interface FileHandle : JsAny {
         position: Int = definedExternally
     ): Promise<WriteResult<B>> // @formatter:on
 
+    fun sync(): Promise<Nothing?>
+
     fun close(): Promise<Nothing?>
 }
 
+private external interface FsStatOptions : JsAny {
+    var bigint: Boolean
+}
+
+private external interface FsRmOptions : JsAny {
+    var force: Boolean
+    var maxRetries: Int
+    var recursive: Boolean
+    var retryDelay: Int
+}
+
+private external interface FsReaddirOptions : JsAny {
+    var encoding: String
+    var withFileTypes: Boolean
+    var recursive: Boolean
+}
+
+private external interface FsMkdirOptions : JsAny {
+    var recursive: Boolean
+    var mode: String
+}
+
+internal external interface FsStats : JsAny {
+    val isDirectory: Boolean
+    val isFile: Boolean
+    val size: Long
+}
+
+private external interface FsConstants : JsAny {
+    val F_OK: String
+}
+
+private external interface FsDirEnt : JsAny {
+    val isDirectory: Boolean
+    val isFile: Boolean
+    val name: String
+    val parentPath: String
+}
+
 private external interface FsPromisesApi : JsAny {
+    val constants: FsConstants
+
     fun open(path: String, mode: String): Promise<FileHandle>
+    fun access(path: String, mode: String): Promise<Nothing?>
+    fun rename(oldPath: String, newPath: String): Promise<Nothing?>
+    fun stat(path: String, options: FsStatOptions = definedExternally): Promise<FsStats>
+    fun rm(path: String, options: FsRmOptions = definedExternally): Promise<Nothing?>
+    fun readdir(path: String, options: FsReaddirOptions = definedExternally): Promise<JsArray<JsAny>>
+    fun mkdir(path: String, options: FsMkdirOptions = definedExternally): Promise<JsAny?>
 }
 
 internal object FsPromises {
     suspend fun open(path: String, mode: String): FileHandle {
         val fs = import<FsPromisesApi>("fs/promises")
         return fs.open(path, mode).await()
+    }
+
+    suspend fun access(path: String): Boolean {
+        val fs = import<FsPromisesApi>("fs/promises")
+        // @formatter:off
+        return fs.access(path, fs.constants.F_OK)
+            .then { true.toJsBoolean() }
+            .catch { false.toJsBoolean() }
+            .await()
+            .toBoolean()
+        // @formatter:on
+    }
+
+    suspend fun rename(oldPath: String, newPath: String): Boolean {
+        val fs = import<FsPromisesApi>("fs/promises")
+        // @formatter:off
+        return fs.rename(oldPath, newPath)
+            .then { true.toJsBoolean() }
+            .catch { false.toJsBoolean() }
+            .await()
+            .toBoolean()
+        // @formatter:on
+    }
+
+    suspend fun stat(path: String): FsStats {
+        val fs = import<FsPromisesApi>("fs/promises")
+        return fs.stat(path).await()
+    }
+
+    suspend fun rm(path: String, force: Boolean = false): Boolean {
+        val fs = import<FsPromisesApi>("fs/promises")
+        // @formatter:off
+        return fs.rm(path, unsafeJso {
+            this.force = force
+        }).then { true.toJsBoolean() }
+            .catch { false.toJsBoolean() }
+            .await()
+            .toBoolean()
+        // @formatter:on
+    }
+
+    suspend fun readdir(path: String, withFileTypes: Boolean = true): Array<String> {
+        val fs = import<FsPromisesApi>("fs/promises")
+        // @formatter:off
+        return fs.readdir(path, unsafeJso {
+            this.withFileTypes = withFileTypes
+        }).then { buffers ->
+            buffers.toArray()
+                .map { entryValue ->
+                    val entry = entryValue.unsafeCast<FsDirEnt>()
+                    "${entry.parentPath}${Paths.separator}${entry.name}".toJsString()
+                }
+                .toTypedArray()
+                .toJsArray()
+        }.catch {
+            emptyArray<JsString>().toJsArray()
+        }.await()
+            .toArray()
+            .map { string -> string.toKotlinString() }
+            .toTypedArray()
+        // @formatter:on
+    }
+
+    suspend fun mkdir(path: String, recursive: Boolean = true): Boolean {
+        val fs = import<FsPromisesApi>("fs/promises")
+        // @formatter:off
+        return fs.mkdir(path, unsafeJso {
+            this.recursive = recursive
+        }).then { true.toJsBoolean() }
+            .catch { false.toJsBoolean() }
+            .await()
+            .toBoolean()
+        // @formatter:on
     }
 }

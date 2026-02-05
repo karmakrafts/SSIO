@@ -60,6 +60,7 @@ class AsyncSystemFileSystemTest {
         val path = Path("baz") / "test.txt"
         AsyncSystemFileSystem.sink(path).use {}
         AsyncSystemFileSystem.delete(path)
+        AsyncSystemFileSystem.
     }
 
     @Test
@@ -76,11 +77,12 @@ class AsyncSystemFileSystemTest {
     fun `List files`() = runTest {
         val dir = Path("foo") / "bar"
         val path = dir / "test.txt"
+        AsyncSystemFileSystem.delete(path, mustExist = false)
         var entries = AsyncSystemFileSystem.list(dir)
         assertTrue(entries.isEmpty())
         AsyncSystemFileSystem.sink(path).use {}
         entries = AsyncSystemFileSystem.list(dir)
-        assertTrue(AsyncSystemFileSystem.resolve(path) in entries)
+        assertTrue(path in entries)
         AsyncSystemFileSystem.delete(path)
     }
 

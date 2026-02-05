@@ -49,8 +49,11 @@ import kotlin.js.unsafeCast
  */
 @OptIn(ExperimentalWasmJsInterop::class)
 internal object OpfsFileSystem : AbstractAsyncFileSystem() {
-    override suspend fun getWorkingDirectory(): Path = Path("/")
-    override suspend fun getTempDirectory(): Path = Path("/tmp")
+    private val workingDirectory: Path = Path("/")
+    private val tempDirectory: Path = Path("/tmp")
+
+    override suspend fun getWorkingDirectory(): Path = workingDirectory
+    override suspend fun getTempDirectory(): Path = tempDirectory
 
     private suspend fun getDirectoryHandle(path: Path, create: Boolean = false): Result<FileSystemDirectoryHandle> {
         val resolvedPath = resolve(path)
@@ -100,7 +103,7 @@ internal object OpfsFileSystem : AbstractAsyncFileSystem() {
         while (true) {
             val result = iterator.next().await().unsafeCast<IteratorReturnResult<FileSystemHandle>>()
             if (result.done) break
-            entries += resolve(path / result.value.name)
+            entries += path / result.value.name
         }
         return entries
     }
@@ -131,7 +134,8 @@ internal object OpfsFileSystem : AbstractAsyncFileSystem() {
         }
 
     override suspend fun source(path: Path): AsyncRawSource {
-        return OpfsFileSource(getFileHandle(path, create = false).getOrThrow().getFile().stream().getReader())
+        val handle = getFileHandle(path, create = false).getOrThrow()
+        return OpfsFileSource(handle.getFile().stream().getReader())
     }
 
     override suspend fun sink(path: Path, append: Boolean): AsyncRawSink {

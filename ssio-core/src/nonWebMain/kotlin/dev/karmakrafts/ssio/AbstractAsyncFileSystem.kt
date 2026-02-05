@@ -35,7 +35,7 @@ abstract class AbstractAsyncFileSystem : AsyncFileSystem {
 
     override suspend fun list(path: Path): List<Path> {
         return if (!exists(path)) emptyList()
-        else SystemFileSystem.list(resolve(path)).toList()
+        else SystemFileSystem.list(path).toList()
     }
 
     override suspend fun createDirectories(path: Path, mustCreate: Boolean) {
