@@ -23,6 +23,6 @@ import dev.karmakrafts.ssio.files.normalize
 internal abstract class AbstractAsyncFileSystem : AsyncFileSystem {
     override suspend fun resolve(path: Path): Path {
         return if (path.isAbsolute) path.normalize()
-        else getWorkingDirectory() / path.normalize()
+        else (getWorkingDirectory() / path).normalize()
     }
 }

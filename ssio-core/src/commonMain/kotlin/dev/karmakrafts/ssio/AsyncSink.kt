@@ -17,7 +17,6 @@
 package dev.karmakrafts.ssio
 
 import kotlinx.io.bytestring.ByteString
-import kotlinx.io.bytestring.encodeToByteString
 
 interface AsyncSink : AsyncRawSink {
     suspend fun writeByte(value: Byte)
@@ -26,6 +25,7 @@ interface AsyncSink : AsyncRawSink {
     suspend fun writeLong(value: Long)
 
     suspend fun writeByteString(value: ByteString, startIndex: Int = 0, endIndex: Int = value.size)
+    suspend fun writeByteArray(value: ByteArray, startIndex: Int = 0, endIndex: Int = value.size)
 }
 
 suspend fun AsyncSink.writeUByte(value: UByte) = writeByte(value.toByte())
@@ -37,12 +37,12 @@ suspend fun AsyncSink.writeFloat(value: Float) = writeInt(value.toBits())
 suspend fun AsyncSink.writeDouble(value: Double) = writeLong(value.toBits())
 
 suspend fun AsyncSink.writeString(value: String) {
-    writeByteString(value.encodeToByteString())
+    writeByteArray(value.encodeToByteArray())
 }
 
 suspend fun AsyncSink.writePrefixedString(value: String) {
     writeInt(value.length)
-    writeByteString(value.encodeToByteString())
+    writeByteArray(value.encodeToByteArray())
 }
 
 suspend inline fun <T> AsyncSink.writeList(list: List<T>, writer: AsyncSink.(T) -> Unit) {

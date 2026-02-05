@@ -49,8 +49,8 @@ import kotlin.js.unsafeCast
  */
 @OptIn(ExperimentalWasmJsInterop::class)
 internal object OpfsFileSystem : AbstractAsyncFileSystem() {
-    override suspend fun getWorkingDirectory(): Path = Path("")
-    override suspend fun getTempDirectory(): Path = Path("temp")
+    override suspend fun getWorkingDirectory(): Path = Path("/")
+    override suspend fun getTempDirectory(): Path = Path("/temp")
 
     private suspend fun getDirectoryHandle(path: Path, create: Boolean = false): Result<FileSystemDirectoryHandle> {
         val resolvedPath = resolve(path)

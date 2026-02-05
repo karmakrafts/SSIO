@@ -31,6 +31,12 @@ private open class BufferedAsyncSink( // @formatter:off
     protected val isClosed: AtomicBoolean = AtomicBoolean(false)
     protected val buffer: Buffer = Buffer()
 
+    override suspend fun writeByteArray(value: ByteArray, startIndex: Int, endIndex: Int) {
+        check(!isClosed.load()) { "AsyncSink is closed" }
+        buffer.write(value, startIndex, endIndex)
+        if (buffer.size >= bufferSize) flush()
+    }
+
     override suspend fun writeByteString(value: ByteString, startIndex: Int, endIndex: Int) {
         check(!isClosed.load()) { "AsyncSink is closed" }
         buffer.write(value, startIndex, endIndex)
@@ -101,6 +107,10 @@ private class SynchronizedBufferedAsyncSink(
     rawSink: AsyncRawSink, bufferSize: Long
 ) : BufferedAsyncSink(rawSink, bufferSize) {
     private val mutex: Mutex = Mutex()
+
+    override suspend fun writeByteArray(value: ByteArray, startIndex: Int, endIndex: Int) = mutex.withLock {
+        super.writeByteArray(value, startIndex, endIndex)
+    }
 
     override suspend fun writeByteString(value: ByteString, startIndex: Int, endIndex: Int) = mutex.withLock {
         super.writeByteString(value, startIndex, endIndex)

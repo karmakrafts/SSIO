@@ -20,6 +20,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.io.Buffer
 import kotlinx.io.bytestring.ByteString
+import kotlinx.io.readByteArray
 import kotlinx.io.readByteString
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.math.min
@@ -43,6 +44,16 @@ private class BufferedAsyncSource( // @formatter:off
         } catch (error: Throwable) {
             Result.failure(error)
         }
+    }
+
+    override suspend fun readByteArray(): ByteArray {
+        check(await(AwaitPredicate.exhausted()).getOrThrow()) { "AsyncSource is exhausted" }
+        return buffer.readByteArray()
+    }
+
+    override suspend fun readByteArray(byteCount: Int): ByteArray {
+        check(await(AwaitPredicate.available(byteCount.toLong())).getOrThrow()) { "AsyncSource is exhausted" }
+        return buffer.readByteArray(byteCount)
     }
 
     override suspend fun readByteString(): ByteString {
@@ -120,6 +131,20 @@ private class SynchronizedBufferedAsyncSource( // @formatter:off
             Result.success(false)
         } catch (error: Throwable) {
             Result.failure(error)
+        }
+    }
+
+    override suspend fun readByteArray(): ByteArray {
+        check(await(AwaitPredicate.exhausted()).getOrThrow()) { "AsyncSource is exhausted" }
+        return mutex.withLock {
+            buffer.readByteArray()
+        }
+    }
+
+    override suspend fun readByteArray(byteCount: Int): ByteArray {
+        check(await(AwaitPredicate.available(byteCount.toLong())).getOrThrow()) { "AsyncSource is exhausted" }
+        return mutex.withLock {
+            buffer.readByteArray(byteCount)
         }
     }
 
