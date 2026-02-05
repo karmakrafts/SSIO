@@ -60,7 +60,6 @@ class AsyncSystemFileSystemTest {
         val path = Path("baz") / "test.txt"
         AsyncSystemFileSystem.sink(path).use {}
         AsyncSystemFileSystem.delete(path)
-        AsyncSystemFileSystem.
     }
 
     @Test
