@@ -23,7 +23,7 @@ import kotlinx.io.Buffer
 import kotlinx.io.readByteArray
 import kotlin.math.min
 
-internal class FsFileSink(
+internal class NodeFileSink(
     private val handle: FileHandle
 ) : AsyncRawSink {
     companion object {

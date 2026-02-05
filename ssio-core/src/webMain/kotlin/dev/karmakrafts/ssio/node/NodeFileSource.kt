@@ -22,7 +22,7 @@ import js.buffer.toByteArray
 import js.promise.await
 import kotlinx.io.Buffer
 
-internal class FsFileSource(
+internal class NodeFileSource(
     private val handle: FileHandle
 ) : AsyncRawSource {
     companion object {

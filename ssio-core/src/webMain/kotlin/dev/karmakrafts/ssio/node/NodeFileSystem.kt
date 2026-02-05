@@ -59,14 +59,14 @@ internal object NodeFileSystem : AbstractAsyncFileSystem() {
 
     override suspend fun source(path: Path): AsyncRawSource {
         val handle = FsPromises.open(path.toString(), "r")
-        return FsFileSource(handle)
+        return NodeFileSource(handle)
     }
 
     override suspend fun sink(path: Path, append: Boolean): AsyncRawSink {
         val mode = if (append) "a+" else "w+"
         path.parent?.let { parent -> createDirectories(parent) }
         val handle = FsPromises.open(path.toString(), mode)
-        return FsFileSink(handle)
+        return NodeFileSink(handle)
     }
 
     override suspend fun exists(path: Path): Boolean = FsPromises.access(path.toString())
