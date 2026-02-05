@@ -14,9 +14,25 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalWasmJsInterop::class)
+
 package dev.karmakrafts.ssio.files
 
+import dev.karmakrafts.ssio.isNode
+import kotlin.js.ExperimentalWasmJsInterop
+import kotlin.js.js
+
+private const val BROWSER_SEPARATOR: String = "/"
+
+// We do this because we cannot suspend for retrieving the separator
+private fun getNodePathSeparator(): String = js("""require('path').sep""")
+
+private fun getPathSeparator(): String {
+    return if (isNode) getNodePathSeparator()
+    else BROWSER_SEPARATOR
+}
+
 actual object Paths {
-    actual val separator: String = "/"
+    actual val separator: String = getPathSeparator()
     actual val root: Path = Path(separator)
 }
