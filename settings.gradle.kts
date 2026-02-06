@@ -42,3 +42,4 @@ plugins {
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 include("ssio-core")
+include("ssio-benchmarks")

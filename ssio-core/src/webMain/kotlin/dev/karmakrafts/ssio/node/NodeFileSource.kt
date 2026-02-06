@@ -31,13 +31,14 @@ internal class NodeFileSource(
 
     private var isClosed: Boolean = false
     private var isClosing: Boolean = false
+    private val buffer: ArrayBuffer = ArrayBuffer(CHUNK_SIZE)
 
     override suspend fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
         check(!isClosed) { "AsyncRawSource is already closed" }
         var remaining = byteCount
         var transferredTotal = 0L
         while (remaining > 0) {
-            val result = handle.read(ArrayBuffer(CHUNK_SIZE)).await()
+            val result = handle.read(buffer).await()
             val bytesRead = result.bytesRead
             if (bytesRead == 0) break
             sink.write(result.buffer.slice(0, bytesRead).toByteArray())
