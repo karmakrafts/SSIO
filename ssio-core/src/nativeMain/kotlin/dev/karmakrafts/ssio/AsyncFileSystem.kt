@@ -19,8 +19,12 @@ package dev.karmakrafts.ssio
 import dev.karmakrafts.ssio.files.Path
 import dev.karmakrafts.ssio.posix.NativeFileSink
 import dev.karmakrafts.ssio.posix.NativeFileSource
+import dev.karmakrafts.ssio.posix.NativeIoHandler
 import dev.karmakrafts.ssio.posix.platformGetCwd
 import dev.karmakrafts.ssio.posix.platformGetTmpDir
+import platform.posix.O_APPEND
+import platform.posix.O_CREAT
+import platform.posix.O_RDWR
 
 private object AsyncFileSystemImpl : AbstractAsyncFileSystem() {
     private val workingDirectory: Path = Path(platformGetCwd())
@@ -28,8 +32,15 @@ private object AsyncFileSystemImpl : AbstractAsyncFileSystem() {
 
     override suspend fun getWorkingDirectory(): Path = workingDirectory
     override suspend fun getTempDirectory(): Path = tempDirectory
-    override suspend fun sink(path: Path, append: Boolean): AsyncRawSink = NativeFileSink(path, append)
-    override suspend fun source(path: Path): AsyncRawSource = NativeFileSource(path)
+
+    override suspend fun sink(path: Path, append: Boolean): AsyncRawSink {
+        var openFlags = O_CREAT or O_RDWR
+        if (append) openFlags = openFlags or O_APPEND
+        path.parent?.let { parent -> AsyncSystemFileSystem.createDirectories(parent) }
+        return NativeFileSink(NativeIoHandler.openFile(path, openFlags))
+    }
+
+    override suspend fun source(path: Path): AsyncRawSource = NativeFileSource(NativeIoHandler.openFile(path))
 }
 
 actual val AsyncSystemFileSystem: AsyncFileSystem = AsyncFileSystemImpl
