@@ -17,17 +17,19 @@
 package dev.karmakrafts.ssio
 
 import dev.karmakrafts.ssio.files.Path
-import dev.karmakrafts.ssio.nio.NioFileSink
-import dev.karmakrafts.ssio.nio.NioFileSource
-import kotlin.io.path.absolute
+import dev.karmakrafts.ssio.posix.NativeFileSink
+import dev.karmakrafts.ssio.posix.NativeFileSource
+import dev.karmakrafts.ssio.posix.platformGetCwd
+import dev.karmakrafts.ssio.posix.platformGetTmpDir
 
 private object AsyncFileSystemImpl : AbstractAsyncFileSystem() {
-    override suspend fun getWorkingDirectory(): Path = AndroidFileSystem.context.filesDir.toSsioPath()
-    override suspend fun getTempDirectory(): Path = AndroidFileSystem.context.dataDir.toSsioPath()
-    override suspend fun sink(path: Path, append: Boolean): AsyncRawSink =
-        NioFileSink(path.toNioPath().normalize().absolute())
+    private val workingDirectory: Path = Path(platformGetCwd())
+    private val tempDirectory: Path = Path(platformGetTmpDir())
 
-    override suspend fun source(path: Path): AsyncRawSource = NioFileSource(path.toNioPath().normalize().absolute())
+    override suspend fun getWorkingDirectory(): Path = workingDirectory
+    override suspend fun getTempDirectory(): Path = tempDirectory
+    override suspend fun sink(path: Path, append: Boolean): AsyncRawSink = NativeFileSink(path, append)
+    override suspend fun source(path: Path): AsyncRawSource = NativeFileSource(path)
 }
 
 actual val AsyncSystemFileSystem: AsyncFileSystem = AsyncFileSystemImpl

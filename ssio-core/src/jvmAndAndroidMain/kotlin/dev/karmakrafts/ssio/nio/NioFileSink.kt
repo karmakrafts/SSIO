@@ -14,39 +14,57 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio
+package dev.karmakrafts.ssio.nio
 
+import dev.karmakrafts.ssio.AsyncRawSink
+import dev.karmakrafts.ssio.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
 import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousFileChannel
+import java.nio.file.StandardOpenOption
 import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.io.path.createFile
+import kotlin.io.path.createParentDirectories
+import kotlin.io.path.exists
 import kotlin.math.min
 import java.nio.file.Path as NioPath
 
-internal class NioFileSource(
+internal class NioFileSink(
     path: NioPath
-) : AsyncRawSource {
+) : AsyncRawSink {
     companion object {
         private const val CHUNK_SIZE: Long = 4096
     }
 
-    private val isClosed: AtomicBoolean = AtomicBoolean(false)
-    private val channel: AsynchronousFileChannel = AsynchronousFileChannel.open(path)
-
-    override suspend fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
-        val data = ByteArray(CHUNK_SIZE.toInt())
-        val fileSize = withContext(Dispatchers.IO) { channel.size() }
-        val toRead = min(fileSize, byteCount)
-        var readTotal = 0L
-        while (readTotal < toRead) {
-            val bytesRead = channel.read(ByteBuffer.wrap(data), 0).await()
-            if (bytesRead == -1) break
-            sink.write(data, 0, bytesRead)
-            readTotal += bytesRead
+    init {
+        if (!path.exists()) {
+            path.createParentDirectories()
+            path.createFile()
         }
-        return readTotal
+    }
+
+    private val isClosed: AtomicBoolean = AtomicBoolean(false)
+    private val channel: AsynchronousFileChannel = AsynchronousFileChannel.open(path, StandardOpenOption.WRITE)
+
+    override suspend fun write(source: Buffer, byteCount: Long) {
+        val toWrite = min(source.size, byteCount)
+        var remaining = toWrite
+        while (remaining > 0) {
+            val chunkSize = min(CHUNK_SIZE, remaining).toInt()
+            val chunk = source.readByteArray(chunkSize)
+            channel.write(ByteBuffer.wrap(chunk), 0).await()
+            remaining -= chunkSize
+        }
+    }
+
+    override suspend fun flush() {
+        check(!isClosed.load()) { "AsyncRawSink is already closed" }
+        withContext(Dispatchers.IO) {
+            channel.force(true)
+        }
     }
 
     override suspend fun close() {
