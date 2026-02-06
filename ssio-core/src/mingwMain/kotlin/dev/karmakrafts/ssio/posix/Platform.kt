@@ -38,8 +38,8 @@ internal actual fun platformSyncFd(fd: Int) {
 }
 
 internal actual fun platformGetCwd(): String = memScoped {
-    val buffer = allocArray<ByteVar>(4096)
-    _getcwd(buffer, 4096)
+    val buffer = allocArray<ByteVar>(MAX_PATH)
+    _getcwd(buffer, MAX_PATH)
     buffer.toKStringFromUtf8()
 }
 

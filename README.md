@@ -5,7 +5,7 @@
 )](https://git.karmakrafts.dev/kk/ssio/-/packages)
 [![](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fdev%2Fkarmakrafts%2Fssio%2Fssio-core%2Fmaven-metadata.xml
 )](https://git.karmakrafts.dev/kk/ssio/-/packages)
-[![](https://img.shields.io/badge/2.3.0-blue?logo=kotlin&label=kotlin)](https://kotlinlang.org/)
+[![](https://img.shields.io/badge/2.3.20--Beta2-blue?logo=kotlin&label=kotlin)](https://kotlinlang.org/)
 [![](https://img.shields.io/badge/documentation-black?logo=kotlin)](https://docs.karmakrafts.dev/ssio-core)
 
 **S**treaming **S**uspend **I**nput **O**utput library for Kotlin Multiplatform.  
@@ -15,6 +15,8 @@ was never implemented.
 ### Features
 
 - Supports all Kotlin Multiplatform targets
+- `AsyncReadOnlyFileSystem` interface
+- `AsyncFileSystem` interface
 - `AsyncCloseable` interface
 - `AsyncRawSource` interface
 - `AsyncRawSink` interface
