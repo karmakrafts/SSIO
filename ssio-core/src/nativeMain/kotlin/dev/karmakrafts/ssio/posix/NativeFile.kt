@@ -21,7 +21,6 @@ import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.convert
-import kotlinx.cinterop.memScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -78,9 +77,7 @@ internal class NativeFile( // @formatter:off
 
     suspend fun read(buffer: COpaquePointer, bufferSize: UInt): Long {
         val task = NativeIoTask.Read({ fd ->
-            memScoped {
-                posixRead(fd, buffer, bufferSize.convert()).convert()
-            }
+            posixRead(fd, buffer, bufferSize.convert()).convert()
         })
         channel.send(task)
         return task.result.await()
@@ -88,9 +85,7 @@ internal class NativeFile( // @formatter:off
 
     suspend fun write(buffer: COpaquePointer, bufferSize: UInt) {
         val task = NativeIoTask.Write({ fd ->
-            memScoped {
-                posixWrite(fd, buffer, bufferSize.convert())
-            }
+            posixWrite(fd, buffer, bufferSize.convert())
         })
         channel.send(task)
         task.result.await()
