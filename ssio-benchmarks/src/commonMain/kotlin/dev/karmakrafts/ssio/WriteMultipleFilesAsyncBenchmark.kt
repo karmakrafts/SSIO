@@ -17,23 +17,21 @@
 package dev.karmakrafts.ssio
 
 import dev.karmakrafts.ssio.files.Path
-import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.Scope
 import kotlinx.benchmark.State
 import kotlinx.benchmark.TearDown
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.joinAll
 
 @State(Scope.Benchmark)
-open class WriteMultipleFilesAsyncBenchmark {
-    private val coroutineScope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
+open class WriteMultipleFilesAsyncBenchmark : AsyncBenchmark() {
+    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
-    @Benchmark
-    fun invoke() = runBlockingIfPossible {
+    override suspend fun run() {
         (0..<10).map { i ->
             coroutineScope.async {
                 val sink = AsyncSystemFileSystem.sink(Path("mf_benchmark_async_$i.txt")).buffered()
@@ -46,7 +44,7 @@ open class WriteMultipleFilesAsyncBenchmark {
     }
 
     @TearDown
-    fun tearDown() = runBlockingIfPossible {
-        coroutineScope.coroutineContext.job.cancelAndJoin()
+    fun tearDown() {
+        coroutineScope.cancel()
     }
 }

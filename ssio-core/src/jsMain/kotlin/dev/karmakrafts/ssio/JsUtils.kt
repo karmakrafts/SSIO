@@ -16,8 +16,15 @@
 
 package dev.karmakrafts.ssio
 
-import kotlinx.coroutines.CoroutineDispatcher
+import js.buffer.ArrayBuffer
+import js.typedarrays.Int8Array
 
-internal expect fun runBlockingIfPossible(block: suspend () -> Unit)
+@Suppress("CAST_NEVER_SUCCEEDS")
+internal actual fun ByteArray.asInt8Array(): Int8Array<ArrayBuffer> {
+    return this as Int8Array<ArrayBuffer>
+}
 
-internal expect val ioDispatcher: CoroutineDispatcher
+@Suppress("CAST_NEVER_SUCCEEDS")
+internal actual fun Int8Array<ArrayBuffer>.asByteArray(): ByteArray {
+    return this as ByteArray
+}

@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalWasmJsInterop::class)
-
 package dev.karmakrafts.ssio
 
-import js.buffer.ArrayBuffer
-import js.typedarrays.Int8Array
+import js.coroutines.promise
+import kotlinx.benchmark.Benchmark
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlin.js.ExperimentalWasmJsInterop
-import kotlin.js.js
+import kotlin.js.Promise
+import kotlin.js.unsafeCast
 
-@OptIn(ExperimentalWasmJsInterop::class)
-private fun checkIsNode(): Boolean = js("""typeof process !== 'undefined' && process.release.name === 'node'""")
+actual abstract class AsyncBenchmark {
+    actual abstract suspend fun run()
 
-internal val isNode: Boolean = checkIsNode()
-
-internal expect fun ByteArray.asInt8Array(): Int8Array<ArrayBuffer>
-internal expect fun Int8Array<ArrayBuffer>.asByteArray(): ByteArray
+    @OptIn(ExperimentalWasmJsInterop::class, DelicateCoroutinesApi::class)
+    @Benchmark
+    fun invoke(): Promise<Nothing?> = GlobalScope.promise {
+        run()
+        null
+    }.unsafeCast<Promise<Nothing?>>()
+}

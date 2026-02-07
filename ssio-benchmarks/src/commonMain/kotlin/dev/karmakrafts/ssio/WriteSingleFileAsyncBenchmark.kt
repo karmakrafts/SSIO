@@ -17,14 +17,12 @@
 package dev.karmakrafts.ssio
 
 import dev.karmakrafts.ssio.files.Path
-import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.Scope
 import kotlinx.benchmark.State
 
 @State(Scope.Benchmark)
-open class WriteSingleFileAsyncBenchmark {
-    @Benchmark
-    fun invoke() = runBlockingIfPossible {
+open class WriteSingleFileAsyncBenchmark : AsyncBenchmark() {
+    override suspend fun run() {
         val sink = AsyncSystemFileSystem.sink(Path("benchmark_async.txt")).buffered()
         for (i in 0..<10) {
             sink.writeString("HELLO, WORLD!\n")

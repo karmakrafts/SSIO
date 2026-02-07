@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalWasmJsInterop::class)
+package dev.karmakrafts.ssio.node
 
-package dev.karmakrafts.ssio
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
-import js.buffer.ArrayBuffer
-import js.typedarrays.Int8Array
-import kotlin.js.ExperimentalWasmJsInterop
-import kotlin.js.js
+internal class SuspendLazy<T>(
+    val initializer: suspend () -> T
+) {
+    private var value: T? = null
+    private var isInitialized: Boolean = false
+    private val mutex: Mutex = Mutex()
 
-@OptIn(ExperimentalWasmJsInterop::class)
-private fun checkIsNode(): Boolean = js("""typeof process !== 'undefined' && process.release.name === 'node'""")
-
-internal val isNode: Boolean = checkIsNode()
-
-internal expect fun ByteArray.asInt8Array(): Int8Array<ArrayBuffer>
-internal expect fun Int8Array<ArrayBuffer>.asByteArray(): ByteArray
+    suspend fun get(): T = mutex.withLock {
+        return if (isInitialized) value!!
+        else {
+            val value = initializer()
+            this.value = value
+            isInitialized = true
+            value
+        }
+    }
+}

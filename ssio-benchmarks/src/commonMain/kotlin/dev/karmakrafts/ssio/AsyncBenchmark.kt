@@ -16,16 +16,6 @@
 
 package dev.karmakrafts.ssio
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.runBlocking
-
-internal actual val ioDispatcher: CoroutineDispatcher
-    get() = Dispatchers.IO
-
-internal actual fun runBlockingIfPossible(block: suspend () -> Unit) {
-    runBlocking {
-        block()
-    }
+expect abstract class AsyncBenchmark() {
+    abstract suspend fun run()
 }

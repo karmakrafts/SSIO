@@ -18,8 +18,9 @@ package dev.karmakrafts.ssio.node
 
 import dev.karmakrafts.ssio.AsyncRawSource
 import js.buffer.ArrayBuffer
-import js.buffer.toByteArray
 import js.promise.await
+import js.typedarrays.Uint8Array
+import js.typedarrays.toByteArray
 import kotlinx.io.Buffer
 
 internal class NodeFileSource(
@@ -41,7 +42,7 @@ internal class NodeFileSource(
             val result = handle.read(buffer).await()
             val bytesRead = result.bytesRead
             if (bytesRead == 0) break
-            sink.write(result.buffer.slice(0, bytesRead).toByteArray())
+            sink.write(Uint8Array(result.buffer, 0, bytesRead).toByteArray())
             remaining -= bytesRead
             transferredTotal += transferredTotal
         }

@@ -119,15 +119,15 @@ private external interface FsPromisesApi : JsAny {
 }
 
 internal object FsPromises {
+    private val fs: SuspendLazy<FsPromisesApi> = SuspendLazy { import("fs/promises") }
+
     suspend fun open(path: String, mode: String): FileHandle {
-        val fs = import<FsPromisesApi>("fs/promises")
-        return fs.open(path, mode).await()
+        return fs.get().open(path, mode).await()
     }
 
     suspend fun access(path: String): Boolean {
-        val fs = import<FsPromisesApi>("fs/promises")
         // @formatter:off
-        return fs.access(path, fs.constants.F_OK)
+        return fs.get().access(path, fs.get().constants.F_OK)
             .then { true.toJsBoolean() }
             .catch { false.toJsBoolean() }
             .await()
@@ -136,9 +136,8 @@ internal object FsPromises {
     }
 
     suspend fun rename(oldPath: String, newPath: String): Boolean {
-        val fs = import<FsPromisesApi>("fs/promises")
         // @formatter:off
-        return fs.rename(oldPath, newPath)
+        return fs.get().rename(oldPath, newPath)
             .then { true.toJsBoolean() }
             .catch { false.toJsBoolean() }
             .await()
@@ -147,14 +146,12 @@ internal object FsPromises {
     }
 
     suspend fun stat(path: String): FsStats {
-        val fs = import<FsPromisesApi>("fs/promises")
-        return fs.stat(path).await()
+        return fs.get().stat(path).await()
     }
 
     suspend fun rm(path: String, force: Boolean = false): Boolean {
-        val fs = import<FsPromisesApi>("fs/promises")
         // @formatter:off
-        return fs.rm(path, unsafeJso {
+        return fs.get().rm(path, unsafeJso {
             this.force = force
         }).then { true.toJsBoolean() }
             .catch { false.toJsBoolean() }
@@ -164,9 +161,8 @@ internal object FsPromises {
     }
 
     suspend fun readdir(path: String, withFileTypes: Boolean = true): Array<String> {
-        val fs = import<FsPromisesApi>("fs/promises")
         // @formatter:off
-        return fs.readdir(path, unsafeJso {
+        return fs.get().readdir(path, unsafeJso {
             this.withFileTypes = withFileTypes
         }).then { buffers ->
             buffers.toArray()
@@ -186,9 +182,8 @@ internal object FsPromises {
     }
 
     suspend fun mkdir(path: String, recursive: Boolean = true): Boolean {
-        val fs = import<FsPromisesApi>("fs/promises")
         // @formatter:off
-        return fs.mkdir(path, unsafeJso {
+        return fs.get().mkdir(path, unsafeJso {
             this.recursive = recursive
         }).then { true.toJsBoolean() }
             .catch { false.toJsBoolean() }

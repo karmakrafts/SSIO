@@ -24,6 +24,7 @@ import dev.karmakrafts.conventions.kotlin.withMingw
 import dev.karmakrafts.conventions.kotlin.withNodeJs
 import dev.karmakrafts.conventions.kotlin.withWeb
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -75,7 +76,7 @@ benchmark {
     }
     configurations {
         named("main") {
-            warmups = 8
+            warmups = 4
             iterations = 10
             iterationTime = 2
             iterationTimeUnit = "s"

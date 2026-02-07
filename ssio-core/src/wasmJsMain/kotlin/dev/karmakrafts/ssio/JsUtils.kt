@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
+@file:OptIn(InternalApi::class)
+
 package dev.karmakrafts.ssio
 
-import js.coroutines.promise
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlin.js.ExperimentalWasmJsInterop
-import kotlin.js.JsAny
+import js.buffer.ArrayBuffer
+import js.internal.InternalApi
+import js.typedarrays.Int8Array
+import js.typedarrays.internal.castOrConvertToByteArray
+import js.typedarrays.toInt8Array
 
-internal actual val ioDispatcher: CoroutineDispatcher
-    get() = Dispatchers.Default
+internal actual fun ByteArray.asInt8Array(): Int8Array<ArrayBuffer> {
+    return toInt8Array()
+}
 
-@OptIn(DelicateCoroutinesApi::class, ExperimentalWasmJsInterop::class)
-internal actual fun runBlockingIfPossible(block: suspend () -> Unit) {
-    GlobalScope.promise<JsAny?> {
-        block()
-        null
-    }
+internal actual fun Int8Array<ArrayBuffer>.asByteArray(): ByteArray {
+    return castOrConvertToByteArray()
 }

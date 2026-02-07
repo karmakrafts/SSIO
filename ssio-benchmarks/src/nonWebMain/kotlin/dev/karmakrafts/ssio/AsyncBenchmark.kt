@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalWasmJsInterop::class)
-
 package dev.karmakrafts.ssio
 
-import js.buffer.ArrayBuffer
-import js.typedarrays.Int8Array
-import kotlin.js.ExperimentalWasmJsInterop
-import kotlin.js.js
+import kotlinx.benchmark.Benchmark
+import kotlinx.coroutines.runBlocking
 
-@OptIn(ExperimentalWasmJsInterop::class)
-private fun checkIsNode(): Boolean = js("""typeof process !== 'undefined' && process.release.name === 'node'""")
+actual abstract class AsyncBenchmark {
+    actual abstract suspend fun run()
 
-internal val isNode: Boolean = checkIsNode()
-
-internal expect fun ByteArray.asInt8Array(): Int8Array<ArrayBuffer>
-internal expect fun Int8Array<ArrayBuffer>.asByteArray(): ByteArray
+    @Benchmark
+    fun invoke() = runBlocking {
+        run()
+    }
+}
