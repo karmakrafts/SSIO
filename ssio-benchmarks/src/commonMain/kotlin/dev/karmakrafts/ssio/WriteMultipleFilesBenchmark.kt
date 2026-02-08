@@ -22,18 +22,25 @@ import kotlinx.benchmark.State
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
-import kotlinx.io.writeString
+import kotlin.random.Random
+import kotlin.time.Clock
 
 @State(Scope.Benchmark)
 open class WriteMultipleFilesBenchmark {
+    companion object {
+        private const val BYTE_COUNT: Int = 4096
+    }
+
+    private val rand: Random = Random(Clock.System.now().epochSeconds)
+
     @Benchmark
     fun invoke() {
         for (i in 0..<10) {
-            val sink = SystemFileSystem.sink(Path("mf_benchmark_$i.txt")).buffered()
-            for (j in 0..<10) {
-                sink.writeString("HELLO, WORLD!\n")
+            SystemFileSystem.sink(Path("mf_benchmark_$i.bin")).buffered().use { sink ->
+                for(j in 0..<20) {
+                    sink.write(rand.nextBytes(BYTE_COUNT))
+                }
             }
-            sink.close()
         }
     }
 }

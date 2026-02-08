@@ -22,15 +22,22 @@ import kotlinx.benchmark.State
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
-import kotlinx.io.writeString
+import kotlin.random.Random
+import kotlin.time.Clock
 
 @State(Scope.Benchmark)
 open class WriteSingleFileBenchmark {
+    companion object {
+        private const val BYTE_COUNT: Int = 8192
+    }
+
+    private val rand: Random = Random(Clock.System.now().epochSeconds)
+
     @Benchmark
     fun invoke() {
-        val sink = SystemFileSystem.sink(Path("benchmark1.txt")).buffered()
+        val sink = SystemFileSystem.sink(Path("benchmark.bin")).buffered()
         for (i in 0..<10) {
-            sink.writeString("HELLO, WORLD!\n")
+            sink.write(rand.nextBytes(BYTE_COUNT))
         }
         sink.close()
     }

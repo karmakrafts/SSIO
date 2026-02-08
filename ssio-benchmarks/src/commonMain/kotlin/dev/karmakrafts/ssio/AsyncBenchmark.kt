@@ -16,6 +16,11 @@
 
 package dev.karmakrafts.ssio
 
-expect abstract class AsyncBenchmark() {
-    abstract suspend fun run()
+import kotlinx.benchmark.CommonBlackhole
+import kotlinx.benchmark.internal.KotlinxBenchmarkRuntimeInternalApi
+
+@OptIn(KotlinxBenchmarkRuntimeInternalApi::class)
+expect abstract class AsyncBenchmark<T>() {
+    protected val blackHole: CommonBlackhole
+    abstract suspend fun run(): T
 }

@@ -33,38 +33,40 @@ private open class BufferedAsyncSink( // @formatter:off
 
     override suspend fun writeByteArray(value: ByteArray, startIndex: Int, endIndex: Int) {
         check(!isClosed.load()) { "AsyncSink is closed" }
+        val toWrite = endIndex - startIndex
+        if (buffer.size + toWrite >= bufferSize) emit()
         buffer.write(value, startIndex, endIndex)
-        if (buffer.size >= bufferSize) flush()
     }
 
     override suspend fun writeByteString(value: ByteString, startIndex: Int, endIndex: Int) {
         check(!isClosed.load()) { "AsyncSink is closed" }
+        val toWrite = endIndex - startIndex
+        if (buffer.size + toWrite >= bufferSize) emit()
         buffer.write(value, startIndex, endIndex)
-        if (buffer.size >= bufferSize) flush()
     }
 
     override suspend fun writeByte(value: Byte) {
         check(!isClosed.load()) { "AsyncSink is closed" }
+        if (buffer.size + Byte.SIZE_BYTES >= bufferSize) emit()
         buffer.writeByte(value)
-        if (buffer.size >= bufferSize) flush()
     }
 
     override suspend fun writeShort(value: Short) {
         check(!isClosed.load()) { "AsyncSink is closed" }
+        if (buffer.size + Short.SIZE_BYTES >= bufferSize) emit()
         buffer.writeShort(value)
-        if (buffer.size >= bufferSize) flush()
     }
 
     override suspend fun writeInt(value: Int) {
         check(!isClosed.load()) { "AsyncSink is closed" }
+        if (buffer.size + Int.SIZE_BYTES >= bufferSize) emit()
         buffer.writeInt(value)
-        if (buffer.size >= bufferSize) flush()
     }
 
     override suspend fun writeLong(value: Long) {
         check(!isClosed.load()) { "AsyncSink is closed" }
+        if (buffer.size + Long.SIZE_BYTES >= bufferSize) emit()
         buffer.writeLong(value)
-        if (buffer.size >= bufferSize) flush()
     }
 
     override suspend fun write(source: Buffer, byteCount: Long) {
@@ -72,18 +74,22 @@ private open class BufferedAsyncSink( // @formatter:off
         var remaining = min(source.size, byteCount)
         while (remaining > 0) {
             val toWrite = min(remaining, Int.MAX_VALUE.toLong())
+            if (buffer.size + toWrite >= bufferSize) emit()
             buffer.write(source, toWrite)
             remaining -= toWrite
-            if (buffer.size >= bufferSize) flush()
         }
     }
 
-    override suspend fun flush() {
+    override suspend fun emit() {
         check(!isClosed.load()) { "AsyncSink is closed" }
         if (buffer.size > 0) {
             rawSink.write(buffer, buffer.size)
             buffer.clear()
         }
+    }
+
+    override suspend fun flush() {
+        emit()
         rawSink.flush()
     }
 
@@ -159,7 +165,7 @@ private class SynchronizedBufferedAsyncSink(
 }
 
 fun AsyncRawSink.buffered( // @formatter:off
-    bufferSize: Long = 8 * 1024,
+    bufferSize: Long = 4096,
     synchronized: Boolean = false
 ): AsyncSink { // @formatter:on
     return if (synchronized) SynchronizedBufferedAsyncSink(this, bufferSize)

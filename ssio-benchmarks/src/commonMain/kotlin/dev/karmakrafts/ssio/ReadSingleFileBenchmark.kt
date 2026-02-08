@@ -16,25 +16,37 @@
 
 package dev.karmakrafts.ssio
 
-import dev.karmakrafts.ssio.files.Path
+import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.Scope
+import kotlinx.benchmark.Setup
 import kotlinx.benchmark.State
+import kotlinx.io.buffered
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.readByteArray
 import kotlin.random.Random
 import kotlin.time.Clock
 
 @State(Scope.Benchmark)
-open class WriteSingleFileAsyncBenchmark : AsyncBenchmark<Unit>() {
+open class ReadSingleFileBenchmark {
     companion object {
+        private const val FILE_NAME: String = "r_benchmark.bin"
         private const val BYTE_COUNT: Int = 8192
     }
 
-    private val rand: Random = Random(Clock.System.now().epochSeconds)
-
-    override suspend fun run() {
-        val sink = AsyncSystemFileSystem.sink(Path("benchmark_async.bin")).buffered()
-        for (i in 0..<10) {
-            sink.writeByteArray(rand.nextBytes(BYTE_COUNT))
+    @Setup
+    fun setup() {
+        val rand = Random(Clock.System.now().epochSeconds)
+        SystemFileSystem.sink(Path(FILE_NAME)).buffered().use { sink ->
+            sink.write(rand.nextBytes(BYTE_COUNT))
         }
-        sink.close()
+    }
+
+    @Benchmark
+    fun invoke(): Any {
+        val source = SystemFileSystem.source(Path(FILE_NAME)).buffered()
+        val data = source.readByteArray(BYTE_COUNT)
+        source.close()
+        return data // Read data gets black-hole'd
     }
 }

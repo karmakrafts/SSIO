@@ -17,13 +17,18 @@
 package dev.karmakrafts.ssio
 
 import kotlinx.benchmark.Benchmark
+import kotlinx.benchmark.CommonBlackhole
+import kotlinx.benchmark.internal.KotlinxBenchmarkRuntimeInternalApi
 import kotlinx.coroutines.runBlocking
 
-actual abstract class AsyncBenchmark {
-    actual abstract suspend fun run()
+@OptIn(KotlinxBenchmarkRuntimeInternalApi::class)
+actual abstract class AsyncBenchmark<T> {
+    protected actual val blackHole: CommonBlackhole = CommonBlackhole()
+
+    actual abstract suspend fun run(): T
 
     @Benchmark
     fun invoke() = runBlocking {
-        run()
+        blackHole.consume(run())
     }
 }

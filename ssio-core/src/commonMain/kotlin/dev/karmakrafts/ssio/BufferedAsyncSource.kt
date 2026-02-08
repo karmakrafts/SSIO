@@ -217,7 +217,7 @@ private class SynchronizedBufferedAsyncSource( // @formatter:off
 }
 
 fun AsyncRawSource.buffered( // @formatter:off
-    bufferSize: Long = 8 * 1024,
+    bufferSize: Long = 4096,
     synchronized: Boolean = false
 ): AsyncSource { // @formatter:on
     return if (synchronized) SynchronizedBufferedAsyncSource(this, bufferSize)

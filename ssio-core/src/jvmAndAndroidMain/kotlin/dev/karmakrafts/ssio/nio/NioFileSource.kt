@@ -22,30 +22,32 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.Buffer
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.nio.channels.AsynchronousFileChannel
 import kotlin.concurrent.atomics.AtomicBoolean
-import kotlin.math.min
 import java.nio.file.Path as NioPath
 
 internal class NioFileSource(
     path: NioPath
 ) : AsyncRawSource {
     companion object {
-        private const val CHUNK_SIZE: Long = 4096
+        private const val CHUNK_SIZE: Int = 4096
     }
 
     private val isClosed: AtomicBoolean = AtomicBoolean(false)
     private val channel: AsynchronousFileChannel = AsynchronousFileChannel.open(path)
+    private val buffer: ByteArray = ByteArray(CHUNK_SIZE)
+    private val nioBuffer: ByteBuffer = ByteBuffer.allocateDirect(CHUNK_SIZE).order(ByteOrder.nativeOrder())
 
     override suspend fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
-        val data = ByteArray(CHUNK_SIZE.toInt())
-        val fileSize = withContext(Dispatchers.IO) { channel.size() }
-        val toRead = min(fileSize, byteCount)
         var readTotal = 0L
-        while (readTotal < toRead) {
-            val bytesRead = channel.read(ByteBuffer.wrap(data), 0).await()
+        while (readTotal < byteCount) {
+            nioBuffer.clear()
+            val bytesRead = channel.read(nioBuffer, 0).await()
+            nioBuffer.flip()
+            nioBuffer.get(buffer, 0, bytesRead)
             if (bytesRead == -1) break
-            sink.write(data, 0, bytesRead)
+            sink.write(buffer, 0, bytesRead)
             readTotal += bytesRead
         }
         return readTotal

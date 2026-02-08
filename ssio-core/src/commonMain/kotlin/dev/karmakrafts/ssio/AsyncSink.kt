@@ -19,6 +19,8 @@ package dev.karmakrafts.ssio
 import kotlinx.io.bytestring.ByteString
 
 interface AsyncSink : AsyncRawSink {
+    suspend fun emit()
+
     suspend fun writeByte(value: Byte)
     suspend fun writeShort(value: Short)
     suspend fun writeInt(value: Int)

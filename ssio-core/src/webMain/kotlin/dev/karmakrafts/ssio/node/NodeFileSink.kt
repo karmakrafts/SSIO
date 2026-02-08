@@ -19,7 +19,6 @@ package dev.karmakrafts.ssio.node
 import dev.karmakrafts.ssio.AsyncRawSink
 import dev.karmakrafts.ssio.asInt8Array
 import js.promise.await
-import js.typedarrays.Int8Array
 import kotlinx.io.Buffer
 import kotlin.math.min
 
@@ -42,8 +41,7 @@ internal class NodeFileSink(
             val chunkSize = min(CHUNK_SIZE.toLong(), remaining).toInt()
             val bytesRead = source.readAtMostTo(buffer, 0, chunkSize)
             if (bytesRead == -1) break
-            // Transfer KT -> JS buffer
-            handle.write(buffer.asInt8Array(), 0, chunkSize).await()
+            handle.write(buffer.asInt8Array(), 0, bytesRead).await()
             remaining -= bytesRead
         }
     }
@@ -53,16 +51,16 @@ internal class NodeFileSink(
     }
 
     override suspend fun close() {
-        check(!isClosed) { "FsFileSink is already closed" }
+        check(!isClosed) { "NodeFileSink is already closed" }
         handle.close().await()
         isClosed = true
     }
 
     override fun closeAbruptly() {
-        check(!isClosed) { "FsFileSink is already closed" }
-        check(!isClosing) { "FsFileSink is already closing" }
+        check(!isClosed) { "NodeFileSink is already closed" }
+        check(!isClosing) { "NodeFileSink is already closing" }
         handle.close().finally {
-            isClosed = false
+            isClosed = true
             isClosing = false
         }
         isClosing = true

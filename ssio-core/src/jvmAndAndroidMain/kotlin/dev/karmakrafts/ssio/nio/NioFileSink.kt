@@ -21,8 +21,8 @@ import dev.karmakrafts.ssio.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.Buffer
-import kotlinx.io.readByteArray
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.nio.channels.AsynchronousFileChannel
 import java.nio.file.StandardOpenOption
 import kotlin.concurrent.atomics.AtomicBoolean
@@ -36,7 +36,7 @@ internal class NioFileSink(
     path: NioPath
 ) : AsyncRawSink {
     companion object {
-        private const val CHUNK_SIZE: Long = 4096
+        private const val CHUNK_SIZE: Int = 4096
     }
 
     init {
@@ -48,14 +48,19 @@ internal class NioFileSink(
 
     private val isClosed: AtomicBoolean = AtomicBoolean(false)
     private val channel: AsynchronousFileChannel = AsynchronousFileChannel.open(path, StandardOpenOption.WRITE)
+    private val buffer: ByteArray = ByteArray(CHUNK_SIZE)
+    private val nioBuffer: ByteBuffer = ByteBuffer.allocate(CHUNK_SIZE).order(ByteOrder.nativeOrder())
 
     override suspend fun write(source: Buffer, byteCount: Long) {
         val toWrite = min(source.size, byteCount)
         var remaining = toWrite
         while (remaining > 0) {
-            val chunkSize = min(CHUNK_SIZE, remaining).toInt()
-            val chunk = source.readByteArray(chunkSize)
-            channel.write(ByteBuffer.wrap(chunk), 0).await()
+            val chunkSize = min(CHUNK_SIZE.toLong(), remaining).toInt()
+            val bytesRead = source.readAtMostTo(buffer, 0, chunkSize)
+            nioBuffer.clear()
+            nioBuffer.put(buffer, 0, bytesRead)
+            nioBuffer.flip()
+            channel.write(nioBuffer, 0).await()
             remaining -= chunkSize
         }
     }

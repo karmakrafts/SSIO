@@ -18,19 +18,24 @@ package dev.karmakrafts.ssio
 
 import js.coroutines.promise
 import kotlinx.benchmark.Benchmark
+import kotlinx.benchmark.CommonBlackhole
+import kotlinx.benchmark.internal.KotlinxBenchmarkRuntimeInternalApi
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.Promise
 import kotlin.js.unsafeCast
 
-actual abstract class AsyncBenchmark {
-    actual abstract suspend fun run()
+@OptIn(KotlinxBenchmarkRuntimeInternalApi::class)
+actual abstract class AsyncBenchmark<T> {
+    protected actual val blackHole: CommonBlackhole = CommonBlackhole()
+
+    actual abstract suspend fun run(): T
 
     @OptIn(ExperimentalWasmJsInterop::class, DelicateCoroutinesApi::class)
     @Benchmark
     fun invoke(): Promise<Nothing?> = GlobalScope.promise {
-        run()
+        blackHole.consume(run())
         null
     }.unsafeCast<Promise<Nothing?>>()
 }

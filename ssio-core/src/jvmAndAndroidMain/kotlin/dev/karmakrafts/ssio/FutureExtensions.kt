@@ -16,12 +16,10 @@
 
 package dev.karmakrafts.ssio
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import java.util.concurrent.Future
 
 internal suspend fun <T> Future<T>.await(): T {
     while (!isDone) yield()
-    return withContext(Dispatchers.IO) { get() }
+    return get()
 }
