@@ -165,7 +165,7 @@ private class SynchronizedBufferedAsyncSink(
 }
 
 fun AsyncRawSink.buffered( // @formatter:off
-    bufferSize: Long = 4096,
+    bufferSize: Long = 8192,
     synchronized: Boolean = false
 ): AsyncSink { // @formatter:on
     return if (synchronized) SynchronizedBufferedAsyncSink(this, bufferSize)

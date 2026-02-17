@@ -31,7 +31,7 @@ internal class NioFileSource(
     path: NioPath
 ) : AsyncRawSource {
     companion object {
-        private const val CHUNK_SIZE: Int = 4096
+        private const val CHUNK_SIZE: Int = 8192
     }
 
     private val isClosed: AtomicBoolean = AtomicBoolean(false)

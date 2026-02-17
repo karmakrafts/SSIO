@@ -34,6 +34,7 @@ internal class NodeFileSink(
     private val buffer: ByteArray = ByteArray(CHUNK_SIZE)
 
     override suspend fun write(source: Buffer, byteCount: Long) {
+        check(!isClosed) { "NodeFileSink is already closed" }
         val toWrite = min(source.size, byteCount)
         var remaining = toWrite
         while (remaining > 0) {
@@ -47,6 +48,7 @@ internal class NodeFileSink(
     }
 
     override suspend fun flush() {
+        check(!isClosed) { "NodeFileSink is already closed" }
         handle.sync().await()
     }
 

@@ -27,8 +27,6 @@ variables:
     when: never
 
 .if-main: &if-main
-  - if: '$CI_COMMIT_MESSAGE =~ /\[skip-ci\]/'
-    when: never
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   - if: $CI_PIPELINE_SOURCE == "schedule"
     when: never

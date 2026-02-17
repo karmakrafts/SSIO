@@ -22,8 +22,10 @@ import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.allocArray
+import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.toKStringFromUtf8
+import platform.posix.PATH_MAX
 import platform.posix.fsync
 import platform.posix.getcwd
 import platform.posix.getenv
@@ -33,8 +35,8 @@ internal actual fun platformSyncFd(fd: Int) {
 }
 
 internal actual fun platformGetCwd(): String = memScoped {
-    val buffer = allocArray<ByteVar>(4096)
-    getcwd(buffer, 4096U)
+    val buffer = allocArray<ByteVar>(PATH_MAX)
+    getcwd(buffer, PATH_MAX.toULong().convert())
     buffer.toKStringFromUtf8()
 }
 
