@@ -18,6 +18,18 @@ package dev.karmakrafts.ssio
 
 import kotlinx.io.Buffer
 
+/**
+ * Low-level asynchronous source that reads raw bytes into a [Buffer].
+ *
+ * This interface provides minimal primitives used by higher-level [AsyncSource].
+ * Implementations should be non-blocking and safe to call from coroutines.
+ */
 interface AsyncRawSource : AsyncCloseable {
+    /**
+     * Reads up to [byteCount] bytes from this source into [sink].
+     *
+     * Returns the number of bytes read, which may be less than requested, or `-1`
+     * to indicate end of stream when no more data is available.
+     */
     suspend fun readAtMostTo(sink: Buffer, byteCount: Long): Long
 }

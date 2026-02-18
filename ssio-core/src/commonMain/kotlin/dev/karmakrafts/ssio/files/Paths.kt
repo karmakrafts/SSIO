@@ -16,7 +16,13 @@
 
 package dev.karmakrafts.ssio.files
 
+/**
+ * Platform-specific path utilities and constants.
+ */
 expect object Paths {
+    /** Filesystem path separator for the current platform. */
     val separator: String
+
+    /** Root path of the current platform (e.g., `/` on Unix). */
     val root: Path
 }

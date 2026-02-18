@@ -16,6 +16,11 @@
 
 package dev.karmakrafts.ssio
 
+/**
+ * Marks APIs that are powerful but potentially brittle or unsafe if misused.
+ *
+ * Opt in explicitly to acknowledge the additional responsibility when calling such APIs.
+ */
 @RequiresOptIn(message = "The SSIO API you are trying to use can be brittle or dangerous")
 @Retention(AnnotationRetention.BINARY)
 annotation class DelicateSsioApi

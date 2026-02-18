@@ -164,6 +164,12 @@ private class SynchronizedBufferedAsyncSink(
     }
 }
 
+/**
+ * Returns an [AsyncSink] that buffers writes to this raw sink.
+ *
+ * @param bufferSize maximum in-memory buffer size before emitting to the underlying sink
+ * @param synchronized if true, serializes access with a mutex for thread-safety
+ */
 fun AsyncRawSink.buffered( // @formatter:off
     bufferSize: Long = 8192,
     synchronized: Boolean = false

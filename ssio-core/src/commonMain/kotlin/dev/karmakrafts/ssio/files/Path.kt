@@ -18,9 +18,19 @@ package dev.karmakrafts.ssio.files
 
 import kotlinx.io.files.Path as KxioPath
 
+/**
+ * Platform-independent representation of a filesystem path.
+ *
+ * Implementations are provided per platform via the `expect/actual` mechanism.
+ */
 expect class Path {
+    /** True if this path is absolute. */
     val isAbsolute: Boolean
+
+    /** Parent path, or null if this is the root or has no parent. */
     val parent: Path?
+
+    /** The last name element of this path. */
     val name: String
 
     override fun toString(): String
@@ -28,7 +38,18 @@ expect class Path {
     override fun hashCode(): Int
 }
 
+/**
+ * Converts this SSIO [Path] to kotlinx-io's [KxioPath].
+ *
+ * @return the corresponding kotlinx-io [KxioPath] representing the same filesystem path.
+ */
 expect fun Path.toKxio(): KxioPath
+
+/**
+ * Converts kotlinx-io's [KxioPath] to SSIO's [Path].
+ *
+ * @return the corresponding SSIO [Path] representing the same filesystem path.
+ */
 expect fun KxioPath.toSsio(): Path
 
 /**
@@ -74,6 +95,11 @@ fun Path(base: Path, vararg segments: String): Path {
  */
 fun Path(base: String, vararg segments: String): Path = Path(Path(base), *segments)
 
+/**
+ * Splits this path into its non-empty name segments.
+ *
+ * @return a list of path name elements excluding empty segments that may result from leading/trailing separators.
+ */
 fun Path.getSegments(): List<String> = toString().split(Paths.separator).filterNot(String::isEmpty)
 
 /**
@@ -97,8 +123,32 @@ fun Path.normalize(): Path {
     else Path(normalized.joinToString(Paths.separator))
 }
 
+/**
+ * Joins this path with a single [other] segment.
+ *
+ * @param other The segment to append to this path. Must not contain [Paths.separator].
+ * @return A new Path representing the concatenation of this path and [other].
+ */
 operator fun Path.div(other: String): Path = Path(this, other)
+
+/**
+ * Joins this path with all segments of [other].
+ *
+ * @param other The path whose segments will be appended to this path.
+ * @return A new Path representing the concatenation of this path and [other].
+ */
 operator fun Path.div(other: Path): Path = Path(this, *other.getSegments().toTypedArray())
 
+/**
+ * Returns the filename without its last extension (e.g., `file` from `file.txt`).
+ *
+ * @return the filename without the last extension segment.
+ */
 fun Path.getFileNameWithoutExtension(): String = name.substringAfterLast('.')
-fun Path.getExtension(): String = name.substringBeforeLast('.')
+
+/**
+ * Returns the last extension of the filename (e.g., `txt` from `file.txt`).
+ *
+ * @return the last extension segment of the filename, or an empty string if no dot is present.
+ */
+fun Path.getExtension(): String = if ("." in name) name.substringBeforeLast('.') else ""

@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
+@file:Suppress("NOTHING_TO_INLINE")
+
 package dev.karmakrafts.ssio
 
-import kotlinx.io.Buffer
-import kotlinx.io.RawSink
+expect inline fun Short.reverseBytes(): Short
 
-private class AsyncRawSinkWrapper(
-    private val delegate: RawSink
-) : AsyncRawSink {
-    override suspend fun write(source: Buffer, byteCount: Long) {
-        delegate.write(source, byteCount)
-    }
+expect inline fun Int.reverseBytes(): Int
 
-    override suspend fun flush() = delegate.flush()
-    override suspend fun close() = delegate.close()
-    override fun closeAbruptly() = delegate.close()
-}
-
-/** Wraps a synchronous [RawSink] into an [AsyncRawSink] facade. */
-fun RawSink.asAsync(): AsyncRawSink = AsyncRawSinkWrapper(this)
+expect inline fun Long.reverseBytes(): Long

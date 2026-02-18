@@ -216,6 +216,12 @@ private class SynchronizedBufferedAsyncSource( // @formatter:off
     }
 }
 
+/**
+ * Returns an [AsyncSource] that buffers reads from this raw source.
+ *
+ * @param bufferSize maximum in-memory buffer size for prefetched bytes
+ * @param synchronized if true, serializes access with a mutex for thread-safety
+ */
 fun AsyncRawSource.buffered( // @formatter:off
     bufferSize: Long = 8192,
     synchronized: Boolean = false

@@ -18,7 +18,24 @@ package dev.karmakrafts.ssio
 
 import kotlinx.io.Buffer
 
+/**
+ * Low-level asynchronous sink that writes raw bytes from a [Buffer].
+ *
+ * This interface provides minimal primitives used by higher-level [AsyncSink].
+ * Implementations should be non-blocking and safe to call from coroutines.
+ */
 interface AsyncRawSink : AsyncCloseable {
+    /**
+     * Writes up to [byteCount] bytes from [source] into this sink.
+     *
+     * The call may write fewer bytes than requested. Callers should loop until all
+     * desired bytes are written. Implementations must not modify unread bytes in [source]
+     * beyond those consumed.
+     */
     suspend fun write(source: Buffer, byteCount: Long)
+
+    /**
+     * Flushes any buffered data to the underlying destination.
+     */
     suspend fun flush()
 }

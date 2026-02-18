@@ -30,4 +30,5 @@ private class AsyncRawSourceWrapper(
     override fun closeAbruptly() = delegate.close()
 }
 
+/** Wraps a synchronous [RawSource] into an [AsyncRawSource] facade. */
 fun RawSource.asAsync(): AsyncRawSource = AsyncRawSourceWrapper(this)

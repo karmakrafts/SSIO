@@ -18,11 +18,23 @@ package dev.karmakrafts.ssio
 
 import kotlinx.io.Buffer
 
+/**
+ * Predicate used by [AsyncSource.await] to decide when enough data is available.
+ *
+ * Implementations examine the current buffered [Buffer] and may request more data via
+ * [fetchMore]. Returning true signals the awaiting condition is satisfied.
+ */
 fun interface AwaitPredicate {
     companion object {
+        /** Predicate that evaluates to true only when the source is fully exhausted. */
         fun exhausted(): AwaitPredicate = { buffer, fetchMore -> buffer.exhausted() && !fetchMore() }
+        /** Predicate that evaluates to true when at least [bytes] are available in the buffer. */
         fun available(bytes: Long): AwaitPredicate = { buffer, _ -> buffer.size >= bytes }
     }
 
+    /**
+     * Evaluates this predicate using current [buffer] state. Call [fetchMore] to attempt fetching
+     * more data into the buffer; it returns true if additional data was fetched.
+     */
     suspend operator fun invoke(buffer: Buffer, fetchMore: suspend () -> Boolean): Boolean
 }
