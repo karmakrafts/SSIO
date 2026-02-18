@@ -57,6 +57,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(projects.ssioCore)
+                implementation(projects.ssioVfs)
                 implementation(libs.kotlinx.benchmark.runtime)
                 implementation(libs.kotlinx.coroutines.core)
             }
@@ -76,7 +77,7 @@ benchmark {
     }
     configurations {
         named("main") {
-            warmups = 4
+            warmups = 10
             iterations = 20
             iterationTime = 100
             iterationTimeUnit = "ms"

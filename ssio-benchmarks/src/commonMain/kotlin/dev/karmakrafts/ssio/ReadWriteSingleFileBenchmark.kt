@@ -22,23 +22,27 @@ import kotlinx.benchmark.State
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.readByteArray
 import kotlin.random.Random
 import kotlin.time.Clock
 
 @State(Scope.Benchmark)
-open class WriteSingleFileBenchmark {
+open class ReadWriteSingleFileBenchmark {
     companion object {
+        private const val FILE_NAME: String = "r_benchmark.bin"
         private const val BYTE_COUNT: Int = 8192
     }
 
-    private val rand: Random = Random(Clock.System.now().epochSeconds)
+    val rand: Random = Random(Clock.System.now().epochSeconds)
 
     @Benchmark
-    fun invoke() {
-        val sink = SystemFileSystem.sink(Path("benchmark.bin")).buffered()
-        for (i in 0..<10) {
+    fun invoke(): Any {
+        SystemFileSystem.sink(Path(FILE_NAME)).buffered().use { sink ->
             sink.write(rand.nextBytes(BYTE_COUNT))
         }
-        sink.close()
+        val source = SystemFileSystem.source(Path(FILE_NAME)).buffered()
+        val data = source.readByteArray(BYTE_COUNT)
+        source.close()
+        return data // Read data gets black-hole'd
     }
 }
