@@ -17,10 +17,43 @@
 package dev.karmakrafts.ssio.pipeline
 
 import dev.karmakrafts.ssio.api.AsyncCloseable
+import dev.karmakrafts.ssio.api.ExperimentalSsioApi
 import kotlinx.io.Buffer
 
-fun interface IoPipelineStage : AsyncCloseable {
+@ExperimentalSsioApi
+fun interface IoPipelineStage : IoPipelineElement, AsyncCloseable {
     suspend operator fun invoke(input: Buffer, output: Buffer)
     override suspend fun close() = Unit
     override fun closeAbruptly() = Unit
+
+    override suspend fun invoke(pipeline: IoPipeline) = with<_, Unit>(pipeline) {
+        if (stageIndex++ and 1 == 1) {
+            frontBuffer.clear()
+            this@IoPipelineStage(backBuffer, frontBuffer)
+        }
+        else {
+            backBuffer.clear()
+            this@IoPipelineStage(frontBuffer, backBuffer)
+        }
+    }
+
+    data class Limit(val byteCount: Long) : IoPipelineStage {
+        override suspend fun invoke(input: Buffer, output: Buffer) {
+            output.write(input, byteCount)
+        }
+    }
+
+    data class Drop(val byteCount: Long) : IoPipelineStage {
+        override suspend fun invoke(input: Buffer, output: Buffer) {
+            input.skip(byteCount)
+            input.transferTo(output)
+        }
+    }
+
+    data class Slice(val start: Long, val end: Long) : IoPipelineStage {
+        override suspend fun invoke(input: Buffer, output: Buffer) {
+            input.skip(start)
+            output.write(input, end - start)
+        }
+    }
 }

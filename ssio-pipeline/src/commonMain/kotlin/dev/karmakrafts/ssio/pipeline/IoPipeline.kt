@@ -18,20 +18,30 @@ package dev.karmakrafts.ssio.pipeline
 
 import dev.karmakrafts.ssio.api.AsyncCloseable
 import dev.karmakrafts.ssio.api.AsyncRawSource
+import dev.karmakrafts.ssio.api.ExperimentalSsioApi
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.io.Buffer
 
+@ExperimentalSsioApi
 class IoPipeline internal constructor( // @formatter:off
     private val source: AsyncRawSource,
-    private val stages: List<IoPipelineStage>
+    private val elements: List<IoPipelineElement>
 ) : AsyncRawSource, AsyncCloseable { // @formatter:on
-    private val backBuffer: Buffer = Buffer()
-    private val frontBuffer: Buffer = Buffer()
+    internal val backBuffer: Buffer = Buffer()
+    internal val frontBuffer: Buffer = Buffer()
+    internal var stageIndex: Int = 0
     private val mutex: Mutex = Mutex()
 
+    internal inline val currentBuffer: Buffer
+        get() = if (stageIndex and 1 == 1) backBuffer else frontBuffer
+
     override suspend fun close() {
-        for (stage in stages) stage.close()
+        for (element in elements) when (element) {
+            is AsyncCloseable -> element.close()
+            is AutoCloseable -> element.close()
+            else -> {}
+        }
         mutex.withLock {
             backBuffer.clear()
             frontBuffer.clear()
@@ -39,22 +49,21 @@ class IoPipeline internal constructor( // @formatter:off
     }
 
     override fun closeAbruptly() {
-        for (stage in stages) stage.closeAbruptly()
+        for (element in elements) when (element) {
+            is AsyncCloseable -> element.closeAbruptly()
+            is AutoCloseable -> element.close()
+            else -> {}
+        }
         backBuffer.clear()
         frontBuffer.clear()
     }
 
     override suspend fun readAtMostTo(sink: Buffer, byteCount: Long): Long = mutex.withLock {
-        source.readAtMostTo(backBuffer, byteCount)
-        for (stageIndex in stages.indices) {
-            val stage = stages[stageIndex]
-            if (stageIndex and 1 == 1) stage(backBuffer, frontBuffer)
-            else stage(frontBuffer, backBuffer)
-        }
-        val sourceBuffer = if (stages.size and 1 == 1) frontBuffer
-        else backBuffer
-        val bytesTransformed = sourceBuffer.size
-        sourceBuffer.transferTo(sink)
+        source.readAtMostTo(currentBuffer, byteCount)
+        for (element in elements) element(this)
+        val bytesTransformed = currentBuffer.size
+        currentBuffer.transferTo(sink)
+        stageIndex = 0
         return bytesTransformed
     }
 }

@@ -16,9 +16,17 @@
 
 package dev.karmakrafts.ssio.pipeline
 
+import dev.karmakrafts.ssio.api.AwaitPredicate
 import dev.karmakrafts.ssio.api.ExperimentalSsioApi
+import kotlinx.io.Buffer
 
 @ExperimentalSsioApi
-@DslMarker
-@Retention(AnnotationRetention.BINARY)
-annotation class IoPipelineDsl
+data class IoPipelineBarrier(
+    private val condition: AwaitPredicate
+) : IoPipelineElement {
+    suspend fun wait(buffer: Buffer) = condition(buffer) { true }
+
+    override suspend fun invoke(pipeline: IoPipeline) {
+        wait(pipeline.currentBuffer) // Wait on current buffer with barrier
+    }
+}

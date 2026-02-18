@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio.pipeline
+package dev.karmakrafts.ssio.api
 
-import dev.karmakrafts.ssio.api.ExperimentalSsioApi
-
-@ExperimentalSsioApi
-@DslMarker
+/**
+ * Marker annotation for incubating SSIO APIs.
+ */
+@RequiresOptIn(message = "The API you are trying to use is still under development and may be subject to change")
 @Retention(AnnotationRetention.BINARY)
-annotation class IoPipelineDsl
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.TYPEALIAS, AnnotationTarget.ANNOTATION_CLASS)
+annotation class ExperimentalSsioApi

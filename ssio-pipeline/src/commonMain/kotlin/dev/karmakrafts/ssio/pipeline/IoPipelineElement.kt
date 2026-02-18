@@ -19,6 +19,6 @@ package dev.karmakrafts.ssio.pipeline
 import dev.karmakrafts.ssio.api.ExperimentalSsioApi
 
 @ExperimentalSsioApi
-@DslMarker
-@Retention(AnnotationRetention.BINARY)
-annotation class IoPipelineDsl
+sealed interface IoPipelineElement {
+    suspend operator fun invoke(pipeline: IoPipeline)
+}
