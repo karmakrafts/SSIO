@@ -20,6 +20,9 @@ import android.content.Context
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.AtomicReference
 
+/**
+ * Android-specific file system configuration.
+ */
 object AndroidFileSystem {
     @PublishedApi
     internal val isInitialized: AtomicBoolean = AtomicBoolean(false)
@@ -27,12 +30,23 @@ object AndroidFileSystem {
     @PublishedApi
     internal val _context: AtomicReference<(() -> Context)?> = AtomicReference(null)
 
+    /**
+     * The Android context used by the file system.
+     *
+     * @throws IllegalStateException if the file system is not initialized.
+     */
     inline val context: Context
         get() {
             check(isInitialized.load()) { "AndroidFileSystem is not initialized" }
             return _context.load()!!()
         }
 
+    /**
+     * Initializes the Android file system with the given context getter.
+     *
+     * @param contextGetter A function that returns the Android context.
+     * @throws IllegalStateException if the file system is already initialized.
+     */
     fun init(contextGetter: () -> Context) {
         check(isInitialized.compareAndSet(expectedValue = false, newValue = true)) {
             "AndroidFileSystem is already initialized"
