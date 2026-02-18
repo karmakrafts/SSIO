@@ -44,66 +44,72 @@ class AsyncVirtualFileSystemTest {
 
     @Test
     fun `Resolve simple relative path`() = runTest {
-        val vfs = AsyncVirtualFileSystem()
-        val root = vfs.resolve(Path(""))
-        val relativePath = Path("foo/bar/test.txt")
-        val absolutePath = vfs.resolve(relativePath)
-        assertTrue(absolutePath.isAbsolute)
-        assertEquals(root / "foo/bar/test.txt", absolutePath)
+        AsyncVirtualFileSystem().use { vfs ->
+            val root = vfs.resolve(Path(""))
+            val relativePath = Path("foo/bar/test.txt")
+            val absolutePath = vfs.resolve(relativePath)
+            assertTrue(absolutePath.isAbsolute)
+            assertEquals(root / "foo/bar/test.txt", absolutePath)
+        }
     }
 
     @Test
     fun `Resolve complex relative path`() = runTest {
-        val vfs = AsyncVirtualFileSystem()
-        val relativePath = Path("foo/bar/../test.txt")
-        val absolutePath = vfs.resolve(relativePath)
-        assertTrue(absolutePath.isAbsolute)
-        assertTrue(absolutePath.toString().endsWith("foo/test.txt"))
+        AsyncVirtualFileSystem().use { vfs ->
+            val relativePath = Path("foo/bar/../test.txt")
+            val absolutePath = vfs.resolve(relativePath)
+            assertTrue(absolutePath.isAbsolute)
+            assertTrue(absolutePath.toString().endsWith("foo/test.txt"))
+        }
     }
 
     @Test
     fun `Create file`() = runTest {
-        val vfs = AsyncVirtualFileSystem()
-        val path = Path("baz") / "test.txt"
-        vfs.sink(path).use {}
-        vfs.delete(path)
+        AsyncVirtualFileSystem().use { vfs ->
+            val path = Path("baz") / "test.txt"
+            vfs.sink(path).use {}
+            vfs.delete(path)
+        }
     }
 
     @Test
     fun `Check if file exists`() = runTest {
-        val vfs = AsyncVirtualFileSystem()
-        val path = Path("foo") / "test.txt"
-        vfs.delete(path, mustExist = false)
-        assertFalse(vfs.exists(path))
-        vfs.sink(path).use {}
-        assertTrue(vfs.exists(path))
-        vfs.delete(path)
+        AsyncVirtualFileSystem().use { vfs ->
+            val path = Path("foo") / "test.txt"
+            vfs.delete(path, mustExist = false)
+            assertFalse(vfs.exists(path))
+            vfs.sink(path).use {}
+            assertTrue(vfs.exists(path))
+            vfs.delete(path)
+        }
     }
 
     @Test
     fun `List files`() = runTest {
-        val vfs = AsyncVirtualFileSystem()
-        val dir = Path("foo") / "bar"
-        val path = dir / "test.txt"
-        vfs.delete(path, mustExist = false)
-        var entries = vfs.list(dir)
-        assertTrue(entries.isEmpty())
-        vfs.sink(path).use {}
-        entries = vfs.list(dir)
-        assertTrue(path in entries)
-        vfs.delete(path)
+        AsyncVirtualFileSystem().use { vfs ->
+            val dir = Path("foo") / "bar"
+            val path = dir / "test.txt"
+            vfs.delete(path, mustExist = false)
+            var entries = vfs.list(dir)
+            assertTrue(entries.isEmpty())
+            vfs.sink(path).use {}
+            entries = vfs.list(dir)
+            assertTrue(path in entries)
+            vfs.delete(path)
+        }
     }
 
     @Test
     fun `Read and write file`() = runTest {
-        val vfs = AsyncVirtualFileSystem()
-        val path = Path("baz") / "test2.bin"
-        vfs.sink(path).buffered().use { sink ->
-            sink.writePrefixedString(testData)
+        AsyncVirtualFileSystem().use { vfs ->
+            val path = Path("baz") / "test2.bin"
+            vfs.sink(path).buffered().use { sink ->
+                sink.writePrefixedString(testData)
+            }
+            vfs.source(path).buffered().use { source ->
+                assertEquals(testData, source.readPrefixedString())
+            }
+            vfs.delete(path)
         }
-        vfs.source(path).buffered().use { source ->
-            assertEquals(testData, source.readPrefixedString())
-        }
-        vfs.delete(path)
     }
 }

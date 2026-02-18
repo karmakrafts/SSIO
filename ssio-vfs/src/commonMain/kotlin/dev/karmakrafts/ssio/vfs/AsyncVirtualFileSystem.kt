@@ -16,6 +16,7 @@
 
 package dev.karmakrafts.ssio.vfs
 
+import dev.karmakrafts.ssio.api.AsyncCloseable
 import dev.karmakrafts.ssio.api.AsyncFileSystem
 import dev.karmakrafts.ssio.api.AsyncRawSink
 import dev.karmakrafts.ssio.api.AsyncRawSource
@@ -30,7 +31,7 @@ import kotlinx.io.files.FileMetadata
 class AsyncVirtualFileSystem( // @formatter:off
     private val workingDirectory: Path = Paths.root,
     private val tempDirectory: Path = Paths.root / "tmp"
-) : AsyncFileSystem { // @formatter:on
+) : AsyncFileSystem, AsyncCloseable { // @formatter:on
     private val rootNode: VfsDirectoryNode = VfsDirectoryNode(Paths.separator)
 
     override suspend fun getWorkingDirectory(): Path = workingDirectory
@@ -83,7 +84,7 @@ class AsyncVirtualFileSystem( // @formatter:off
             val newFileNode = getFileNode(newPath).getOrThrow()
             oldFileNode.useBuffer { oldBuffer ->
                 newFileNode.useBuffer { newBuffer ->
-                    oldBuffer.copyTo(newBuffer)
+                    oldBuffer.transferTo(newBuffer)
                 }
             }
             delete(oldPath, false)
@@ -149,4 +150,10 @@ class AsyncVirtualFileSystem( // @formatter:off
         if (node.isFailure) return emptyList()
         return node.getOrThrow().entries().map { node -> path / node.name }.toList()
     }
+
+    override suspend fun close() {
+        rootNode.clear()
+    }
+
+    override fun closeAbruptly() = Unit // If we close abruptly, we can't clean up after ourselves
 }

@@ -18,4 +18,5 @@ package dev.karmakrafts.ssio.vfs
 
 internal sealed interface VfsNode {
     val name: String
+    suspend fun clear()
 }

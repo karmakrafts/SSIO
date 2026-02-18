@@ -25,11 +25,19 @@ internal data class VfsDirectoryNode( // @formatter:off
 ) : VfsNode { // @formatter:on
     private val mutex: Mutex = Mutex()
 
+    override suspend fun clear() = mutex.withLock {
+        for (node in entries.values) {
+            node.clear()
+        }
+        entries.clear()
+    }
+
     suspend fun entries(): Sequence<VfsNode> = mutex.withLock {
         entries.values.asSequence()
     }
 
     suspend operator fun minusAssign(name: String) = mutex.withLock {
+        entries[name]?.clear()
         entries -= name
     }
 

@@ -29,4 +29,7 @@ internal data class VfsFileNode( // @formatter:off
     suspend inline fun <R> useBuffer(block: (Buffer) -> R): R = mutex.withLock {
         block(buffer)
     }
+
+    // When we delete a file in the VFS, we clear its backing buffer to help reclaiming memory
+    override suspend fun clear() = useBuffer(Buffer::clear)
 }
