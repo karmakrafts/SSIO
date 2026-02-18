@@ -19,6 +19,9 @@ package dev.karmakrafts.ssio.api
 import kotlinx.io.Buffer
 import kotlinx.io.RawSink
 
+/**
+ * A wrapper for a [RawSink] that implements [AsyncRawSink].
+ */
 private class AsyncRawSinkWrapper(
     private val delegate: RawSink
 ) : AsyncRawSink {
@@ -31,5 +34,9 @@ private class AsyncRawSinkWrapper(
     override fun closeAbruptly() = delegate.close()
 }
 
-/** Wraps a synchronous [RawSink] into an [AsyncRawSink] facade. */
+/**
+ * Wraps this [RawSink] as an [AsyncRawSink].
+ *
+ * @return an [AsyncRawSink] that delegates to this [RawSink].
+ */
 fun RawSink.asAsync(): AsyncRawSink = AsyncRawSinkWrapper(this)

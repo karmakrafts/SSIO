@@ -19,19 +19,16 @@ package dev.karmakrafts.ssio.api
 import kotlinx.io.Sink
 import kotlinx.io.writeIntLe
 
-/** Writes a list size followed by elements encoded with [writer]. */
 inline fun <T> Sink.writeList(list: List<T>, writer: Sink.(T) -> Unit) {
     writeInt(list.size)
     for (value in list) writer(value)
 }
 
-/** Writes a list size as little endian followed by elements encoded with [writer]. */
 inline fun <T> Sink.writeListLe(list: List<T>, writer: Sink.(T) -> Unit) {
     writeIntLe(list.size)
     for (value in list) writer(value)
 }
 
-/** Writes a map size followed by key/value pairs encoded with [keyWriter] and [valueWriter]. */
 inline fun <K, V> Sink.writeMap(map: Map<K, V>, keyWriter: Sink.(K) -> Unit, valueWriter: Sink.(V) -> Unit) {
     writeInt(map.size)
     for ((key, value) in map) {
@@ -40,7 +37,6 @@ inline fun <K, V> Sink.writeMap(map: Map<K, V>, keyWriter: Sink.(K) -> Unit, val
     }
 }
 
-/** Writes a map size as little endian followed by key/value pairs encoded with [keyWriter] and [valueWriter]. */
 inline fun <K, V> Sink.writeMapLe(map: Map<K, V>, keyWriter: Sink.(K) -> Unit, valueWriter: Sink.(V) -> Unit) {
     writeIntLe(map.size)
     for ((key, value) in map) {

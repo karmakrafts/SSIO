@@ -16,13 +16,18 @@
 
 package dev.karmakrafts.ssio.api
 
+import kotlinx.coroutines.yield
 import kotlinx.io.Buffer
 import kotlin.math.min
 import kotlin.random.Random
 import kotlin.time.Clock
 
+/**
+ * A source which provides a never ending stream of pseudo-random bytes,
+ * providing by an underlying thread-local [Random] instance.
+ */
 object RandomAsyncSource : AsyncRawSource {
-    private const val CHUNK_SIZE: Int = 8192
+    private const val CHUNK_SIZE: Int = 64 // One typical cache line
 
     private class Context( // @formatter:off
         val random: Random = Random(Clock.System.now().epochSeconds),
@@ -41,6 +46,7 @@ object RandomAsyncSource : AsyncRawSource {
             sink.write(buffer, 0, chunkSize)
             remaining -= chunkSize
             writtenTotal += chunkSize
+            yield() // Yield after every chunk to keep things non-blocking
         }
         return writtenTotal
     }

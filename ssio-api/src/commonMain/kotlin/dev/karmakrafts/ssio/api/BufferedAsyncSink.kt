@@ -18,6 +18,7 @@ package dev.karmakrafts.ssio.api
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.yield
 import kotlinx.io.Buffer
 import kotlinx.io.bytestring.ByteString
 import kotlinx.io.write
@@ -98,6 +99,7 @@ private open class BufferedAsyncSink( // @formatter:off
             if (buffer.size + toWrite >= bufferSize) emit()
             buffer.write(source, toWrite)
             remaining -= toWrite
+            yield()
         }
     }
 

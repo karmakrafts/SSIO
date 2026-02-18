@@ -19,6 +19,9 @@ package dev.karmakrafts.ssio.api
 import kotlinx.io.Buffer
 import kotlinx.io.bytestring.ByteString
 
+/**
+ * A sink which voids any data that's piped into it.
+ */
 object DiscardingAsyncSink : AsyncSink {
     override suspend fun emit() = Unit
 

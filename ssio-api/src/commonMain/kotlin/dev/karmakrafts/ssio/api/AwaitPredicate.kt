@@ -36,6 +36,11 @@ fun interface AwaitPredicate {
     /**
      * Evaluates this predicate using current [buffer] state. Call [fetchMore] to attempt fetching
      * more data into the buffer; it returns true if additional data was fetched.
+     *
+     * @param buffer The buffer to fetch data from.
+     * @param fetchMore A function which may fetch more data if available.
+     *  Returns true if more data was fetched, false otherwise.
+     * @return True if the wait condition was met, false otherwise.
      */
     suspend operator fun invoke(buffer: Buffer, fetchMore: suspend () -> Boolean): Boolean
 }

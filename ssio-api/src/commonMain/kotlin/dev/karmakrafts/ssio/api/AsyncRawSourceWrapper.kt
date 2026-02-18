@@ -19,6 +19,9 @@ package dev.karmakrafts.ssio.api
 import kotlinx.io.Buffer
 import kotlinx.io.RawSource
 
+/**
+ * A wrapper for a [RawSource] that implements [AsyncRawSource].
+ */
 private class AsyncRawSourceWrapper(
     private val delegate: RawSource
 ) : AsyncRawSource {
@@ -30,5 +33,9 @@ private class AsyncRawSourceWrapper(
     override fun closeAbruptly() = delegate.close()
 }
 
-/** Wraps a synchronous [RawSource] into an [AsyncRawSource] facade. */
+/**
+ * Wraps this [RawSource] as an [AsyncRawSource].
+ *
+ * @return an [AsyncRawSource] that delegates to this [RawSource].
+ */
 fun RawSource.asAsync(): AsyncRawSource = AsyncRawSourceWrapper(this)
