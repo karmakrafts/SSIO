@@ -37,18 +37,6 @@ The following matrix illustrates what implementations are used for which target 
 | WASM    | Browser       | OPFS           |
 | WASM    | NodeJS        | fs.promises    |
 
-### Without SSIO
-
-<img src="docs/blocking.gif" alt="Metaphoric meme about the german rapper SSIO to illustrate blocking IO" width="512">
-
-Busy waiting, stalling and wasted time when performing potentially long-blocking IO tasks.
-
-### With SSIO
-
-<img src="docs/async.gif" alt="Metaphoric meme about the german rapper SSIO to illustrate async IO" width="512">
-
-Concurrent execution, no stalling and all time used to perform actual work while handling IO.
-
 ### Why should I use this over kotlinx.io or java.nio?
 
 The answer is simple: you shouldn't if you don't need a suspend IO API available in your common source set.  
