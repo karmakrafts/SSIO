@@ -78,9 +78,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                api(libs.kotlinx.io.bytestring)
-                api(libs.kotlinx.io.core)
-                api(libs.kotlinx.coroutines.core)
+                api(projects.ssioApi)
             }
         }
         commonTest {
@@ -96,7 +94,7 @@ kotlin {
         }
         androidMain {
             dependencies {
-                api(libs.jna.asAAR())
+                implementation(libs.jna.asAAR())
             }
         }
     }

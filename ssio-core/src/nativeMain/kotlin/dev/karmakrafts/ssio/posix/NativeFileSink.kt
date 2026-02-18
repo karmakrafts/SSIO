@@ -16,7 +16,7 @@
 
 package dev.karmakrafts.ssio.posix
 
-import dev.karmakrafts.ssio.AsyncRawSink
+import dev.karmakrafts.ssio.api.AsyncRawSink
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.addressOf

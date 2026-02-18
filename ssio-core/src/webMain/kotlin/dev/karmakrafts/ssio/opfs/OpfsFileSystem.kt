@@ -19,11 +19,11 @@
 package dev.karmakrafts.ssio.opfs
 
 import dev.karmakrafts.ssio.AbstractAsyncFileSystem
-import dev.karmakrafts.ssio.AsyncRawSink
-import dev.karmakrafts.ssio.AsyncRawSource
-import dev.karmakrafts.ssio.files.Path
-import dev.karmakrafts.ssio.files.div
-import dev.karmakrafts.ssio.files.getSegments
+import dev.karmakrafts.ssio.api.AsyncRawSink
+import dev.karmakrafts.ssio.api.AsyncRawSource
+import dev.karmakrafts.ssio.api.Path
+import dev.karmakrafts.ssio.api.div
+import dev.karmakrafts.ssio.api.getSegments
 import js.disposable.use
 import js.iterable.IteratorReturnResult
 import js.objects.unsafeJso

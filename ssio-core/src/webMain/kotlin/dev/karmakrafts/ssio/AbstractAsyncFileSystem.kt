@@ -16,9 +16,10 @@
 
 package dev.karmakrafts.ssio
 
-import dev.karmakrafts.ssio.files.Path
-import dev.karmakrafts.ssio.files.div
-import dev.karmakrafts.ssio.files.normalize
+import dev.karmakrafts.ssio.api.AsyncFileSystem
+import dev.karmakrafts.ssio.api.Path
+import dev.karmakrafts.ssio.api.div
+import dev.karmakrafts.ssio.api.normalize
 
 internal abstract class AbstractAsyncFileSystem : AsyncFileSystem {
     override suspend fun resolve(path: Path): Path {

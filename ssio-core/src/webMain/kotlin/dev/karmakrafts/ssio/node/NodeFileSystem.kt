@@ -17,9 +17,9 @@
 package dev.karmakrafts.ssio.node
 
 import dev.karmakrafts.ssio.AbstractAsyncFileSystem
-import dev.karmakrafts.ssio.AsyncRawSink
-import dev.karmakrafts.ssio.AsyncRawSource
-import dev.karmakrafts.ssio.files.Path
+import dev.karmakrafts.ssio.api.AsyncRawSink
+import dev.karmakrafts.ssio.api.AsyncRawSource
+import dev.karmakrafts.ssio.api.Path
 import kotlinx.io.files.FileMetadata
 
 internal object NodeFileSystem : AbstractAsyncFileSystem() {

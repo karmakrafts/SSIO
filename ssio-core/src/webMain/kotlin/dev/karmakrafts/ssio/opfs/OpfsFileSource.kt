@@ -18,7 +18,7 @@
 
 package dev.karmakrafts.ssio.opfs
 
-import dev.karmakrafts.ssio.AsyncRawSource
+import dev.karmakrafts.ssio.api.AsyncRawSource
 import js.buffer.ArrayBuffer
 import js.promise.await
 import js.typedarrays.Uint8Array

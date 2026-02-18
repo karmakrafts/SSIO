@@ -16,8 +16,8 @@
 
 package dev.karmakrafts.ssio.posix
 
-import dev.karmakrafts.ssio.AsyncCloseable
-import dev.karmakrafts.ssio.files.Path
+import dev.karmakrafts.ssio.api.AsyncCloseable
+import dev.karmakrafts.ssio.api.Path
 import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber

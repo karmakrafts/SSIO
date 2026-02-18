@@ -41,5 +41,7 @@ plugins {
 }
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+include("ssio-api")
 include("ssio-core")
+include("ssio-vfs")
 include("ssio-benchmarks")

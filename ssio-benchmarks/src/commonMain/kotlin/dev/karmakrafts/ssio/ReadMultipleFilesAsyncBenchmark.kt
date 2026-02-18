@@ -16,7 +16,9 @@
 
 package dev.karmakrafts.ssio
 
-import dev.karmakrafts.ssio.files.Path
+import dev.karmakrafts.ssio.api.Path
+import dev.karmakrafts.ssio.api.buffered
+import dev.karmakrafts.ssio.api.use
 import kotlinx.benchmark.Scope
 import kotlinx.benchmark.Setup
 import kotlinx.benchmark.State

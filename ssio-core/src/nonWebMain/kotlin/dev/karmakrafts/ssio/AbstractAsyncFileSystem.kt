@@ -16,8 +16,9 @@
 
 package dev.karmakrafts.ssio
 
-import dev.karmakrafts.ssio.files.div
-import dev.karmakrafts.ssio.files.normalize
+import dev.karmakrafts.ssio.api.AsyncFileSystem
+import dev.karmakrafts.ssio.api.div
+import dev.karmakrafts.ssio.api.normalize
 import kotlinx.io.files.FileMetadata
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem

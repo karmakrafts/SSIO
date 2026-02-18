@@ -16,7 +16,7 @@
 
 package dev.karmakrafts.ssio.nio
 
-import dev.karmakrafts.ssio.AsyncRawSink
+import dev.karmakrafts.ssio.api.AsyncRawSink
 import dev.karmakrafts.ssio.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

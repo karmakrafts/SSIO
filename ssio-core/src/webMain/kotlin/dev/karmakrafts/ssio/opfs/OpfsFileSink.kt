@@ -18,7 +18,7 @@
 
 package dev.karmakrafts.ssio.opfs
 
-import dev.karmakrafts.ssio.AsyncRawSink
+import dev.karmakrafts.ssio.api.AsyncRawSink
 import js.typedarrays.toInt8Array
 import kotlinx.io.Buffer
 import kotlinx.io.readByteArray

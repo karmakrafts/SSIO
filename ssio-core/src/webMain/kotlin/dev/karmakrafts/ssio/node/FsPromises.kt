@@ -18,7 +18,7 @@
 
 package dev.karmakrafts.ssio.node
 
-import dev.karmakrafts.ssio.files.Paths
+import dev.karmakrafts.ssio.api.Paths
 import js.core.JsPrimitives.toKotlinString
 import js.import.import
 import js.objects.unsafeJso

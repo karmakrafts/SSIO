@@ -16,7 +16,7 @@
 
 package dev.karmakrafts.ssio.node
 
-import dev.karmakrafts.ssio.AsyncRawSink
+import dev.karmakrafts.ssio.api.AsyncRawSink
 import dev.karmakrafts.ssio.asInt8Array
 import js.promise.await
 import kotlinx.io.Buffer
