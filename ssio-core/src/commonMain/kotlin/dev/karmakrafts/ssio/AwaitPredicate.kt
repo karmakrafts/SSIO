@@ -22,7 +22,7 @@ import kotlinx.io.Buffer
  * Predicate used by [AsyncSource.await] to decide when enough data is available.
  *
  * Implementations examine the current buffered [Buffer] and may request more data via
- * [fetchMore]. Returning true signals the awaiting condition is satisfied.
+ * `fetchMore`. Returning true signals the awaiting condition is satisfied.
  */
 fun interface AwaitPredicate {
     companion object {
