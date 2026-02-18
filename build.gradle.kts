@@ -36,6 +36,8 @@ group = "dev.karmakrafts.ssio"
 version = GitLabCI.getDefaultVersion(libs.versions.ssio)
 
 subprojects {
+    if("benchmark" in project.name) return@subprojects // We don't want to publish benchmarks
+
     apply<MavenPublishPlugin>()
     apply<SigningPlugin>()
 

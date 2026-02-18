@@ -23,6 +23,10 @@ import dev.karmakrafts.ssio.api.Path
 import dev.karmakrafts.ssio.api.Paths
 import kotlinx.io.files.FileMetadata
 
+/**
+ * A noop file system that provides no functionality and only returns
+ * [NoopFileSource] and [NoopFileSink] for file IO.
+ */
 object AsyncNoopFileSystem : AsyncFileSystem {
     override suspend fun getWorkingDirectory(): Path = Paths.root
     override suspend fun getTempDirectory(): Path = Paths.root

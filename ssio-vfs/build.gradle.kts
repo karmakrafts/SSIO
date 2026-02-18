@@ -16,7 +16,6 @@
 
 @file:OptIn(ExperimentalKotlinGradlePluginApi::class)
 
-import dev.karmakrafts.conventions.asAAR
 import dev.karmakrafts.conventions.configureJava
 import dev.karmakrafts.conventions.defaultDokkaConfig
 import dev.karmakrafts.conventions.kotlin.defaultCompilerOptions
@@ -61,28 +60,6 @@ kotlin {
             dependencies {
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
-            }
-        }
-    }
-}
-
-dokka {
-    dokkaSourceSets {
-        named("commonMain") {
-            externalDocumentationLinks {
-                register("java") {
-                    val version = libs.versions.java.get()
-                    url.set(uri("https://docs.oracle.com/en/java/javase/$version/docs/api/"))
-                    packageListUrl.set(uri("https://docs.oracle.com/en/java/javase/$version/docs/api/element-list"))
-                }
-                register("kotlinx.coroutines") {
-                    url.set(uri("https://kotlinlang.org/api/kotlinx.coroutines/"))
-                    packageListUrl.set(uri("https://kotlinlang.org/api/kotlinx.coroutines/package-list"))
-                }
-                register("kotlinx.io") {
-                    url.set(uri("https://kotlinlang.org/api/kotlinx-io/"))
-                    packageListUrl.set(uri("https://kotlinlang.org/api/kotlinx-io/package-list"))
-                }
             }
         }
     }

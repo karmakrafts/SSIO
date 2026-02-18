@@ -22,7 +22,7 @@ private class ThreadLocalImpl<T>(
     initializer: () -> T
 ) : ThreadLocal<T> {
     private val delegate: JThreadLocal<T> = JThreadLocal.withInitial(initializer)
-    override val value: T get() = delegate.get()
+    override val value: T get() = delegate.get()!!
 }
 
 internal actual fun <T> ThreadLocal(initializer: () -> T): ThreadLocal<T> = ThreadLocalImpl(initializer)

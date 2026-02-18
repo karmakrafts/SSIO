@@ -28,6 +28,9 @@ import dev.karmakrafts.ssio.api.normalize
 import kotlinx.io.Buffer
 import kotlinx.io.files.FileMetadata
 
+/**
+ * A simple graph based virtual file system implementation.
+ */
 class AsyncVirtualFileSystem( // @formatter:off
     private val workingDirectory: Path = Paths.root,
     private val tempDirectory: Path = Paths.root / "tmp"

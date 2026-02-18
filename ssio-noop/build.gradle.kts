@@ -16,7 +16,6 @@
 
 @file:OptIn(ExperimentalKotlinGradlePluginApi::class)
 
-import dev.karmakrafts.conventions.asAAR
 import dev.karmakrafts.conventions.configureJava
 import dev.karmakrafts.conventions.defaultDokkaConfig
 import dev.karmakrafts.conventions.kotlin.defaultCompilerOptions

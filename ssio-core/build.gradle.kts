@@ -104,11 +104,6 @@ dokka {
     dokkaSourceSets {
         named("commonMain") {
             externalDocumentationLinks {
-                register("java") {
-                    val version = libs.versions.java.get()
-                    url.set(uri("https://docs.oracle.com/en/java/javase/$version/docs/api/"))
-                    packageListUrl.set(uri("https://docs.oracle.com/en/java/javase/$version/docs/api/element-list"))
-                }
                 register("kotlinx.coroutines") {
                     url.set(uri("https://kotlinlang.org/api/kotlinx.coroutines/"))
                     packageListUrl.set(uri("https://kotlinlang.org/api/kotlinx.coroutines/package-list"))
@@ -119,12 +114,12 @@ dokka {
                 }
             }
         }
-        named("androidMain") {
+        named("jvmAndAndroidMain") {
             externalDocumentationLinks {
-                register("jna") {
-                    val version = libs.versions.jna.get()
-                    url.set(uri("https://javadoc.io/doc/net.java.dev.jna/jna/$version/"))
-                    packageListUrl.set(uri("https://javadoc.io/doc/net.java.dev.jna/jna/$version/element-list"))
+                register("java") {
+                    val version = libs.versions.java.get()
+                    url.set(uri("https://docs.oracle.com/en/java/javase/$version/docs/api/"))
+                    packageListUrl.set(uri("https://docs.oracle.com/en/java/javase/$version/docs/api/element-list"))
                 }
             }
         }
