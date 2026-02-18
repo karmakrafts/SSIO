@@ -19,24 +19,50 @@ package dev.karmakrafts.ssio.api
 import kotlinx.io.Source
 import kotlinx.io.readIntLe
 
+/**
+ * Reads a [List] from this [Source] using the provided [reader].
+ *
+ * @param reader the reader to use for reading each element
+ * @return the list of read elements
+ */
 inline fun <T> Source.readList(reader: Source.() -> T): List<T> {
     val size = readInt()
     return if (size == 0) emptyList()
     else (0..<size).map { reader() }
 }
 
+/**
+ * Reads a [List] from this [Source] using the provided [reader] and little-endian byte order for the size.
+ *
+ * @param reader the reader to use for reading each element
+ * @return the list of read elements
+ */
 inline fun <T> Source.readListLe(reader: Source.() -> T): List<T> {
     val size = readIntLe()
     return if (size == 0) emptyList()
     else (0..<size).map { reader() }
 }
 
+/**
+ * Reads a [Map] from this [Source] using the provided [keyReader] and [valueReader].
+ *
+ * @param keyReader the reader to use for reading each key
+ * @param valueReader the reader to use for reading each value
+ * @return the map of read entries
+ */
 inline fun <K, V> Source.readMap(keyReader: Source.() -> K, valueReader: Source.() -> V): Map<K, V> {
     val size = readInt()
     return if (size == 0) emptyMap()
     else (0..<size).associate { keyReader() to valueReader() }
 }
 
+/**
+ * Reads a [Map] from this [Source] using the provided [keyReader] and [valueReader] and little-endian byte order for the size.
+ *
+ * @param keyReader the reader to use for reading each key
+ * @param valueReader the reader to use for reading each value
+ * @return the map of read entries
+ */
 inline fun <K, V> Source.readMapLe(keyReader: Source.() -> K, valueReader: Source.() -> V): Map<K, V> {
     val size = readIntLe()
     return if (size == 0) emptyMap()
