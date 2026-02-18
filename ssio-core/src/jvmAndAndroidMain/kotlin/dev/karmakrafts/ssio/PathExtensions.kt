@@ -16,7 +16,7 @@
 
 package dev.karmakrafts.ssio
 
-import dev.karmakrafts.ssio.files.Path
+import dev.karmakrafts.ssio.api.Path
 import java.io.File
 import kotlin.io.path.absolutePathString
 import java.nio.file.Path as NioPath

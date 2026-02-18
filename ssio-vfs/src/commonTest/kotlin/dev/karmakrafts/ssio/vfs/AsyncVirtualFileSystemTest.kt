@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio
+package dev.karmakrafts.ssio.vfs
 
 import dev.karmakrafts.ssio.api.Path
 import dev.karmakrafts.ssio.api.buffered
@@ -28,7 +28,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class AsyncSystemFileSystemTest {
+class AsyncVirtualFileSystemTest {
     companion object {
         private val testData: String = """
             Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
@@ -44,60 +44,66 @@ class AsyncSystemFileSystemTest {
 
     @Test
     fun `Resolve simple relative path`() = runTest {
-        val root = AsyncSystemFileSystem.resolve(Path(""))
+        val vfs = AsyncVirtualFileSystem()
+        val root = vfs.resolve(Path(""))
         val relativePath = Path("foo/bar/test.txt")
-        val absolutePath = AsyncSystemFileSystem.resolve(relativePath)
+        val absolutePath = vfs.resolve(relativePath)
         assertTrue(absolutePath.isAbsolute)
         assertEquals(root / "foo/bar/test.txt", absolutePath)
     }
 
     @Test
     fun `Resolve complex relative path`() = runTest {
+        val vfs = AsyncVirtualFileSystem()
         val relativePath = Path("foo/bar/../test.txt")
-        val absolutePath = AsyncSystemFileSystem.resolve(relativePath)
+        val absolutePath = vfs.resolve(relativePath)
         assertTrue(absolutePath.isAbsolute)
         assertTrue(absolutePath.toString().endsWith("foo/test.txt"))
     }
 
     @Test
     fun `Create file`() = runTest {
+        val vfs = AsyncVirtualFileSystem()
         val path = Path("baz") / "test.txt"
-        AsyncSystemFileSystem.sink(path).use {}
-        AsyncSystemFileSystem.delete(path)
+        vfs.sink(path).use {}
+        vfs.delete(path)
     }
 
     @Test
     fun `Check if file exists`() = runTest {
+        val vfs = AsyncVirtualFileSystem()
         val path = Path("foo") / "test.txt"
-        AsyncSystemFileSystem.delete(path, mustExist = false)
-        assertFalse(AsyncSystemFileSystem.exists(path))
-        AsyncSystemFileSystem.sink(path).use {}
-        assertTrue(AsyncSystemFileSystem.exists(path))
-        AsyncSystemFileSystem.delete(path)
+        vfs.delete(path, mustExist = false)
+        assertFalse(vfs.exists(path))
+        vfs.sink(path).use {}
+        assertTrue(vfs.exists(path))
+        vfs.delete(path)
     }
 
     @Test
     fun `List files`() = runTest {
+        val vfs = AsyncVirtualFileSystem()
         val dir = Path("foo") / "bar"
         val path = dir / "test.txt"
-        AsyncSystemFileSystem.delete(path, mustExist = false)
-        var entries = AsyncSystemFileSystem.list(dir)
+        vfs.delete(path, mustExist = false)
+        var entries = vfs.list(dir)
         assertTrue(entries.isEmpty())
-        AsyncSystemFileSystem.sink(path).use {}
-        entries = AsyncSystemFileSystem.list(dir)
+        vfs.sink(path).use {}
+        entries = vfs.list(dir)
         assertTrue(path in entries)
-        AsyncSystemFileSystem.delete(path)
+        vfs.delete(path)
     }
 
     @Test
     fun `Read and write file`() = runTest {
+        val vfs = AsyncVirtualFileSystem()
         val path = Path("baz") / "test2.bin"
-        AsyncSystemFileSystem.sink(path).buffered().use { sink ->
+        vfs.sink(path).buffered().use { sink ->
             sink.writePrefixedString(testData)
         }
-        AsyncSystemFileSystem.source(path).buffered().use { source ->
+        vfs.source(path).buffered().use { source ->
             assertEquals(testData, source.readPrefixedString())
         }
-        AsyncSystemFileSystem.delete(path)
+        vfs.delete(path)
     }
 }
