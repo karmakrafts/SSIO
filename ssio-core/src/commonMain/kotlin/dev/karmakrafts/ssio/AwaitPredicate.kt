@@ -28,6 +28,7 @@ fun interface AwaitPredicate {
     companion object {
         /** Predicate that evaluates to true only when the source is fully exhausted. */
         fun exhausted(): AwaitPredicate = { buffer, fetchMore -> buffer.exhausted() && !fetchMore() }
+
         /** Predicate that evaluates to true when at least [bytes] are available in the buffer. */
         fun available(bytes: Long): AwaitPredicate = { buffer, _ -> buffer.size >= bytes }
     }
