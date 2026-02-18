@@ -21,11 +21,16 @@ This is an async IO extension for [kotlinx.io](https://github.com/Kotlin/kotlinx
 - `AsyncRawSink` interface
 - `AsyncSource` wrapper for buffering raw async sources
 - `AwaitPredicate` interface for await conditions like `exhausted` and `available`
-- Utility functions like `discardingAsyncSink` and `buffered` extensions
+- `DiscardingAsyncSink` object for voiding data
+- `RandomAsyncSource` object for sourcing an endless pseudo-random byte stream
+- `AsyncSystemFileSystem` global file system instance via the `ssio-core` module
+- `AsyncVirtualFileSystem` class via the `ssio-vfs` module
+- `AsyncNoopFileSystem` object via the `ssio-noop` module
 
 ### Platforms
 
-The following matrix illustrates what implementations are used for which target & runtime combination:
+The following matrix illustrates what implementations are used for which target & runtime combination  
+in the `ssio-core` implementation:
 
 | Target  | Runtime       | Implementation |
 |---------|---------------|----------------|
