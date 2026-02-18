@@ -13,7 +13,7 @@ This is an async IO extension for [kotlinx.io](https://github.com/Kotlin/kotlinx
 
 ### Features
 
-- Supports all Kotlin Multiplatform targets, including JS/WASM Browser through OPFS
+- Supports all Kotlin Multiplatform targets
 - `AsyncReadOnlyFileSystem` interface
 - `AsyncFileSystem` interface
 - `AsyncCloseable` interface
@@ -22,6 +22,20 @@ This is an async IO extension for [kotlinx.io](https://github.com/Kotlin/kotlinx
 - `AsyncSource` wrapper for buffering raw async sources
 - `AwaitPredicate` interface for await conditions like `exhausted` and `available`
 - Utility functions like `discardingAsyncSink` and `buffered` extensions
+
+### Platforms
+
+The following matrix illustrates what implementations are used for which target & runtime combination:
+
+| Target  | Runtime       | Implementation |
+|---------|---------------|----------------|
+| JVM     | JVM           | NIO            |
+| Android | ART           | NIO            |
+| Native  | Kotlin/Native | CIO            |
+| JS      | Browser       | OPFS           |
+| JS      | NodeJS        | fs.promises    |
+| WASM    | Browser       | OPFS           |
+| WASM    | NodeJS        | fs.promises    |
 
 ### Without SSIO
 
