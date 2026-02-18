@@ -9,12 +9,11 @@
 [![](https://img.shields.io/badge/documentation-black?logo=kotlin)](https://docs.karmakrafts.dev/ssio-core)
 
 **S**treaming **S**uspend **I**nput **O**utput library for Kotlin Multiplatform.  
-This is an async IO extension for [kotlinx.io](https://github.com/Kotlin/kotlinx-io) based on [the async API proposal](https://github.com/Kotlin/kotlinx-io/issues/163) which  
-was never implemented.
+This is an async IO extension for [kotlinx.io](https://github.com/Kotlin/kotlinx-io) based on [the async API proposal](https://github.com/Kotlin/kotlinx-io/issues/163).
 
 ### Features
 
-- Supports all Kotlin Multiplatform targets
+- Supports all Kotlin Multiplatform targets, including JS/WASM Browser through OPFS
 - `AsyncReadOnlyFileSystem` interface
 - `AsyncFileSystem` interface
 - `AsyncCloseable` interface
