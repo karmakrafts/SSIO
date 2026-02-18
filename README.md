@@ -35,6 +35,11 @@ Busy waiting, stalling and wasted time when performing potentially long-blocking
 
 Concurrent execution, no stalling and all time used to perform actual work while handling IO.
 
+### Why should I use this over kotlinx.io or java.nio?
+
+The answer is simple: you shouldn't if you don't need a suspend IO API available in your common source set.  
+If you do, this library is probably what you're looking for.
+
 ## How to use it
 
 First, add the official Maven Central repository to your settings.gradle.kts:
