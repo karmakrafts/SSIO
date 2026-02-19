@@ -19,6 +19,21 @@ package dev.karmakrafts.ssio.pipeline
 import dev.karmakrafts.ssio.api.ExperimentalSsioApi
 
 @ExperimentalSsioApi
-sealed interface IoPipelineElement {
-    suspend operator fun invoke(pipeline: IoPipeline)
+fun IoPipeline.limit(byteCount: Long): IoPipeline = transform { input, output ->
+    output.write(input, byteCount)
 }
+
+@ExperimentalSsioApi
+fun IoPipeline.drop(byteCount: Long): IoPipeline = transform { input, output ->
+    input.skip(byteCount)
+    input.transferTo(output)
+}
+
+@ExperimentalSsioApi
+fun IoPipeline.slice(start: Long, end: Long): IoPipeline = transform { input, output ->
+    input.skip(start)
+    output.write(input, end - start)
+}
+
+@ExperimentalSsioApi
+fun IoPipeline.slice(range: LongRange): IoPipeline = slice(range.first, range.last)

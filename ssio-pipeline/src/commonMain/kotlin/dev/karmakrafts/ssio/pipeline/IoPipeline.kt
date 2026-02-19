@@ -16,54 +16,86 @@
 
 package dev.karmakrafts.ssio.pipeline
 
-import dev.karmakrafts.ssio.api.AsyncCloseable
 import dev.karmakrafts.ssio.api.AsyncRawSource
 import dev.karmakrafts.ssio.api.ExperimentalSsioApi
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import kotlinx.io.Buffer
+import kotlin.math.min
 
 @ExperimentalSsioApi
-class IoPipeline internal constructor( // @formatter:off
-    private val source: AsyncRawSource,
-    private val elements: List<IoPipelineElement>
-) : AsyncRawSource, AsyncCloseable { // @formatter:on
-    internal val backBuffer: Buffer = Buffer()
-    internal val frontBuffer: Buffer = Buffer()
-    internal var stageIndex: Int = 0
-    private val mutex: Mutex = Mutex()
+interface IoPipeline : AsyncRawSource {
+    fun transform(transform: IoTransform): IoPipeline
+    suspend fun <R> mapAndClose(transform: Data2ObjectTransform<R>): R
+}
 
-    internal inline val currentBuffer: Buffer
-        get() = if (stageIndex and 1 == 1) backBuffer else frontBuffer
+@ExperimentalSsioApi
+private data class IoPipelineImpl(
+    private val source: AsyncRawSource
+) : IoPipeline {
+    companion object {
+        private const val CHUNK_SIZE: Int = 4096
+    }
 
-    override suspend fun close() {
-        for (element in elements) when (element) {
-            is AsyncCloseable -> element.close()
-            is AutoCloseable -> element.close()
-            else -> {}
+    private val backBuffer: Buffer = Buffer()
+    private val frontBuffer: Buffer = Buffer()
+    private var opIndex: Int = 0
+    private val transforms: ArrayList<IoTransform> = ArrayList(8)
+
+    private inline val currentInput: Buffer
+        get() = if (opIndex and 1 == 0) backBuffer else frontBuffer
+
+    private inline val currentOutput: Buffer
+        get() = if (opIndex and 1 == 1) backBuffer else frontBuffer
+
+    override fun transform(transform: IoTransform): IoPipeline {
+        transforms += transform
+        return this
+    }
+
+    override suspend fun <R> mapAndClose(transform: Data2ObjectTransform<R>): R {
+        return try {
+            transform(currentOutput)
         }
-        mutex.withLock {
-            backBuffer.clear()
-            frontBuffer.clear()
+        finally {
+            withContext(NonCancellable) {
+                close()
+            }
         }
     }
 
-    override fun closeAbruptly() {
-        for (element in elements) when (element) {
-            is AsyncCloseable -> element.closeAbruptly()
-            is AutoCloseable -> element.close()
-            else -> {}
+    override suspend fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
+        var remaining = byteCount
+        var readTotal = 0L
+        while (remaining > 0) {
+            val toRead = min(remaining, CHUNK_SIZE.toLong())
+            opIndex = 0
+            if (source.readAtMostTo(currentInput, toRead) == -1L) break
+            for (transform in transforms) {
+                currentOutput.clear()
+                transform(currentInput, currentOutput)
+                opIndex++
+            }
+            val chunkSize = currentOutput.size
+            remaining -= chunkSize
+            readTotal += chunkSize
+            currentOutput.transferTo(sink)
         }
+        return readTotal
+    }
+
+    override suspend fun close() {
+        source.close()
         backBuffer.clear()
         frontBuffer.clear()
     }
 
-    override suspend fun readAtMostTo(sink: Buffer, byteCount: Long): Long = mutex.withLock {
-        source.readAtMostTo(currentBuffer, byteCount)
-        for (element in elements) element(this)
-        val bytesTransformed = currentBuffer.size
-        currentBuffer.transferTo(sink)
-        stageIndex = 0
-        return bytesTransformed
+    override fun closeAbruptly() {
+        source.closeAbruptly()
+        backBuffer.clear()
+        frontBuffer.clear()
     }
 }
+
+@ExperimentalSsioApi
+fun AsyncRawSource.asPipeline(): IoPipeline = IoPipelineImpl(this)
