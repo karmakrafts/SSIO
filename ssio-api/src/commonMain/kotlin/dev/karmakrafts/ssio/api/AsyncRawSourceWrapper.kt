@@ -16,21 +16,54 @@
 
 package dev.karmakrafts.ssio.api
 
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import kotlinx.io.Buffer
 import kotlinx.io.RawSource
+import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.math.min
 
 /**
  * A wrapper for a [RawSource] that implements [AsyncRawSource].
  */
-private class AsyncRawSourceWrapper(
-    private val delegate: RawSource
-) : AsyncRawSource {
+private class AsyncRawSourceWrapper( // @formatter:off
+    private val delegate: RawSource,
+    private val chunkSize: Int
+) : AsyncRawSource { // @formatter:on
+    private val isClosed: AtomicBoolean = AtomicBoolean(false)
+
     override suspend fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
-        return delegate.readAtMostTo(sink, byteCount)
+        check(!isClosed.load()) { "AsyncRawSource is already closed" }
+        return withContext(ioDispatcher) {
+            var remaining = byteCount
+            var readTotal = 0L
+            while (remaining > 0) {
+                val toRead = min(chunkSize.toLong(), remaining)
+                val read = delegate.readAtMostTo(sink, toRead)
+                if (read == -1L) break
+                readTotal += read
+                remaining -= read
+                yield() // Yield between chunks to keep things non-blocking
+            }
+            readTotal
+        }
     }
 
-    override suspend fun close() = delegate.close()
-    override fun closeAbruptly() = delegate.close()
+    override suspend fun close() {
+        check(isClosed.compareAndSet(expectedValue = false, newValue = true)) {
+            "AsyncRawSource is already closed"
+        }
+        withContext(ioDispatcher) {
+            delegate.close()
+        }
+    }
+
+    override fun closeAbruptly() {
+        check(isClosed.compareAndSet(expectedValue = false, newValue = true)) {
+            "AsyncRawSource is already closed"
+        }
+        delegate.close()
+    }
 }
 
 /**
@@ -38,4 +71,4 @@ private class AsyncRawSourceWrapper(
  *
  * @return an [AsyncRawSource] that delegates to this [RawSource].
  */
-fun RawSource.asAsync(): AsyncRawSource = AsyncRawSourceWrapper(this)
+fun RawSource.asAsync(chunkSize: Int = 64): AsyncRawSource = AsyncRawSourceWrapper(this, chunkSize)

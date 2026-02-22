@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+### Fixed
+
+- `RawSource.asAsync` not chunking work onto platform IO dispatcher
+- `RawSink.asAsync` not chunking work onto platform IO dispatcher
+- Default internal buffer size being 8192 bytes in some places instead of 4096 bytes
+
 ## [1.2.0]
 
 ### Changed

@@ -99,7 +99,7 @@ private open class BufferedAsyncSink( // @formatter:off
             if (buffer.size + toWrite >= bufferSize) emit()
             buffer.write(source, toWrite)
             remaining -= toWrite
-            yield()
+            yield() // Yield between chunks
         }
     }
 
@@ -206,7 +206,7 @@ private class SynchronizedBufferedAsyncSink(
  * @param synchronized if true, serializes access with a mutex for thread-safety
  */
 fun AsyncRawSink.buffered( // @formatter:off
-    bufferSize: Long = 8192,
+    bufferSize: Long = 4096,
     synchronized: Boolean = false
 ): AsyncSink { // @formatter:on
     return if (synchronized) SynchronizedBufferedAsyncSink(this, bufferSize)

@@ -16,27 +16,61 @@
 
 package dev.karmakrafts.ssio.api
 
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import kotlinx.io.Buffer
 import kotlinx.io.RawSink
+import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.math.min
 
 /**
  * A wrapper for a [RawSink] that implements [AsyncRawSink].
  */
-private class AsyncRawSinkWrapper(
-    private val delegate: RawSink
-) : AsyncRawSink {
+private class AsyncRawSinkWrapper( // @formatter:off
+    private val delegate: RawSink,
+    private val chunkSize: Int
+) : AsyncRawSink { // @formatter:on
+    private val isClosed: AtomicBoolean = AtomicBoolean(false)
+
     override suspend fun write(source: Buffer, byteCount: Long) {
-        delegate.write(source, byteCount)
+        check(!isClosed.load()) { "AsyncRawSink is already closed" }
+        withContext(ioDispatcher) {
+            var remaining = byteCount
+            while (remaining > 0) {
+                val toWrite = min(chunkSize.toLong(), remaining)
+                delegate.write(source, toWrite)
+                remaining -= toWrite
+                yield() // Yield between chunks to keep things non-blocking
+            }
+        }
     }
 
-    override suspend fun flush() = delegate.flush()
-    override suspend fun close() = delegate.close()
-    override fun closeAbruptly() = delegate.close()
+    override suspend fun flush() = withContext(ioDispatcher) {
+        check(!isClosed.load()) { "AsyncRawSink is already closed" }
+        delegate.flush()
+    }
+
+    override suspend fun close() {
+        check(isClosed.compareAndSet(expectedValue = false, newValue = true)) {
+            "AsyncRawSink is already closed"
+        }
+        withContext(ioDispatcher) {
+            delegate.close()
+        }
+    }
+
+    override fun closeAbruptly() {
+        check(isClosed.compareAndSet(expectedValue = false, newValue = true)) {
+            "AsyncRawSink is already closed"
+        }
+        delegate.close()
+    }
 }
 
 /**
  * Wraps this [RawSink] as an [AsyncRawSink].
  *
+ * @param chunkSize The size of the chunks emitted between yields in bytes.
  * @return an [AsyncRawSink] that delegates to this [RawSink].
  */
-fun RawSink.asAsync(): AsyncRawSink = AsyncRawSinkWrapper(this)
+fun RawSink.asAsync(chunkSize: Int = 64): AsyncRawSink = AsyncRawSinkWrapper(this, chunkSize)

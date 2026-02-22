@@ -16,15 +16,6 @@
 
 package dev.karmakrafts.ssio.api
 
-/**
- * Marker annotation for incubating SSIO APIs.
- */
-@RequiresOptIn(message = "The API you are trying to use is still under development and may be subject to change")
-@Retention(AnnotationRetention.BINARY)
-@Target(
-    AnnotationTarget.CLASS,
-    AnnotationTarget.FUNCTION,
-    AnnotationTarget.TYPEALIAS,
-    AnnotationTarget.ANNOTATION_CLASS
-)
-annotation class ExperimentalSsioApi
+import kotlinx.coroutines.CoroutineDispatcher
+
+internal expect val ioDispatcher: CoroutineDispatcher

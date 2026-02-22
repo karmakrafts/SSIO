@@ -262,7 +262,7 @@ private class SynchronizedBufferedAsyncSource( // @formatter:off
  * @param synchronized if true, serializes access with a mutex for thread-safety
  */
 fun AsyncRawSource.buffered( // @formatter:off
-    bufferSize: Long = 8192,
+    bufferSize: Long = 4096,
     synchronized: Boolean = false
 ): AsyncSource { // @formatter:on
     return if (synchronized) SynchronizedBufferedAsyncSource(this, bufferSize)
