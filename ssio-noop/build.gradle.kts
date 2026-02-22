@@ -17,7 +17,7 @@
 @file:OptIn(ExperimentalKotlinGradlePluginApi::class)
 
 import dev.karmakrafts.conventions.configureJava
-import dev.karmakrafts.conventions.defaultDokkaConfig
+import dev.karmakrafts.conventions.dokka.configureDokka
 import dev.karmakrafts.conventions.kotlin.defaultCompilerOptions
 import dev.karmakrafts.conventions.kotlin.withAndroidLibrary
 import dev.karmakrafts.conventions.kotlin.withBrowser
@@ -37,7 +37,14 @@ plugins {
 }
 
 configureJava(libs.versions.java)
-defaultDokkaConfig()
+
+configureDokka {
+    withJava()
+    withKotlin()
+    withKotlinxCoroutines()
+    withKotlinxIo()
+    dependsOn(projects.ssioApi)
+}
 
 kotlin {
     defaultCompilerOptions()

@@ -24,7 +24,6 @@ import dev.karmakrafts.conventions.kotlin.withMingw
 import dev.karmakrafts.conventions.kotlin.withNodeJs
 import dev.karmakrafts.conventions.kotlin.withWeb
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
