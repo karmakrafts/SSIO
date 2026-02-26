@@ -22,6 +22,20 @@ import kotlinx.io.buffered
 import java.io.OutputStream
 import java.nio.channels.WritableByteChannel
 
+/**
+ * Returns an [OutputStream] that writes to this [AsyncRawSink] by blocking the current thread.
+ *
+ * The [AsyncRawSink] is buffered before being converted to an [OutputStream].
+ *
+ * @return the [OutputStream]
+ */
 fun AsyncRawSink.asOutputStream(): OutputStream = asBlocking().buffered().asOutputStream()
 
+/**
+ * Returns a [WritableByteChannel] that writes to this [AsyncRawSink] by blocking the current thread.
+ *
+ * The [AsyncRawSink] is buffered before being converted to a [WritableByteChannel].
+ *
+ * @return the [WritableByteChannel]
+ */
 fun AsyncRawSink.asByteChannel(): WritableByteChannel = asBlocking().buffered().asByteChannel()

@@ -20,7 +20,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.io.Buffer
 import kotlinx.io.RawSink
 
-class BlockingRawSinkWrapper(
+internal class BlockingRawSinkWrapper(
     private val delegate: AsyncRawSink
 ) : RawSink {
     override fun close() = runBlocking {

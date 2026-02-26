@@ -22,9 +22,6 @@ package dev.karmakrafts.ssio.api
 @RequiresOptIn(message = "The API you are trying to use is still under development and may be subject to change")
 @Retention(AnnotationRetention.BINARY)
 @Target(
-    AnnotationTarget.CLASS,
-    AnnotationTarget.FUNCTION,
-    AnnotationTarget.TYPEALIAS,
-    AnnotationTarget.ANNOTATION_CLASS
+    AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.TYPEALIAS, AnnotationTarget.ANNOTATION_CLASS
 )
 annotation class ExperimentalSsioApi

@@ -19,4 +19,10 @@ package dev.karmakrafts.ssio.api
 import kotlinx.io.asSource
 import java.io.InputStream
 
+/**
+ * Returns an [AsyncRawSource] that reads from this [InputStream] asynchronously.
+ *
+ * @param chunkSize the size of the chunks to read in each step, in kibibytes. Defaults to 64.
+ * @return the [AsyncRawSource]
+ */
 fun InputStream.asAsyncSource(chunkSize: Int = 64): AsyncRawSource = asSource().asAsync(chunkSize)

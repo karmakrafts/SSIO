@@ -18,4 +18,9 @@ package dev.karmakrafts.ssio.api
 
 import kotlinx.io.RawSink
 
+/**
+ * Wraps this [AsyncRawSink] into a blocking [RawSink].
+ *
+ * @return a blocking [RawSink] wrapping this [AsyncRawSink]
+ */
 fun AsyncRawSink.asBlocking(): RawSink = BlockingRawSinkWrapper(this)

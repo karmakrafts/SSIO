@@ -19,4 +19,10 @@ package dev.karmakrafts.ssio.api
 import kotlinx.io.asSink
 import java.io.OutputStream
 
+/**
+ * Returns an [AsyncRawSink] that writes to this [OutputStream] asynchronously.
+ *
+ * @param chunkSize the size of the chunks to write in each step, in kibibytes. Defaults to 64.
+ * @return the [AsyncRawSink]
+ */
 fun OutputStream.asAsyncSink(chunkSize: Int = 64): AsyncRawSink = asSink().asAsync(chunkSize)

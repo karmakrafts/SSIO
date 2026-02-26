@@ -20,7 +20,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.io.Buffer
 import kotlinx.io.RawSource
 
-class BlockingRawSourceWrapper(
+internal class BlockingRawSourceWrapper(
     private val delegate: AsyncRawSource
 ) : RawSource {
     override fun close() = runBlocking {

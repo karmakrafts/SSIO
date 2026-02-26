@@ -21,7 +21,18 @@ import kotlinx.io.asSource
 import java.nio.channels.Channels
 import java.nio.channels.ReadableByteChannel
 
+/**
+ * Returns an [AsyncRawSource] that reads from this [ReadableByteChannel] asynchronously.
+ *
+ * @param chunkSize the size of the chunks to read in each step, in kibibytes. Defaults to 64.
+ * @return the [AsyncRawSource]
+ */
 fun ReadableByteChannel.asAsyncSource(chunkSize: Int = 64): AsyncRawSource =
     Channels.newInputStream(this).asAsyncSource(chunkSize)
 
+/**
+ * Returns a [RawSource] that reads from this [ReadableByteChannel].
+ *
+ * @return the [RawSource]
+ */
 fun ReadableByteChannel.asSource(): RawSource = Channels.newInputStream(this).asSource()

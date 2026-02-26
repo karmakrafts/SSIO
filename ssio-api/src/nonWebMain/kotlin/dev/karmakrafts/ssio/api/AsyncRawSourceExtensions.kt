@@ -18,4 +18,9 @@ package dev.karmakrafts.ssio.api
 
 import kotlinx.io.RawSource
 
+/**
+ * Wraps this [AsyncRawSource] into a blocking [RawSource].
+ *
+ * @return a blocking [RawSource] wrapping this [AsyncRawSource]
+ */
 fun AsyncRawSource.asBlocking(): RawSource = BlockingRawSourceWrapper(this)

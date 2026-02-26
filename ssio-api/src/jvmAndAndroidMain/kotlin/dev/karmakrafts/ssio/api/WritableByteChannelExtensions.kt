@@ -21,7 +21,18 @@ import kotlinx.io.asSink
 import java.nio.channels.Channels
 import java.nio.channels.WritableByteChannel
 
+/**
+ * Returns an [AsyncRawSink] that writes to this [WritableByteChannel] asynchronously.
+ *
+ * @param chunkSize the size of the chunks to write in each step, in kibibytes. Defaults to 64.
+ * @return the [AsyncRawSink]
+ */
 fun WritableByteChannel.asAsyncSink(chunkSize: Int = 64): AsyncRawSink =
     Channels.newOutputStream(this).asAsyncSink(chunkSize)
 
+/**
+ * Returns a [RawSink] that writes to this [WritableByteChannel].
+ *
+ * @return the [RawSink]
+ */
 fun WritableByteChannel.asSink(): RawSink = Channels.newOutputStream(this).asSink()

@@ -22,6 +22,20 @@ import kotlinx.io.buffered
 import java.io.InputStream
 import java.nio.channels.ReadableByteChannel
 
+/**
+ * Returns an [InputStream] that reads from this [AsyncRawSource] by blocking the current thread.
+ *
+ * The [AsyncRawSource] is buffered before being converted to an [InputStream].
+ *
+ * @return the [InputStream]
+ */
 fun AsyncRawSource.asInputStream(): InputStream = asBlocking().buffered().asInputStream()
 
+/**
+ * Returns a [ReadableByteChannel] that reads from this [AsyncRawSource] by blocking the current thread.
+ *
+ * The [AsyncRawSource] is buffered before being converted to a [ReadableByteChannel].
+ *
+ * @return the [ReadableByteChannel]
+ */
 fun AsyncRawSource.asByteChannel(): ReadableByteChannel = asBlocking().buffered().asByteChannel()
