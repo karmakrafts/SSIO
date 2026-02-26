@@ -1,5 +1,14 @@
 ## [Unreleased]
 
+### Added
+
+- `AsyncRawSource.asInputStream` for JVM & Android
+- `AsyncRawSource.asByteChannel` for JVM & Android
+- `AsyncRawSink.asOutputStream` for JVM & Android
+- `AsyncRawSink.asByteChannel` for JVM & Android
+- `AsyncRawSource.asBlocking` for all targets except web
+- `AsyncRawSink.asBlocking` for all targets except web
+
 ### Fixed
 
 - `RawSource.asAsync` not chunking work onto platform IO dispatcher
