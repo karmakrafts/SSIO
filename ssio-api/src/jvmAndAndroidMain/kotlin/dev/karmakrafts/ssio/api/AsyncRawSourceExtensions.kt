@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:JvmName("AsyncRawSourceExtensionsJvm")
+
 package dev.karmakrafts.ssio.api
 
 import kotlinx.io.asByteChannel
