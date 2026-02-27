@@ -16,20 +16,11 @@
 
 package dev.karmakrafts.ssio.api
 
-/**
- * Platform-specific path utilities and constants.
- */
-expect object Paths {
-    /** Filesystem path separator for the current platform. */
-    val separator: String
-
-    /**
-     * Drive separator for absolute paths.
-     * On platforms like Windows, this will be `":"`,
-     * on all other platforms it will be null.
-     */
-    val driveSeparator: String?
-
-    /** Root path of the current platform (e.g., `/` on Unix). */
-    val root: Path
+// TODO: we consider FreeBSD Linux right now for the sake of simplicity, change this
+internal actual val platform: Platform = if (isNode) when (getNodePlatform()) {
+    "darwin" -> Platform.MACOS
+    "linux", "freebsd", "openbsd" -> Platform.LINUX
+    "win32", "cygwin" -> Platform.WINDOWS
+    else -> Platform.UNKNOWN
 }
+else Platform.BROWSER

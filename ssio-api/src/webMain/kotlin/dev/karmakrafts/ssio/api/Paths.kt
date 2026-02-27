@@ -33,5 +33,6 @@ private fun getPathSeparator(): String {
 
 actual object Paths {
     actual val separator: String = getPathSeparator()
+    actual val driveSeparator: String? = null
     actual val root: Path = Path(separator)
 }

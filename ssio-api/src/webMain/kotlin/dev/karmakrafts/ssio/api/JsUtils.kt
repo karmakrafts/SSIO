@@ -19,7 +19,15 @@ package dev.karmakrafts.ssio.api
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.js
 
+private external interface Process {
+    val platform: String
+}
+
+private external val process: Process
+
 @OptIn(ExperimentalWasmJsInterop::class)
 private fun checkIsNode(): Boolean = js("""typeof process !== 'undefined' && process.release.name === 'node'""")
 
 internal val isNode: Boolean = checkIsNode()
+
+internal fun getNodePlatform(): String = process.platform

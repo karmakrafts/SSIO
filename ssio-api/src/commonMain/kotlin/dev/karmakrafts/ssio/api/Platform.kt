@@ -16,20 +16,33 @@
 
 package dev.karmakrafts.ssio.api
 
-/**
- * Platform-specific path utilities and constants.
- */
-expect object Paths {
-    /** Filesystem path separator for the current platform. */
-    val separator: String
+internal enum class Platform {
+    // @formatter:off
+    WINDOWS,
+    LINUX,
+    MACOS,
+    ANDROID,
+    IOS,
+    TVOS,
+    WATCHOS,
+    BROWSER,
+    WASI,
+    UNKNOWN;
+    // @formatter:on
 
-    /**
-     * Drive separator for absolute paths.
-     * On platforms like Windows, this will be `":"`,
-     * on all other platforms it will be null.
-     */
-    val driveSeparator: String?
+    companion object {
+        val unixoid: Set<Platform> = setOf(LINUX, MACOS, ANDROID, IOS, TVOS, WATCHOS)
+        val apple: Set<Platform> = setOf(MACOS, IOS, TVOS, WATCHOS)
+    }
 
-    /** Root path of the current platform (e.g., `/` on Unix). */
-    val root: Path
+    inline val isWindows: Boolean
+        get() = this == WINDOWS
+
+    inline val isUnixoid: Boolean
+        get() = this in unixoid
+
+    inline val isApple: Boolean
+        get() = this in apple
 }
+
+internal expect val platform: Platform

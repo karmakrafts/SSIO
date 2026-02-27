@@ -94,6 +94,11 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
             }
         }
+        named("jvmAndAndroidMain") {
+            dependencies {
+                implementation(libs.oshi.core)
+            }
+        }
     }
 }
 

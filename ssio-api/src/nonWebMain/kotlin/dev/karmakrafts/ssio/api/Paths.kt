@@ -23,5 +23,11 @@ import kotlin.jvm.JvmName
 
 actual object Paths {
     actual val separator: String = SystemPathSeparator.toString()
+
+    actual val driveSeparator: String? = when {
+        platform.isWindows -> ":"
+        else -> null
+    }
+
     actual val root: Path = Path(separator)
 }

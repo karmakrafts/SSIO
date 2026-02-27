@@ -124,6 +124,25 @@ fun Path.normalize(): Path {
 }
 
 /**
+ * Retrieves the drive letter associated with this path
+ * if present, returns null otherwise.
+ *
+ * For example, on Windows, when calling this function
+ * on the path `C:\Users\Person`, it would yield the string `"C:"`.
+ *
+ * @return The drive letter associated with this path if present,
+ *  null otherwise.
+ */
+fun Path.getDriveLetter(): String? {
+    val separator = Paths.driveSeparator ?: return null
+    val value = toString()
+    return when {
+        separator in value -> value.substring(0, value.indexOf(':'))
+        else -> null
+    }
+}
+
+/**
  * Joins this path with a single [other] segment.
  *
  * @param other The segment to append to this path. Must not contain [Paths.separator].

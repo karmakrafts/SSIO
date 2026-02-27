@@ -6,15 +6,16 @@ androidGradle = "9.0.1" # https://developer.android.com/reference/tools/gradle-a
 androidMinSdk = "26"
 
 ssio = "1.3.0"
-karmaConventions = "1.12.1" # https://github.com/karmakrafts/karma-conventions/tags
+karmaConventions = "1.12.2" # https://github.com/karmakrafts/karma-conventions/tags
 kotlin = "2.3.20-RC" # https://github.com/JetBrains/kotlin/releases
-kotlinWrappers = "2026.2.17" # https://github.com/JetBrains/kotlin-wrappers/releases
+kotlinWrappers = "2026.2.21" # https://github.com/JetBrains/kotlin-wrappers/releases
 kotlinxIo = "0.9.0" # https://github.com/Kotlin/kotlinx-io/releases
 kotlinxCoroutines = "1.10.2" # https://github.com/Kotlin/kotlinx.coroutines/releases
 kotlinxBenchmark = "0.4.16" # https://github.com/Kotlin/kotlinx-benchmark/releases
 dokka = "2.2.0-Beta" # https://github.com/Kotlin/dokka/releases
 gradleNexus = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
 jna = "5.18.1" # https://github.com/java-native-access/jna/tags
+oshi = "6.10.0" # https://github.com/oshi/oshi/releases
 
 [libraries]
 
@@ -26,6 +27,7 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmark" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
+oshi-core = { module = "com.github.oshi:oshi-core", version.ref = "oshi" }
 
 [plugins]
 

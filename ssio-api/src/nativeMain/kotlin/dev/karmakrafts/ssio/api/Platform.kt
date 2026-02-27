@@ -16,20 +16,18 @@
 
 package dev.karmakrafts.ssio.api
 
-/**
- * Platform-specific path utilities and constants.
- */
-expect object Paths {
-    /** Filesystem path separator for the current platform. */
-    val separator: String
+import kotlin.experimental.ExperimentalNativeApi
+import kotlin.native.Platform as NativePlatform
 
-    /**
-     * Drive separator for absolute paths.
-     * On platforms like Windows, this will be `":"`,
-     * on all other platforms it will be null.
-     */
-    val driveSeparator: String?
-
-    /** Root path of the current platform (e.g., `/` on Unix). */
-    val root: Path
+@OptIn(ExperimentalNativeApi::class)
+internal actual val platform: Platform = when (NativePlatform.osFamily) {
+    OsFamily.WINDOWS -> Platform.WINDOWS
+    OsFamily.MACOSX -> Platform.MACOS
+    OsFamily.LINUX -> Platform.LINUX
+    OsFamily.IOS -> Platform.IOS
+    OsFamily.TVOS -> Platform.TVOS
+    OsFamily.WATCHOS -> Platform.WATCHOS
+    OsFamily.ANDROID -> Platform.ANDROID
+    OsFamily.WASM -> Platform.WASI
+    OsFamily.UNKNOWN -> Platform.UNKNOWN
 }
