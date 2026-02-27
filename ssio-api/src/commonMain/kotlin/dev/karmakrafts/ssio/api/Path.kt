@@ -137,7 +137,7 @@ fun Path.getDriveLetter(): String? {
     val separator = Paths.driveSeparator ?: return null
     val value = toString()
     return when {
-        separator in value -> value.substring(0, value.indexOf(':'))
+        separator in value -> value.substring(0, value.indexOf(separator))
         else -> null
     }
 }
