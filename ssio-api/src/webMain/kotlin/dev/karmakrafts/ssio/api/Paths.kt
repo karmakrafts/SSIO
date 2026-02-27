@@ -36,5 +36,6 @@ actual object Paths {
     actual val driveSeparator: String? = null
     actual val currentDirectoryDelimiter: String = "."
     actual val parentDirectoryDelimiter: String = ".."
+    actual val extensionDelimiter: String = "."
     actual val root: Path = Path(separator)
 }

@@ -131,7 +131,7 @@ fun Path.normalize(): Path {
  * if present, returns null otherwise.
  *
  * For example, on Windows, when calling this function
- * on the path `C:\Users\Person`, it would yield the string `"C:"`.
+ * on the path `"C:\Users\Person"`, it would yield the string `"C:"`.
  *
  * @return The drive letter associated with this path if present,
  *  null otherwise.
@@ -166,11 +166,11 @@ operator fun Path.div(other: Path): Path = Path(this, *other.getSegments().toTyp
  *
  * @return the filename without the last extension segment.
  */
-fun Path.getFileNameWithoutExtension(): String = name.substringAfterLast('.')
+fun Path.getFileNameWithoutExtension(): String = name.substringAfterLast(Paths.extensionDelimiter, name)
 
 /**
  * Returns the last extension of the filename (e.g., `txt` from `file.txt`).
  *
  * @return the last extension segment of the filename, or an empty string if no dot is present.
  */
-fun Path.getExtension(): String = if ("." in name) name.substringBeforeLast('.') else ""
+fun Path.getExtension(): String = name.substringBeforeLast(Paths.extensionDelimiter, "")

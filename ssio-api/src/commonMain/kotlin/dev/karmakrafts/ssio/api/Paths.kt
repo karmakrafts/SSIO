@@ -42,6 +42,12 @@ expect object Paths {
      */
     val parentDirectoryDelimiter: String
 
+    /**
+     * Standard delimiter used before file extensions.
+     * Will be `"."` on most platforms.
+     */
+    val extensionDelimiter: String
+
     /** Root path of the current platform (e.g., `/` on Unix). */
     val root: Path
 }
