@@ -112,15 +112,18 @@ fun Path.getSegments(): List<String> = toString().split(Paths.separator).filterN
 fun Path.normalize(): Path {
     val normalized = ArrayDeque<String>()
     val segments = toString().split(Paths.separator).filterNot(String::isEmpty)
-    for (segment in segments) {
-        when (segment) {
-            "." -> {} // Ignore this
-            ".." -> normalized.removeLast()
+    val driveLetter = getDriveLetter()
+    for (index in segments.indices) {
+        if (driveLetter != null && index == 0) continue // Skip drive letter if present
+        when (val segment = segments[index]) {
+            Paths.currentDirectoryDelimiter -> {} // Ignore this
+            Paths.parentDirectoryDelimiter -> normalized.removeLast()
             else -> normalized += segment
         }
     }
-    return if (isAbsolute) Path("${Paths.separator}${normalized.joinToString(Paths.separator)}")
-    else Path(normalized.joinToString(Paths.separator))
+    val driveLetterPrefix = driveLetter ?: ""
+    return if (isAbsolute) Path("$driveLetterPrefix${Paths.separator}${normalized.joinToString(Paths.separator)}")
+    else Path("$driveLetterPrefix${normalized.joinToString(Paths.separator)}")
 }
 
 /**

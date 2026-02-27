@@ -30,6 +30,18 @@ expect object Paths {
      */
     val driveSeparator: String?
 
+    /**
+     * Filesystem delimiter for indicating the current directory.
+     * Will be `"."` on most platforms.
+     */
+    val currentDirectoryDelimiter: String
+
+    /**
+     * Filesystem delimiter for indicating the parent directory.
+     * Will be `".."` on most platforms.
+     */
+    val parentDirectoryDelimiter: String
+
     /** Root path of the current platform (e.g., `/` on Unix). */
     val root: Path
 }

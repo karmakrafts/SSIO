@@ -29,5 +29,7 @@ actual object Paths {
         else -> null
     }
 
+    actual val currentDirectoryDelimiter: String = "."
+    actual val parentDirectoryDelimiter: String = ".."
     actual val root: Path = Path(separator)
 }
