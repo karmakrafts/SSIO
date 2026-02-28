@@ -1,0 +1,10 @@
+package = liburing
+
+# CInterop uses system Linux headers here, but it doesn't really matter
+compilerOpts.linux_x64 = -I/usr/include -Ibuild/liburing/linuxAmd64/include
+compilerOpts.linux_arm64 = -I/usr/include -Ibuild/liburing/linuxArm64/include
+headers = liburing.h
+
+libraryPaths.linux_x64 = build/liburing/linuxAmd64/lib
+libraryPaths.linux_arm64 = build/liburing/linuxArm64/lib
+staticLibraries = liburing.a

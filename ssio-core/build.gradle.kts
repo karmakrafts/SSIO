@@ -16,15 +16,24 @@
 
 @file:OptIn(ExperimentalKotlinGradlePluginApi::class)
 
+import dev.karmakrafts.conventions.GitLabPackage
 import dev.karmakrafts.conventions.asAAR
 import dev.karmakrafts.conventions.configureJava
 import dev.karmakrafts.conventions.dokka.configureDokka
+import dev.karmakrafts.conventions.gitlab
 import dev.karmakrafts.conventions.kotlin.defaultCompilerOptions
 import dev.karmakrafts.conventions.kotlin.withAndroidLibrary
+import dev.karmakrafts.conventions.kotlin.withAndroidNative
 import dev.karmakrafts.conventions.kotlin.withBrowser
+import dev.karmakrafts.conventions.kotlin.withCInterop
+import dev.karmakrafts.conventions.kotlin.withIos
 import dev.karmakrafts.conventions.kotlin.withJvm
-import dev.karmakrafts.conventions.kotlin.withNative
+import dev.karmakrafts.conventions.kotlin.withLinux
+import dev.karmakrafts.conventions.kotlin.withMacos
+import dev.karmakrafts.conventions.kotlin.withMingw
 import dev.karmakrafts.conventions.kotlin.withNodeJs
+import dev.karmakrafts.conventions.kotlin.withTvos
+import dev.karmakrafts.conventions.kotlin.withWatchos
 import dev.karmakrafts.conventions.kotlin.withWeb
 import dev.karmakrafts.conventions.setProjectInfo
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
@@ -36,6 +45,9 @@ plugins {
     signing
     `maven-publish`
 }
+
+val liburingPackage: GitLabPackage =
+    gitlab().project("kk/prebuilts/liburing").packageRegistry["generic/build", libs.versions.liburing]
 
 configureJava(libs.versions.java)
 
@@ -52,7 +64,15 @@ kotlin {
     withSourcesJar()
     withJvm()
     withAndroidLibrary("$group.core", minSdk = libs.versions.androidMinSdk)
-    withNative()
+    withLinux {
+        withCInterop("liburing", liburingPackage)
+    }
+    withAndroidNative()
+    withMingw()
+    withMacos()
+    withIos()
+    withTvos()
+    withWatchos()
     withWeb {
         withBrowser()
         withNodeJs()
