@@ -116,7 +116,8 @@ test:nodejs:
     - gradle jsNodeTest wasmJsNodeTest
   tags:
     - linux
-    - docker
+    - shell
+    - amd64
 
 test:browser:
   stage: test
@@ -128,7 +129,8 @@ test:browser:
     - gradle jsBrowserTest wasmJsBrowserTest
   tags:
     - linux
-    - docker
+    - shell
+    - amd64
 
 test:linux:amd64:
   stage: test
@@ -189,12 +191,11 @@ publish:maven:jvmAndAndroid:
     - *if-release
   script:
     - |
-      gradle \
+      ./gradlew \
       publish{Jvm,Android}PublicationToGitLabRepository \
       publish{Jvm,Android}PublicationToSonatypeRepository
   tags:
-    - linux
-    - docker
+    - macos
 
 publish:maven:web:
   stage: publish
@@ -203,12 +204,11 @@ publish:maven:web:
     - *if-release
   script:
     - |
-      gradle \
+      ./gradlew \
       publish{Js,WasmJs}PublicationToGitLabRepository \
       publish{Js,WasmJs}PublicationToSonatypeRepository
   tags:
-    - linux
-    - docker
+    - macos
 
 publish:maven:linux:amd64:
   stage: publish
