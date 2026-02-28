@@ -16,6 +16,7 @@
 
 package dev.karmakrafts.ssio.cio
 
+import dev.karmakrafts.ssio.AsyncSystemFileSystem
 import dev.karmakrafts.ssio.api.AsyncCloseable
 import dev.karmakrafts.ssio.api.Path
 import dev.karmakrafts.ssio.platformSyncFd
@@ -26,7 +27,10 @@ import kotlinx.cinterop.convert
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
+import platform.posix.O_APPEND
+import platform.posix.O_CREAT
 import platform.posix.O_RDONLY
+import platform.posix.O_RDWR
 import kotlin.concurrent.atomics.AtomicBoolean
 import platform.posix.close as posixClose
 import platform.posix.open as posixOpen
@@ -37,11 +41,28 @@ import platform.posix.write as posixWrite
 internal class NativeFile( // @formatter:off
     val fd: Int
 ) : AsyncCloseable { // @formatter:on
+    companion object {
+        suspend fun create(path: Path, writable: Boolean = false, append: Boolean = false, auxFlags: Int = 0): NativeFile {
+            path.parent?.let { parent -> AsyncSystemFileSystem.createDirectories(parent) }
+            return NativeFile(path, writable, append, auxFlags)
+        }
+    }
+
     private val isClosed: AtomicBoolean = AtomicBoolean(false)
 
     // @formatter:off
-    constructor(path: Path, openFlags: Int = O_RDONLY, accessFlags: Int = 0x1A4) :
-        this(posixOpen(path.toString(), openFlags, accessFlags))
+    constructor(path: Path, openFlags: Int, accessFlags: Int = 0x1A4) :
+        this(Unit.run {
+            posixOpen(path.toString(), openFlags, accessFlags)
+        })
+
+    constructor(path: Path, writable: Boolean = false, append: Boolean = false, auxFlags: Int = 0) :
+        this(path, Unit.run {
+            var openFlags = O_CREAT
+            openFlags = openFlags or if(writable) O_RDWR else O_RDONLY
+            if (append) openFlags = openFlags or O_APPEND
+            openFlags or auxFlags
+        })
     // @formatter:on
 
     override fun equals(other: Any?): Boolean {

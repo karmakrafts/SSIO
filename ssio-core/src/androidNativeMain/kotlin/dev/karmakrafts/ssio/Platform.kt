@@ -31,9 +31,6 @@ import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.toKStringFromUtf8
-import platform.posix.O_APPEND
-import platform.posix.O_CREAT
-import platform.posix.O_RDWR
 import platform.posix.PATH_MAX
 import platform.posix.fsync
 import platform.posix.getcwd
@@ -56,11 +53,10 @@ internal actual fun platformGetTmpDir(): String {
     return "/tmp"
 }
 
-internal actual suspend fun createFileSource(path: Path): AsyncRawSource = CIOFileSource(NativeFile(path))
+internal actual suspend fun createFileSource(path: Path): AsyncRawSource {
+    return CIOFileSource(NativeFile.create(path))
+}
 
 internal actual suspend fun createFileSink(path: Path, append: Boolean): AsyncRawSink {
-    var openFlags = O_CREAT or O_RDWR
-    if (append) openFlags = openFlags or O_APPEND
-    path.parent?.let { parent -> AsyncSystemFileSystem.createDirectories(parent) }
-    return CIOFileSink(NativeFile(path, openFlags))
+    return CIOFileSink(NativeFile.create(path, true, append))
 }

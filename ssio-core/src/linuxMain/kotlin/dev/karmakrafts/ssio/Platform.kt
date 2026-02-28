@@ -24,33 +24,29 @@ import dev.karmakrafts.ssio.api.Path
 import dev.karmakrafts.ssio.cio.CIOFileSink
 import dev.karmakrafts.ssio.cio.CIOFileSource
 import dev.karmakrafts.ssio.cio.NativeFile
-import dev.karmakrafts.ssio.uring.URing
 import dev.karmakrafts.ssio.uring.URingFileSink
 import dev.karmakrafts.ssio.uring.URingFileSource
+import dev.karmakrafts.ssio.uring.isUringAvailable
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.toKStringFromUtf8
-import platform.posix.O_APPEND
-import platform.posix.O_CREAT
-import platform.posix.O_RDWR
+import liburing.O_DIRECT
 import platform.posix.PATH_MAX
 import platform.posix.fsync
 import platform.posix.getcwd
 import platform.posix.getenv
 
-private val fileSourceFactory: suspend (path: Path) -> AsyncRawSource = if (URing.isAvailable) ::URingFileSource
-else { path -> CIOFileSource(NativeFile(path)) }
+private val fileSourceFactory: suspend (Path) -> AsyncRawSource = if (isUringAvailable) { path ->
+    URingFileSource(NativeFile.create(path, auxFlags = O_DIRECT))
+}
+else { path -> CIOFileSource(NativeFile.create(path)) }
 
-private val fileSinkFactory: suspend (path: Path, append: Boolean) -> AsyncRawSink =
-    if (URing.isAvailable) ::URingFileSink
-    else { path, append ->
-        var openFlags = O_CREAT or O_RDWR
-        if (append) openFlags = openFlags or O_APPEND
-        path.parent?.let { parent -> AsyncSystemFileSystem.createDirectories(parent) }
-        CIOFileSink(NativeFile(path, openFlags))
-    }
+private val fileSinkFactory: suspend (Path, Boolean) -> AsyncRawSink = if (isUringAvailable) { path, append ->
+    URingFileSink(NativeFile.create(path, true, append, auxFlags = O_DIRECT))
+}
+else { path, append -> CIOFileSink(NativeFile.create(path, true, append)) }
 
 internal actual fun platformSyncFd(fd: Int) {
     fsync(fd)

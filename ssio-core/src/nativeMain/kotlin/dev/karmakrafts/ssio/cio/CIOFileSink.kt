@@ -18,11 +18,11 @@ package dev.karmakrafts.ssio.cio
 
 import dev.karmakrafts.ssio.api.AsyncRawSink
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.Pinned
 import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.addressOf
-import kotlinx.cinterop.usePinned
+import kotlinx.cinterop.pin
 import kotlinx.io.Buffer
-import kotlinx.io.readByteArray
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.math.min
 
@@ -35,6 +35,8 @@ internal class CIOFileSink(
     }
 
     private val isClosed: AtomicBoolean = AtomicBoolean(false)
+    private val buffer: ByteArray = ByteArray(CHUNK_SIZE)
+    private val pinnedBuffer: Pinned<ByteArray> = buffer.pin()
 
     override suspend fun write(source: Buffer, byteCount: Long) {
         check(!isClosed.load()) { "AsyncRawSink is already closed" }
@@ -42,9 +44,8 @@ internal class CIOFileSink(
         var remaining = toWrite
         while (remaining > 0) {
             val chunkSize = min(CHUNK_SIZE.toLong(), remaining).toInt()
-            source.readByteArray(chunkSize).usePinned { pinnedChunk ->
-                file.write(pinnedChunk.addressOf(0), chunkSize.toUInt())
-            }
+            source.readAtMostTo(buffer, 0, chunkSize)
+            file.write(pinnedBuffer.addressOf(0), chunkSize.toUInt())
             remaining -= chunkSize
         }
     }
@@ -56,11 +57,13 @@ internal class CIOFileSink(
 
     override suspend fun close() {
         check(isClosed.compareAndSet(expectedValue = false, newValue = true)) { "AsyncRawSink is already closed" }
+        pinnedBuffer.unpin()
         file.close()
     }
 
     override fun closeAbruptly() {
         check(isClosed.compareAndSet(expectedValue = false, newValue = true)) { "AsyncRawSink is already closed" }
+        pinnedBuffer.unpin()
         file.closeAbruptly()
     }
 }

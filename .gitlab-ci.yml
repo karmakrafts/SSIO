@@ -113,11 +113,10 @@ test:nodejs:
     - *if-merge-request
     - *if-main
   script:
-    - ./gradlew jsNodeTest wasmJsNodeTest
+    - gradle jsNodeTest wasmJsNodeTest
   tags:
     - linux
-    - shell
-    - amd64
+    - docker
 
 test:browser:
   stage: test
@@ -126,24 +125,36 @@ test:browser:
     - *if-merge-request
     - *if-main
   script:
-    - ./gradlew jsBrowserTest wasmJsBrowserTest
+    - gradle jsBrowserTest wasmJsBrowserTest
   tags:
     - linux
-    - shell
-    - amd64
+    - docker
 
-test:linux:
+test:linux:amd64:
   stage: test
   interruptible: true
   rules:
     - *if-merge-request
     - *if-main
   script:
-    - ./gradlew linuxX64Test jvmTest
+    - gradle linuxX64Test jvmTest
   tags:
     - linux
-    - shell
+    - docker
     - amd64
+
+test:linux:arm64:
+  stage: test
+  interruptible: true
+  rules:
+    - *if-merge-request
+    - *if-main
+  script:
+    - gradle linuxArm64Test jvmTest
+  tags:
+    - linux
+    - docker
+    - arm64
 
 test:macos:
   stage: test
@@ -171,13 +182,107 @@ test:windows:
 
 # ------------------------------ Publish
 
-publish:maven:
+publish:maven:jvmAndAndroid:
   stage: publish
   rules:
     - *if-main
     - *if-release
   script:
-    - ./gradlew publishAllPublicationsToGitLabRepository publishToSonatype closeAndReleaseStagingRepositories
+    - |
+      gradle \
+      publish{Jvm,Android}PublicationToGitLabRepository \
+      publish{Jvm,Android}PublicationToSonatypeRepository
+  tags:
+    - linux
+    - docker
+
+publish:maven:web:
+  stage: publish
+  rules:
+    - *if-main
+    - *if-release
+  script:
+    - |
+      gradle \
+      publish{Js,WasmJs}PublicationToGitLabRepository \
+      publish{Js,WasmJs}PublicationToSonatypeRepository
+  tags:
+    - linux
+    - docker
+
+publish:maven:linux:amd64:
+  stage: publish
+  rules:
+    - *if-main
+    - *if-release
+  script:
+    - |
+      gradle \
+      publishLinuxX64PublicationToGitLabRepository \
+      publishLinuxX64PublicationToSonatypeRepository
+  tags:
+    - linux
+    - docker
+    - amd64
+
+publish:maven:linux:arm64:
+  stage: publish
+  rules:
+    - *if-main
+    - *if-release
+  script:
+    - |
+      gradle \
+      publishLinuxArm64PublicationToGitLabRepository \
+      publishLinuxArm64PublicationToSonatypeRepository
+  tags:
+    - linux
+    - docker
+    - arm64
+
+publish:maven:apple:
+  stage: publish
+  rules:
+    - *if-main
+    - *if-release
+  script:
+    - |
+      ./gradlew \
+      publish{MacosArm64,IosArm64,IosSimulatorArm64,TvosArm64,TvosSimulatorArm64,WatchosArm64,WatchosArm32,WatchosSimulatorArm64}PublicationToGitLabRepository \
+      publish{MacosArm64,IosArm64,IosSimulatorArm64,TvosArm64,TvosSimulatorArm64,WatchosArm64,WatchosArm32,WatchosSimulatorArm64}PublicationToSonatypeRepository
+  tags:
+    - macos
+
+publish:maven:windows:
+  stage: publish
+  rules:
+    - *if-main
+    - *if-release
+  script:
+    - |
+      ./gradlew \
+      publishMingwX64PublicationToGitLabRepository \
+      publishMingwX64PublicationToSonatypeRepository
+  tags:
+    - windows
+    - shell
+    - amd64
+
+publish:maven:finalize:
+  stage: publish
+  needs:
+    - publish:maven:linux:amd64
+    - publish:maven:linux:arm64
+    - publish:maven:apple
+    - publish:maven:windows
+    - publish:maven:jvmAndAndroid
+    - publish:maven:web
+  script:
+    - |
+      ./gradlew \
+      publishKotlinMultiplatformPublicationToGitLabRepository \
+      publishKotlinMultiplatformPublicationToSonatypeRepository \
+      closeAndReleaseStagingRepositories
   tags:
     - macos
 
