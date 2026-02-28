@@ -44,6 +44,7 @@ internal value class URing(
     }
 
     constructor(entries: UInt) : this(nativeHeap.alloc<io_uring>().apply {
+        require(entries and 1U == 0U) { "URing entry count must be a power of 2" }
         check(io_uring_queue_init(entries, ptr, 0U) == 0) { "Could not initialize URing instance" }
     }.ptr)
 
