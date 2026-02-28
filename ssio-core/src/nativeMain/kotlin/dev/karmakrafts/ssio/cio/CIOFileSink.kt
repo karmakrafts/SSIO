@@ -17,7 +17,6 @@
 package dev.karmakrafts.ssio.cio
 
 import dev.karmakrafts.ssio.api.AsyncRawSink
-import dev.karmakrafts.ssio.api.Path
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.addressOf

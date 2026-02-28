@@ -21,9 +21,9 @@ package dev.karmakrafts.ssio
 import dev.karmakrafts.ssio.api.AsyncRawSink
 import dev.karmakrafts.ssio.api.AsyncRawSource
 import dev.karmakrafts.ssio.api.Path
-import dev.karmakrafts.ssio.cio.NativeFile
 import dev.karmakrafts.ssio.cio.CIOFileSink
 import dev.karmakrafts.ssio.cio.CIOFileSource
+import dev.karmakrafts.ssio.cio.NativeFile
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.allocArray
