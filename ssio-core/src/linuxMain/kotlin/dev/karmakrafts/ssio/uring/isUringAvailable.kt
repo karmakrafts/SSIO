@@ -29,7 +29,7 @@ val isUringAvailable: Boolean by lazy {
     // In order to determine if io_uring is supported, we probe by initializing a ring
     memScoped {
         val ring = alloc<io_uring>()
-        val result = io_uring_queue_init(1U, ring.ptr, 0U)
+        val result = io_uring_queue_init(2U, ring.ptr, 0U)
         if (result < 0) return@memScoped false
         io_uring_queue_exit(ring.ptr)
         true
