@@ -14,53 +14,73 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio.posix
+package dev.karmakrafts.ssio.nio
 
 import dev.karmakrafts.ssio.api.AsyncRawSink
-import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.UnsafeNumber
-import kotlinx.cinterop.addressOf
-import kotlinx.cinterop.usePinned
+import dev.karmakrafts.ssio.await
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.io.Buffer
-import kotlinx.io.readByteArray
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.channels.AsynchronousFileChannel
+import java.nio.file.StandardOpenOption
 import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.io.path.createFile
+import kotlin.io.path.createParentDirectories
+import kotlin.io.path.exists
 import kotlin.math.min
+import java.nio.file.Path as NioPath
 
-@OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
-internal class NativeFileSink(
-    private val file: NativeFile
+internal class NIOFileSink(
+    path: NioPath
 ) : AsyncRawSink {
     companion object {
         private const val CHUNK_SIZE: Int = 4096
     }
 
+    init {
+        if (!path.exists()) {
+            path.createParentDirectories()
+            path.createFile()
+        }
+    }
+
     private val isClosed: AtomicBoolean = AtomicBoolean(false)
+    private val channel: AsynchronousFileChannel = AsynchronousFileChannel.open(path, StandardOpenOption.WRITE)
+    private val buffer: ByteArray = ByteArray(CHUNK_SIZE)
+    private val nioBuffer: ByteBuffer = ByteBuffer.allocate(CHUNK_SIZE).order(ByteOrder.nativeOrder())
 
     override suspend fun write(source: Buffer, byteCount: Long) {
-        check(!isClosed.load()) { "AsyncRawSink is already closed" }
         val toWrite = min(source.size, byteCount)
         var remaining = toWrite
         while (remaining > 0) {
             val chunkSize = min(CHUNK_SIZE.toLong(), remaining).toInt()
-            source.readByteArray(chunkSize).usePinned { pinnedChunk ->
-                file.write(pinnedChunk.addressOf(0), chunkSize.toUInt())
-            }
+            val bytesRead = source.readAtMostTo(buffer, 0, chunkSize)
+            nioBuffer.clear()
+            nioBuffer.put(buffer, 0, bytesRead)
+            nioBuffer.flip()
+            channel.write(nioBuffer, 0).await()
             remaining -= chunkSize
         }
     }
 
     override suspend fun flush() {
         check(!isClosed.load()) { "AsyncRawSink is already closed" }
-        file.flush()
+        withContext(Dispatchers.IO) {
+            channel.force(true)
+        }
     }
 
     override suspend fun close() {
         check(isClosed.compareAndSet(expectedValue = false, newValue = true)) { "AsyncRawSink is already closed" }
-        file.close()
+        withContext(Dispatchers.IO) {
+            channel.close()
+        }
     }
 
     override fun closeAbruptly() {
         check(isClosed.compareAndSet(expectedValue = false, newValue = true)) { "AsyncRawSink is already closed" }
-        file.closeAbruptly()
+        channel.close()
     }
 }

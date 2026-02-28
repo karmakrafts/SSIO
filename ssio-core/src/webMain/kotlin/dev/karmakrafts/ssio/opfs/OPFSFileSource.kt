@@ -30,7 +30,7 @@ import web.streams.read
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.math.min
 
-internal class OpfsFileSource( // @formatter:off
+internal class OPFSFileSource( // @formatter:off
     private val reader: ReadableStreamDefaultReader<Uint8Array<ArrayBuffer>>,
 ) : AsyncRawSource { // @formatter:on
     private val buffer: Buffer = Buffer()

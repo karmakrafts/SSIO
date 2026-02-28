@@ -16,8 +16,14 @@
 
 @file:OptIn(ExperimentalForeignApi::class)
 
-package dev.karmakrafts.ssio.posix
+package dev.karmakrafts.ssio
 
+import dev.karmakrafts.ssio.api.AsyncRawSink
+import dev.karmakrafts.ssio.api.AsyncRawSource
+import dev.karmakrafts.ssio.api.Path
+import dev.karmakrafts.ssio.cio.NativeFile
+import dev.karmakrafts.ssio.cio.CIOFileSink
+import dev.karmakrafts.ssio.cio.CIOFileSource
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.allocArray
@@ -26,6 +32,9 @@ import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.toCPointer
 import kotlinx.cinterop.toKStringFromUtf16
 import kotlinx.cinterop.toKStringFromUtf8
+import platform.posix.O_APPEND
+import platform.posix.O_CREAT
+import platform.posix.O_RDWR
 import platform.posix._get_osfhandle
 import platform.posix._getcwd
 import platform.posix.fflush
@@ -47,4 +56,13 @@ internal actual fun platformGetTmpDir(): String = memScoped {
     val buffer = allocArray<wchar_tVar>(MAX_PATH)
     GetTempPathW(MAX_PATH.convert(), buffer)
     buffer.toKStringFromUtf16()
+}
+
+internal actual suspend fun createFileSource(path: Path): AsyncRawSource = CIOFileSource(NativeFile(path))
+
+internal actual suspend fun createFileSink(path: Path, append: Boolean): AsyncRawSink {
+    var openFlags = O_CREAT or O_RDWR
+    if (append) openFlags = openFlags or O_APPEND
+    path.parent?.let { parent -> AsyncSystemFileSystem.createDirectories(parent) }
+    return CIOFileSink(NativeFile(path, openFlags))
 }

@@ -28,7 +28,7 @@ import web.streams.close
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.math.min
 
-internal class OpfsFileSink( // @formatter:off
+internal class OPFSFileSink( // @formatter:off
     private val stream: FileSystemWritableFileStream
 ) : AsyncRawSink { // @formatter:on
     private var isClosing: Boolean = false

@@ -48,7 +48,7 @@ import kotlin.js.unsafeCast
  * Async filesystem for JS/WASM using OPFS APIs.
  */
 @OptIn(ExperimentalWasmJsInterop::class)
-internal object OpfsFileSystem : AbstractAsyncFileSystem() {
+internal object OPFSFileSystem : AbstractAsyncFileSystem() {
     private val workingDirectory: Path = Path("/")
     private val tempDirectory: Path = Path("/tmp")
 
@@ -135,7 +135,7 @@ internal object OpfsFileSystem : AbstractAsyncFileSystem() {
 
     override suspend fun source(path: Path): AsyncRawSource {
         val handle = getFileHandle(path, create = false).getOrThrow()
-        return OpfsFileSource(handle.getFile().stream().getReader())
+        return OPFSFileSource(handle.getFile().stream().getReader())
     }
 
     override suspend fun sink(path: Path, append: Boolean): AsyncRawSink {
@@ -145,7 +145,7 @@ internal object OpfsFileSystem : AbstractAsyncFileSystem() {
             val file = handle.getFile()
             stream.seek(file.size)
         }
-        return OpfsFileSink(stream)
+        return OPFSFileSink(stream)
     }
 
     override suspend fun exists(path: Path): Boolean = getFileHandle(path, create = false).fold({ true }) {

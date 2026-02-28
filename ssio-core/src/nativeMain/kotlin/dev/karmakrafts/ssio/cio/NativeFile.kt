@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio.posix
+package dev.karmakrafts.ssio.cio
 
 import dev.karmakrafts.ssio.api.AsyncCloseable
 import dev.karmakrafts.ssio.api.Path
+import dev.karmakrafts.ssio.platformSyncFd
 import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber

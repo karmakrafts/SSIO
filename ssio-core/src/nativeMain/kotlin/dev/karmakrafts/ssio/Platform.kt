@@ -16,19 +16,13 @@
 
 package dev.karmakrafts.ssio
 
-import dev.karmakrafts.ssio.api.AsyncFileSystem
 import dev.karmakrafts.ssio.api.AsyncRawSink
 import dev.karmakrafts.ssio.api.AsyncRawSource
 import dev.karmakrafts.ssio.api.Path
 
-private object AsyncFileSystemImpl : AbstractAsyncFileSystem() {
-    private val workingDirectory: Path = Path(platformGetCwd())
-    private val tempDirectory: Path = Path(platformGetTmpDir())
+internal expect fun platformSyncFd(fd: Int)
+internal expect fun platformGetCwd(): String
+internal expect fun platformGetTmpDir(): String
 
-    override suspend fun getWorkingDirectory(): Path = workingDirectory
-    override suspend fun getTempDirectory(): Path = tempDirectory
-    override suspend fun sink(path: Path, append: Boolean): AsyncRawSink = createFileSink(path, append)
-    override suspend fun source(path: Path): AsyncRawSource = createFileSource(path)
-}
-
-actual val AsyncSystemFileSystem: AsyncFileSystem = AsyncFileSystemImpl
+internal expect suspend fun createFileSource(path: Path): AsyncRawSource
+internal expect suspend fun createFileSink(path: Path, append: Boolean): AsyncRawSink

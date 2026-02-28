@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
+@file:OptIn(ExperimentalForeignApi::class)
 
-package dev.karmakrafts.ssio.posix
+package dev.karmakrafts.ssio
 
+import dev.karmakrafts.ssio.api.AsyncRawSink
+import dev.karmakrafts.ssio.api.AsyncRawSource
+import dev.karmakrafts.ssio.api.Path
+import dev.karmakrafts.ssio.cio.NativeFile
+import dev.karmakrafts.ssio.cio.CIOFileSink
+import dev.karmakrafts.ssio.cio.CIOFileSource
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.allocArray
-import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.toKStringFromUtf8
-import platform.posix.PATH_MAX
+import platform.posix.O_APPEND
+import platform.posix.O_CREAT
+import platform.posix.O_RDWR
 import platform.posix.fsync
 import platform.posix.getcwd
 import platform.posix.getenv
@@ -34,9 +41,10 @@ internal actual fun platformSyncFd(fd: Int) {
     fsync(fd)
 }
 
+@OptIn(UnsafeNumber::class)
 internal actual fun platformGetCwd(): String = memScoped {
-    val buffer = allocArray<ByteVar>(PATH_MAX)
-    getcwd(buffer, PATH_MAX.toULong().convert())
+    val buffer = allocArray<ByteVar>(4096)
+    getcwd(buffer, 4096U)
     buffer.toKStringFromUtf8()
 }
 
@@ -44,4 +52,13 @@ internal actual fun platformGetTmpDir(): String {
     val dirAddress = getenv("TMPDIR")
     if (dirAddress != null) return dirAddress.toKStringFromUtf8()
     return "/tmp"
+}
+
+internal actual suspend fun createFileSource(path: Path): AsyncRawSource = CIOFileSource(NativeFile(path))
+
+internal actual suspend fun createFileSink(path: Path, append: Boolean): AsyncRawSink {
+    var openFlags = O_CREAT or O_RDWR
+    if (append) openFlags = openFlags or O_APPEND
+    path.parent?.let { parent -> AsyncSystemFileSystem.createDirectories(parent) }
+    return CIOFileSink(NativeFile(path, openFlags))
 }

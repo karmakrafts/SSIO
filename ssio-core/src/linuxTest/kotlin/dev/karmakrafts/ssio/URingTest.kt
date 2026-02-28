@@ -16,8 +16,13 @@
 
 package dev.karmakrafts.ssio
 
-import dev.karmakrafts.ssio.api.AsyncFileSystem
-import dev.karmakrafts.ssio.node.NodeFileSystem
-import dev.karmakrafts.ssio.opfs.OPFSFileSystem
+import dev.karmakrafts.ssio.uring.URing
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
-actual val AsyncSystemFileSystem: AsyncFileSystem = if (isNode) NodeFileSystem else OPFSFileSystem
+class URingTest {
+    @Test
+    fun `Check if available`() {
+        assertTrue(URing.isAvailable)
+    }
+}

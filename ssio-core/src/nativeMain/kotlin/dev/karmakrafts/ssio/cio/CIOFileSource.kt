@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio.posix
+package dev.karmakrafts.ssio.cio
 
 import dev.karmakrafts.ssio.api.AsyncRawSource
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -26,7 +26,7 @@ import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.math.min
 
 @OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
-internal class NativeFileSource(
+internal class CIOFileSource(
     private val file: NativeFile
 ) : AsyncRawSource {
     companion object {

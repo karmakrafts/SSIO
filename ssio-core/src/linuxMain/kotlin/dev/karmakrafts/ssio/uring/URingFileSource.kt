@@ -14,8 +14,24 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio.posix
+package dev.karmakrafts.ssio.uring
 
-internal expect fun platformSyncFd(fd: Int)
-internal expect fun platformGetCwd(): String
-internal expect fun platformGetTmpDir(): String
+import dev.karmakrafts.ssio.api.AsyncRawSource
+import dev.karmakrafts.ssio.api.Path
+import kotlinx.io.Buffer
+
+internal class URingFileSource( // @formatter:off
+    private val path: Path
+) : AsyncRawSource { // @formatter:on
+    override suspend fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun close() {
+        TODO("Not yet implemented")
+    }
+
+    override fun closeAbruptly() {
+        TODO("Not yet implemented")
+    }
+}

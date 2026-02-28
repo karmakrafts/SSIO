@@ -27,7 +27,7 @@ import java.nio.channels.AsynchronousFileChannel
 import kotlin.concurrent.atomics.AtomicBoolean
 import java.nio.file.Path as NioPath
 
-internal class NioFileSource(
+internal class NIOFileSource(
     path: NioPath
 ) : AsyncRawSource {
     companion object {
