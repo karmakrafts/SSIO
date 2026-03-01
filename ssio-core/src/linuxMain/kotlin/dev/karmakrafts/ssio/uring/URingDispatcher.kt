@@ -51,7 +51,10 @@ internal object URingDispatcher {
         val completions = ArrayList<URingCompletionQueueEntry>(COMPLETION_BATCH_SIZE)
         while (isRunning.load()) {
             var completionCount = ring.peekCompletions(completions, COMPLETION_BATCH_SIZE)
-            if (completionCount == 0) continue
+            if (completionCount == 0) {
+                Thread.yield()
+                continue
+            }
             for (index in 0..<completionCount) {
                 val completion = completions[index]
                 val deferredRef = completion.getData()?.asStableRef<CompletableDeferred<Int>>() ?: continue
@@ -60,7 +63,6 @@ internal object URingDispatcher {
                 deferredRef.dispose() // Unpin pointer to underlying Kotlin object so it can be GC'd
             }
             ring.advance(completions.size)
-            Thread.yield()
         }
     }
 
