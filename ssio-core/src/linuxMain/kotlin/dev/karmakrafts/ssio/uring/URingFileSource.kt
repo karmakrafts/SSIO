@@ -33,7 +33,7 @@ internal class URingFileSource( // @formatter:off
     private val file: NativeFile
 ) : AsyncRawSource { // @formatter:on
     companion object {
-        private const val CHUNK_SIZE: Int = 8192
+        private const val CHUNK_SIZE: Int = 4096
     }
 
     private val isClosed: AtomicBoolean = AtomicBoolean(false)
@@ -58,7 +58,7 @@ internal class URingFileSource( // @formatter:off
             }
             if (bytesRead <= 0) break // We reached EOF while reading the current chunk
             sink.write(buffer, 0, bytesRead)
-            remaining -= bytesRead
+            remaining -= chunkSize
             readTotal += bytesRead
         }
         return readTotal

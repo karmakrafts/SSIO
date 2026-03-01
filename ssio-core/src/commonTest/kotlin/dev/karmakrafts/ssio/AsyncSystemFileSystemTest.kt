@@ -19,9 +19,9 @@ package dev.karmakrafts.ssio
 import dev.karmakrafts.ssio.api.Path
 import dev.karmakrafts.ssio.api.buffered
 import dev.karmakrafts.ssio.api.div
-import dev.karmakrafts.ssio.api.readPrefixedString
+import dev.karmakrafts.ssio.api.readString
 import dev.karmakrafts.ssio.api.use
-import dev.karmakrafts.ssio.api.writePrefixedString
+import dev.karmakrafts.ssio.api.writeString
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -31,6 +31,70 @@ import kotlin.test.assertTrue
 class AsyncSystemFileSystemTest {
     companion object {
         private val testData: String = """
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
             Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
             sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
             At vero eos et accusam et justo duo dolores et ea rebum. 
@@ -117,10 +181,10 @@ class AsyncSystemFileSystemTest {
     fun `Read and write file`() = runTest {
         val path = Path("baz") / "test2.bin"
         AsyncSystemFileSystem.sink(path).buffered().use { sink ->
-            sink.writePrefixedString(testData)
+            sink.writeString(testData)
         }
         AsyncSystemFileSystem.source(path).buffered().use { source ->
-            assertEquals(testData, source.readPrefixedString())
+            assertEquals(testData, source.readString())
         }
         AsyncSystemFileSystem.delete(path)
     }

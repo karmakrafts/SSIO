@@ -32,7 +32,7 @@ internal class URingFileSink( // @formatter:off
     private val file: NativeFile,
 ) : AsyncRawSink { // @formatter:on
     companion object {
-        private const val CHUNK_SIZE: Int = 8192
+        private const val CHUNK_SIZE: Int = 4096
     }
 
     private val isClosed: AtomicBoolean = AtomicBoolean(false)

@@ -40,7 +40,10 @@ private class BufferedAsyncSource( // @formatter:off
         check(!isClosed.load()) { "AsyncSource is closed" }
         return try {
             while (true) {
-                if (predicate(buffer) { rawSource.readAtMostTo(buffer, bufferSize) != -1L }) return Result.success(true)
+                val conditionMet = predicate(buffer) {
+                    rawSource.readAtMostTo(buffer, bufferSize) > 0
+                }
+                if (conditionMet) return Result.success(true)
                 if (rawSource.readAtMostTo(buffer, bufferSize) == -1L) return Result.success(false)
             }
             Result.success(false)
@@ -50,7 +53,7 @@ private class BufferedAsyncSource( // @formatter:off
     }
 
     override suspend fun readByteArray(): ByteArray {
-        check(await(AwaitPredicate.exhausted()).getOrThrow()) { "AsyncSource is exhausted" }
+        check(await(AwaitPredicate.exhausted()).isSuccess) { "Could not read AsyncSource" }
         return buffer.readByteArray()
     }
 
@@ -60,7 +63,7 @@ private class BufferedAsyncSource( // @formatter:off
     }
 
     override suspend fun readByteString(): ByteString {
-        check(await(AwaitPredicate.exhausted()).getOrThrow()) { "AsyncSource is exhausted" }
+        check(await(AwaitPredicate.exhausted()).isSuccess) { "Could not read AsyncSource" }
         return buffer.readByteString()
     }
 
@@ -153,7 +156,7 @@ private class SynchronizedBufferedAsyncSource( // @formatter:off
     }
 
     override suspend fun readByteArray(): ByteArray {
-        check(await(AwaitPredicate.exhausted()).getOrThrow()) { "AsyncSource is exhausted" }
+        check(await(AwaitPredicate.exhausted()).isSuccess) { "Could not read AsyncSource" }
         return mutex.withLock {
             buffer.readByteArray()
         }
@@ -174,7 +177,7 @@ private class SynchronizedBufferedAsyncSource( // @formatter:off
     }
 
     override suspend fun readByteString(): ByteString {
-        check(await(AwaitPredicate.exhausted()).getOrThrow()) { "AsyncSource is exhausted" }
+        check(await(AwaitPredicate.exhausted()).isSuccess) { "Could not read AsyncSource" }
         return mutex.withLock {
             buffer.readByteString()
         }
