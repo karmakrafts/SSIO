@@ -19,10 +19,12 @@ package dev.karmakrafts.ssio.uring
 import dev.karmakrafts.ssio.api.AsyncRawSink
 import dev.karmakrafts.ssio.cio.NativeFile
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.Pinned
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.pin
 import kotlinx.io.Buffer
 import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.concurrent.atomics.AtomicLong
 import kotlin.math.min
 
 @OptIn(ExperimentalForeignApi::class)
@@ -30,11 +32,13 @@ internal class URingFileSink( // @formatter:off
     private val file: NativeFile,
 ) : AsyncRawSink { // @formatter:on
     companion object {
-        private const val CHUNK_SIZE: Int = 512 // As suggested by benchmarks
+        private const val CHUNK_SIZE: Int = 8192
     }
 
-    private val buffer: ByteArray = ByteArray(CHUNK_SIZE)
     private val isClosed: AtomicBoolean = AtomicBoolean(false)
+    private var offset: AtomicLong = AtomicLong(0L)
+    private val buffer: ByteArray = ByteArray(CHUNK_SIZE)
+    private val pinnedBuffer: Pinned<ByteArray> = buffer.pin()
 
     override suspend fun write(source: Buffer, byteCount: Long) {
         check(!isClosed.load()) { "URingFileSink is already closed" }
@@ -42,27 +46,31 @@ internal class URingFileSink( // @formatter:off
         while (remaining > 0) {
             val chunkSize = min(CHUNK_SIZE.toLong(), remaining).toInt()
             val bytesRead = source.readAtMostTo(buffer, 0, chunkSize)
-            if (bytesRead == -1) break // We reached EOF
-            val pinnedBuffer = buffer.pin()
-            uringDispatcher.enqueue { entry ->
-                entry.prepareWrite(file.fd, pinnedBuffer.addressOf(0), bytesRead.toUInt())
-            }.join()
-            pinnedBuffer.unpin()
+            if (bytesRead == -1) break // We reached EOF while reading the current source
+            URingDispatcher.op { entry ->
+                entry.prepareWrite(
+                    fd = file.fd,
+                    buf = pinnedBuffer.addressOf(0),
+                    size = bytesRead.toUInt(),
+                    offset = offset.fetchAndAdd(bytesRead.toLong()).toULong()
+                )
+            }
             remaining -= chunkSize
         }
     }
 
     override suspend fun flush() {
         check(!isClosed.load()) { "URingFileSink is already closed" }
-        uringDispatcher.enqueue { entry ->
+        URingDispatcher.op { entry ->
             entry.prepareFlush(file.fd)
-        }.join()
+        }
     }
 
     override suspend fun close() {
         check(isClosed.compareAndSet(expectedValue = false, newValue = true)) {
             "URingFileSink is already closed"
         }
+        pinnedBuffer.unpin()
         file.close()
     }
 
@@ -70,6 +78,7 @@ internal class URingFileSink( // @formatter:off
         check(isClosed.compareAndSet(expectedValue = false, newValue = true)) {
             "URingFileSink is already closed"
         }
+        pinnedBuffer.unpin()
         file.closeAbruptly()
     }
 }

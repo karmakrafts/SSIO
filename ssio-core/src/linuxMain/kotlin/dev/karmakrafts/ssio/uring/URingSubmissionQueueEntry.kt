@@ -25,23 +25,24 @@ import liburing.io_uring_prep_write
 import liburing.io_uring_sqe
 import liburing.io_uring_sqe_set_data
 
+@Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
 internal value class URingSubmissionQueueEntry( // @formatter:off
     val address: CPointer<io_uring_sqe>
 ) { // @formatter:on
-    fun setData(data: COpaquePointer?) {
+    inline fun setData(data: COpaquePointer?) {
         io_uring_sqe_set_data(address, data)
     }
 
-    fun prepareWrite(fd: Int, buf: COpaquePointer, size: UInt, offset: ULong = 0UL) {
+    inline fun prepareWrite(fd: Int, buf: COpaquePointer, size: UInt, offset: ULong = 0UL) {
         io_uring_prep_write(address, fd, buf, size, offset)
     }
 
-    fun prepareRead(fd: Int, buf: COpaquePointer, size: UInt, offset: ULong = 0UL) {
+    inline fun prepareRead(fd: Int, buf: COpaquePointer, size: UInt, offset: ULong = 0UL) {
         io_uring_prep_read(address, fd, buf, size, offset)
     }
 
-    fun prepareFlush(fd: Int, flags: UInt = 0U) {
+    inline fun prepareFlush(fd: Int, flags: UInt = 0U) {
         io_uring_prep_fsync(address, fd, flags)
     }
 }

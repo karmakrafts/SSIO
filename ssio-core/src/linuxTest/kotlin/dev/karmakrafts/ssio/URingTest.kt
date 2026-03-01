@@ -65,8 +65,8 @@ class URingTest {
                 val rawCompletion = completion.address.pointed
                 val result = rawCompletion.res
                 assert(result >= 0) { "Error while writing file: ${strerror(result)?.toKStringFromUtf8()}" }
-                ring.markSeen(completion)
             }
+            ring.advance(completionCount)
             pinnedData.unpin()
         }
         // Read a single file
@@ -81,16 +81,16 @@ class URingTest {
                 yield()
                 completionCount = ring.peekCompletions(completions, 4)
             }
-            var readTotal = 0
+            var readTotal = 0L
             for (index in 0..<completionCount) {
                 val completion = completions[index]
                 val rawCompletion = completion.address.pointed
                 val result = rawCompletion.res
                 assert(result >= 0) { "Error while reading file: ${strerror(result)?.toKStringFromUtf8()}" }
                 readTotal += result
-                ring.markSeen(completion)
             }
-            assertEquals(testData, buffer.sliceArray(0..<readTotal).decodeToString())
+            ring.advance(completionCount)
+            assertEquals(testData, buffer.sliceArray(0..<readTotal.toInt()).decodeToString())
             pinnedBuffer.unpin()
         }
         ring.close()

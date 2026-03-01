@@ -42,7 +42,9 @@ internal class NativeFile( // @formatter:off
     val fd: Int
 ) : AsyncCloseable { // @formatter:on
     companion object {
-        suspend fun create(path: Path, writable: Boolean = false, append: Boolean = false, auxFlags: Int = 0): NativeFile {
+        suspend fun create(
+            path: Path, writable: Boolean = false, append: Boolean = false, auxFlags: Int = 0
+        ): NativeFile {
             path.parent?.let { parent -> AsyncSystemFileSystem.createDirectories(parent) }
             return NativeFile(path, writable, append, auxFlags)
         }

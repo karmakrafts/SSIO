@@ -33,7 +33,7 @@ import kotlin.time.Clock
 open class ReadWriteMultipleFilesAsyncBenchmark : AsyncBenchmark<Unit>() {
     companion object {
         private const val FILE_COUNT: Int = 10
-        private const val IOPS: Int = 20
+        private const val IOPS: Int = 32
         private const val BASE_FILE_NAME: String = "rm_async_benchmark_"
         private const val BYTE_COUNT: Int = 8192
     }

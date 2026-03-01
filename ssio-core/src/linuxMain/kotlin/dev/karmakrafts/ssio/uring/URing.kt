@@ -27,8 +27,8 @@ import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.nativeHeap
 import kotlinx.cinterop.ptr
 import liburing.io_uring
+import liburing.io_uring_cq_advance
 import liburing.io_uring_cqe
-import liburing.io_uring_cqe_seen
 import liburing.io_uring_get_sqe
 import liburing.io_uring_peek_batch_cqe
 import liburing.io_uring_queue_exit
@@ -64,7 +64,7 @@ internal value class URing(
 
     fun submit() = io_uring_submit(address)
 
-    fun markSeen(completion: URingCompletionQueueEntry) = io_uring_cqe_seen(address, completion.address)
+    fun advance(completionCount: Int) = io_uring_cq_advance(address, completionCount.toUInt())
 
     override fun close() {
         io_uring_queue_exit(address)

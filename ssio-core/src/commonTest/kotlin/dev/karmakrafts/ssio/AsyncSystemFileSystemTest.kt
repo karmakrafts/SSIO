@@ -19,6 +19,7 @@ package dev.karmakrafts.ssio
 import dev.karmakrafts.ssio.api.Path
 import dev.karmakrafts.ssio.api.buffered
 import dev.karmakrafts.ssio.api.div
+import dev.karmakrafts.ssio.api.readPrefixedString
 import dev.karmakrafts.ssio.api.use
 import dev.karmakrafts.ssio.api.writePrefixedString
 import kotlinx.coroutines.test.runTest
@@ -36,8 +37,32 @@ class AsyncSystemFileSystemTest {
             Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
             Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
             sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
-            At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, 
-            no sea takimata sanctus est Lorem ipsum dolor sit amet.
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+            sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. 
+            At vero eos et accusam et justo duo dolores et ea rebum. 
+            Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
         """.trimIndent()
     }
 
@@ -90,15 +115,13 @@ class AsyncSystemFileSystemTest {
 
     @Test
     fun `Read and write file`() = runTest {
-        println("STARTING TEST")
         val path = Path("baz") / "test2.bin"
         AsyncSystemFileSystem.sink(path).buffered().use { sink ->
             sink.writePrefixedString(testData)
         }
-        println("WROTE FILE")
-        //AsyncSystemFileSystem.source(path).buffered().use { source ->
-        //    assertEquals(testData, source.readPrefixedString())
-        //}
-        //AsyncSystemFileSystem.delete(path)
+        AsyncSystemFileSystem.source(path).buffered().use { source ->
+            assertEquals(testData, source.readPrefixedString())
+        }
+        AsyncSystemFileSystem.delete(path)
     }
 }

@@ -16,13 +16,18 @@
 
 package dev.karmakrafts.ssio.uring
 
+import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.pointed
 import liburing.io_uring_cqe
+import liburing.io_uring_cqe_get_data
 
+@Suppress("NOTHING_TO_INLINE")
 @OptIn(ExperimentalForeignApi::class)
 internal value class URingCompletionQueueEntry( // @formatter:off
     val address: CPointer<io_uring_cqe>
 ) { // @formatter:on
-
+    inline fun getData(): COpaquePointer? = io_uring_cqe_get_data(address)
+    inline fun getResult(): Int = address.pointed.res
 }

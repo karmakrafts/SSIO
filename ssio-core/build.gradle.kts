@@ -128,6 +128,7 @@ kotlin {
         linuxMain {
             dependencies {
                 implementation(libs.filament.core)
+                implementation(libs.stately.concurrent.collections)
             }
         }
     }

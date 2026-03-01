@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ *     
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -14,27 +14,18 @@
  * limitations under the License.
  */
 
-package dev.karmakrafts.ssio.uring
+package dev.karmakrafts.ssio.cio
 
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
-import liburing.io_uring
-import liburing.io_uring_queue_exit
-import liburing.io_uring_queue_init
-import platform.posix.getenv
+import liburing.fstat64
+import liburing.stat64
 
 @OptIn(ExperimentalForeignApi::class)
-val isUringAvailable: Boolean by lazy {
-    // Allow force-disabling liburing support on Linux using environment
-    if (getenv("SSIO_DISABLE_URING") != null) return@lazy false
-    // In order to determine if io_uring is supported, we probe by initializing a ring
-    memScoped {
-        val ring = alloc<io_uring>()
-        val result = io_uring_queue_init(2U, ring.ptr, 0U)
-        if (result < 0) return@memScoped false
-        io_uring_queue_exit(ring.ptr)
-        true
-    }
+internal fun NativeFile.getSize(): Long = memScoped {
+    val stat = alloc<stat64>()
+    fstat64(fd, stat.ptr)
+    stat.st_size
 }

@@ -32,19 +32,18 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.toKStringFromUtf8
-import liburing.O_DIRECT
 import platform.posix.PATH_MAX
 import platform.posix.fsync
 import platform.posix.getcwd
 import platform.posix.getenv
 
 private val fileSourceFactory: suspend (Path) -> AsyncRawSource = if (isUringAvailable) { path ->
-    URingFileSource(NativeFile.create(path, auxFlags = O_DIRECT))
+    URingFileSource(NativeFile.create(path))
 }
 else { path -> CIOFileSource(NativeFile.create(path)) }
 
 private val fileSinkFactory: suspend (Path, Boolean) -> AsyncRawSink = if (isUringAvailable) { path, append ->
-    URingFileSink(NativeFile.create(path, true, append, auxFlags = O_DIRECT))
+    URingFileSink(NativeFile.create(path, true, append))
 }
 else { path, append -> CIOFileSink(NativeFile.create(path, true, append)) }
 

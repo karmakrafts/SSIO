@@ -16,36 +16,81 @@
 
 package dev.karmakrafts.ssio.uring
 
+import dev.karmakrafts.filament.Thread
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.StableRef
+import kotlinx.cinterop.asStableRef
 import kotlinx.cinterop.staticCFunction
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.yield
 import platform.posix.atexit
 import kotlin.concurrent.atomics.AtomicBoolean
-
-internal val uringDispatcher: URingDispatcher by lazy(::URingDispatcher)
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.fetchAndDecrement
+import kotlin.concurrent.atomics.fetchAndIncrement
 
 @OptIn(ExperimentalForeignApi::class)
-internal class URingDispatcher {
-    companion object {
-        const val RING_ENTRIES: Int = 8
-    }
+internal object URingDispatcher {
+    const val RING_ENTRIES: Int = 256
+    const val COMPLETION_BATCH_SIZE: Int = 16
 
-    private val ring: URing = URing(RING_ENTRIES.toUInt())
     private val isRunning: AtomicBoolean = AtomicBoolean(true)
+    private val ring: URing = URing(RING_ENTRIES.toUInt())
+    private val sqMutex: Mutex = Mutex() // To serialize SQ access from coroutines
+
+    private val _submissionsInFlight: AtomicInt = AtomicInt(0)
+    private inline val submissionsInFlight: Int
+        get() = _submissionsInFlight.load()
+
+    private inline val canAcceptSubmissions: Boolean
+        get() = submissionsInFlight < RING_ENTRIES
+
+    private val thread: Thread = Thread {
+        val completions = ArrayList<URingCompletionQueueEntry>(COMPLETION_BATCH_SIZE)
+        while (isRunning.load()) {
+            var completionCount = ring.peekCompletions(completions, COMPLETION_BATCH_SIZE)
+            if (completionCount == 0) continue
+            for (index in 0..<completionCount) {
+                val completion = completions[index]
+                val deferredRef = completion.getData()?.asStableRef<CompletableDeferred<Int>>() ?: continue
+                _submissionsInFlight.fetchAndDecrement()
+                deferredRef.get().complete(completion.getResult()) // Complete deferred task with CQE result
+                deferredRef.dispose() // Unpin pointer to underlying Kotlin object so it can be GC'd
+            }
+            ring.advance(completions.size)
+            Thread.yield()
+        }
+    }
 
     init {
         atexit(staticCFunction<Unit> {
-            uringDispatcher.shutdown()
+            val self = URingDispatcher
+            self.shutdown()
         })
     }
 
-    suspend inline fun enqueue(action: (URingSubmissionQueueEntry) -> Unit): CompletableDeferred<Int> {
-        val completable = CompletableDeferred<Int>()
-        return completable
+    private suspend fun waitUntilIdle() {
+        while (!canAcceptSubmissions) yield()
     }
 
-    private fun shutdown() {
-        isRunning.store(false)
+    suspend inline fun op(crossinline action: (URingSubmissionQueueEntry) -> Unit): Int {
+        waitUntilIdle()
+        _submissionsInFlight.fetchAndIncrement()
+        val completable = CompletableDeferred<Int>()
+        sqMutex.withLock {
+            val submission = ring.createSubmission()
+            action(submission)
+            submission.setData(StableRef.create(completable).asCPointer())
+            ring.submit() // TODO: split off submit so we can batch submissions
+        }
+        return completable.await()
+    }
+
+    fun shutdown() {
+        if (!isRunning.compareAndSet(expectedValue = true, newValue = false)) return
+        thread.join()
         ring.close()
     }
 }

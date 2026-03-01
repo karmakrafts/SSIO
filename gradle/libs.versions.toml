@@ -17,6 +17,7 @@ gradleNexus = "2.0.0" # https://github.com/gradle-nexus/publish-plugin/releases
 jna = "5.18.1" # https://github.com/java-native-access/jna/tags
 oshi = "6.10.0" # https://github.com/oshi/oshi/releases
 filament = "1.7.2" # https://github.com/karmakrafts/Filament/releases
+stately = "2.1.0" # https://github.com/touchlab/Stately/releases
 
 liburing = "2.14.3" # https://git.karmakrafts.dev/kk/prebuilts/liburing/-/releases
 
@@ -32,6 +33,7 @@ kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 oshi-core = { module = "com.github.oshi:oshi-core", version.ref = "oshi" }
 filament-core = { module = "dev.karmakrafts.filament:filament-core", version.ref = "filament" }
+stately-concurrent-collections = { module = "co.touchlab:stately-concurrent-collections", version.ref = "stately" }
 
 [plugins]
 
