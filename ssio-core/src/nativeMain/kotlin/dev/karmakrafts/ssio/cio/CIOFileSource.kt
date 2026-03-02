@@ -45,9 +45,9 @@ internal class CIOFileSource(
         while (remaining > 0) {
             val chunkSize = min(CHUNK_SIZE.toLong(), remaining).toInt()
             val bytesRead = file.read(pinnedBuffer.addressOf(0), chunkSize.toUInt())
-            if (bytesRead <= 0) break
+            if (bytesRead == 0L) return -1L
             sink.write(buffer, 0, bytesRead.toInt())
-            remaining -= bytesRead
+            remaining -= chunkSize
             readTotal += bytesRead
         }
         return readTotal

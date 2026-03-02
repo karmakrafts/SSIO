@@ -44,8 +44,9 @@ internal class CIOFileSink(
         var remaining = toWrite
         while (remaining > 0) {
             val chunkSize = min(CHUNK_SIZE.toLong(), remaining).toInt()
-            source.readAtMostTo(buffer, 0, chunkSize)
-            file.write(pinnedBuffer.addressOf(0), chunkSize.toUInt())
+            val bytesRead = source.readAtMostTo(buffer, 0, chunkSize)
+            if (bytesRead == -1) break
+            file.write(pinnedBuffer.addressOf(0), bytesRead.toUInt())
             remaining -= chunkSize
         }
     }
