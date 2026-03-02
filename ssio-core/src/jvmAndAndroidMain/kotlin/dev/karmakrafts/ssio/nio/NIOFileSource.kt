@@ -25,6 +25,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.AsynchronousFileChannel
 import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.concurrent.atomics.AtomicLong
 import java.nio.file.Path as NioPath
 
 internal class NIOFileSource(
@@ -36,19 +37,23 @@ internal class NIOFileSource(
 
     private val isClosed: AtomicBoolean = AtomicBoolean(false)
     private val channel: AsynchronousFileChannel = AsynchronousFileChannel.open(path)
+    private val fileSize: Long = channel.size()
+    private val offset: AtomicLong = AtomicLong(0L)
     private val buffer: ByteArray = ByteArray(CHUNK_SIZE)
     private val nioBuffer: ByteBuffer = ByteBuffer.allocateDirect(CHUNK_SIZE).order(ByteOrder.nativeOrder())
 
     override suspend fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
+        if (offset.load() == fileSize) return -1L // We already reached EOF
         var readTotal = 0L
         while (readTotal < byteCount) {
             nioBuffer.clear()
-            val bytesRead = channel.read(nioBuffer, 0).await()
+            val bytesRead = channel.read(nioBuffer, offset.load()).await()
             nioBuffer.flip()
+            if (bytesRead == -1) break // We reached EOF while reading the current chunk
             nioBuffer.get(buffer, 0, bytesRead)
-            if (bytesRead == -1) break
             sink.write(buffer, 0, bytesRead)
             readTotal += bytesRead
+            offset.fetchAndAdd(bytesRead.toLong())
         }
         return readTotal
     }

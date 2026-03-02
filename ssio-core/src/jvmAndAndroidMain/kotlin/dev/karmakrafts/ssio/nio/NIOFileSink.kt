@@ -26,6 +26,7 @@ import java.nio.ByteOrder
 import java.nio.channels.AsynchronousFileChannel
 import java.nio.file.StandardOpenOption
 import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.concurrent.atomics.AtomicLong
 import kotlin.io.path.createFile
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.exists
@@ -50,6 +51,7 @@ internal class NIOFileSink(
     private val channel: AsynchronousFileChannel = AsynchronousFileChannel.open(path, StandardOpenOption.WRITE)
     private val buffer: ByteArray = ByteArray(CHUNK_SIZE)
     private val nioBuffer: ByteBuffer = ByteBuffer.allocate(CHUNK_SIZE).order(ByteOrder.nativeOrder())
+    private val offset: AtomicLong = AtomicLong(0L)
 
     override suspend fun write(source: Buffer, byteCount: Long) {
         val toWrite = min(source.size, byteCount)
@@ -60,7 +62,7 @@ internal class NIOFileSink(
             nioBuffer.clear()
             nioBuffer.put(buffer, 0, bytesRead)
             nioBuffer.flip()
-            channel.write(nioBuffer, 0).await()
+            channel.write(nioBuffer, offset.fetchAndAdd(bytesRead.toLong())).await()
             remaining -= chunkSize
         }
     }

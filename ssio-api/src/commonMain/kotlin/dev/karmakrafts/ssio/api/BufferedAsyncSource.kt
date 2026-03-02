@@ -63,7 +63,8 @@ private class BufferedAsyncSource( // @formatter:off
     }
 
     override suspend fun readByteString(): ByteString {
-        check(await(AwaitPredicate.exhausted()).isSuccess) { "Could not read AsyncSource" }
+        val result = await(AwaitPredicate.exhausted())
+        check(result.isSuccess) { "Could not read AsyncSource: ${result.exceptionOrNull()}" }
         return buffer.readByteString()
     }
 
