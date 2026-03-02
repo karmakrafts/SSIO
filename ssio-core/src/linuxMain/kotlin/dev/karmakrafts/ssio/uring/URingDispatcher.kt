@@ -57,9 +57,9 @@ internal object URingDispatcher {
             }
             for (index in 0..<completionCount) {
                 val completion = completions[index]
-                val deferredRef = completion.getData()?.asStableRef<CompletableDeferred<Int>>() ?: continue
+                val deferredRef = completion.data?.asStableRef<CompletableDeferred<Int>>() ?: continue
                 _submissionsInFlight.fetchAndDecrement()
-                deferredRef.get().complete(completion.getResult()) // Complete deferred task with CQE result
+                deferredRef.get().complete(completion.result) // Complete deferred task with CQE result
                 deferredRef.dispose() // Unpin pointer to underlying Kotlin object so it can be GC'd
             }
             ring.advance(completions.size)

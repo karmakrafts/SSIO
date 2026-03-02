@@ -28,6 +28,9 @@ import liburing.io_uring_cqe_get_data
 internal value class URingCompletionQueueEntry( // @formatter:off
     val address: CPointer<io_uring_cqe>
 ) { // @formatter:on
-    inline fun getData(): COpaquePointer? = io_uring_cqe_get_data(address)
-    inline fun getResult(): Int = address.pointed.res
+    inline val data: COpaquePointer?
+        get() = io_uring_cqe_get_data(address)
+
+    inline val result: Int
+        get() = address.pointed.res
 }
