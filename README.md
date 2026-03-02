@@ -36,11 +36,18 @@ in the `ssio-core` implementation:
 |---------|---------------|----------------|
 | JVM     | JVM           | NIO            |
 | Android | ART           | NIO            |
-| Native  | Kotlin/Native | CIO            |
+| Linux   | Kotlin/Native | CIO/io_uring*  |
+| Windows | Kotlin/Native | CIO            |
+| macOS   | Kotlin/Native | CIO            |
+| iOS     | Kotlin/Native | CIO            |
+| tvOS    | Kotlin/Native | CIO            |
+| watchOS | Kotlin/Native | CIO            |
 | JS      | Browser       | OPFS           |
 | JS      | NodeJS        | fs.promises    |
 | WASM    | Browser       | OPFS           |
 | WASM    | NodeJS        | fs.promises    |
+
+> **NOTE:** Implementations marked with an asterisk* are used only when the underlying system supports them.
 
 ### Why should I use this over kotlinx.io or java.nio?
 
