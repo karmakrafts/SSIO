@@ -113,7 +113,7 @@ test:nodejs:
     - *if-merge-request
     - *if-main
   script:
-    - gradle jsNodeTest wasmJsNodeTest
+    - ./gradlew jsNodeTest wasmJsNodeTest
   tags:
     - linux
     - shell
@@ -126,13 +126,13 @@ test:browser:
     - *if-merge-request
     - *if-main
   script:
-    - gradle jsBrowserTest wasmJsBrowserTest
+    - ./gradlew jsBrowserTest wasmJsBrowserTest
   tags:
     - linux
     - shell
     - amd64
 
-test:linux:amd64:
+test:linux:
   stage: test
   interruptible: true
   rules:
@@ -144,19 +144,6 @@ test:linux:amd64:
     - linux
     - docker
     - amd64
-
-test:linux:arm64:
-  stage: test
-  interruptible: true
-  rules:
-    - *if-merge-request
-    - *if-main
-  script:
-    - gradle linuxArm64Test jvmTest
-  tags:
-    - linux
-    - docker
-    - arm64
 
 test:macos:
   stage: test
@@ -210,7 +197,7 @@ publish:maven:web:
   tags:
     - macos
 
-publish:maven:linux:amd64:
+publish:maven:linux:
   stage: publish
   rules:
     - *if-main
@@ -218,27 +205,12 @@ publish:maven:linux:amd64:
   script:
     - |
       gradle \
-      publishLinuxX64PublicationToGitLabRepository \
-      publishLinuxX64PublicationToSonatypeRepository
+      publishLinux{X64,Arm64}PublicationToGitLabRepository \
+      publishLinux{X64,Arm64}PublicationToSonatypeRepository
   tags:
     - linux
     - docker
     - amd64
-
-publish:maven:linux:arm64:
-  stage: publish
-  rules:
-    - *if-main
-    - *if-release
-  script:
-    - |
-      gradle \
-      publishLinuxArm64PublicationToGitLabRepository \
-      publishLinuxArm64PublicationToSonatypeRepository
-  tags:
-    - linux
-    - docker
-    - arm64
 
 publish:maven:apple:
   stage: publish
@@ -271,8 +243,7 @@ publish:maven:windows:
 publish:maven:finalize:
   stage: publish
   needs:
-    - publish:maven:linux:amd64
-    - publish:maven:linux:arm64
+    - publish:maven:linux
     - publish:maven:apple
     - publish:maven:windows
     - publish:maven:jvmAndAndroid
