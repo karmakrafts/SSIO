@@ -19,73 +19,49 @@
 package dev.karmakrafts.ssio.opfs
 
 import dev.karmakrafts.ssio.api.AsyncRawSource
-import js.buffer.ArrayBuffer
-import js.promise.await
-import js.typedarrays.Uint8Array
-import js.typedarrays.toByteArray
+import dev.karmakrafts.ssio.asByteArray
+import js.typedarrays.toInt8Array
 import kotlinx.io.Buffer
-import web.streams.ReadableStreamDefaultReader
-import web.streams.cancel
-import web.streams.read
+import web.blob.bytes
+import web.file.File
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.math.min
 
 internal class OPFSFileSource( // @formatter:off
-    private val reader: ReadableStreamDefaultReader<Uint8Array<ArrayBuffer>>,
+    private val file: File
 ) : AsyncRawSource { // @formatter:on
-    private val buffer: Buffer = Buffer()
-    private var isClosing: Boolean = false
+    companion object {
+        private const val CHUNK_SIZE: Int = 4096
+    }
+
     private var isClosed: Boolean = false
+    private var offset: Long = 0L
 
     override suspend fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
         check(!isClosed) { "OpfsFileSource is already closed" }
-        var transferredTotal = 0L
-        // First check buffer for leftovers
-        if (buffer.size > 0) {
-            val toRead = min(buffer.size, byteCount)
-            transferredTotal += buffer.readAtMostTo(sink, toRead)
-            // If we got enough data from the buffer, we can return early
-            if (transferredTotal == byteCount) return transferredTotal
+        var remaining = byteCount
+        var readTotal = 0L
+        while (remaining > 0) {
+            val chunkSize = min(CHUNK_SIZE.toLong(), remaining)
+            val subSlice = file.slice(offset.toDouble(), (offset + chunkSize).toDouble())
+            val data = subSlice.bytes()
+            val bytesRead = data.length
+            if (bytesRead == 0) return -1L // We reached EOF
+            sink.write(data.toInt8Array().asByteArray(), 0, bytesRead)
+            remaining -= chunkSize
+            readTotal += bytesRead
         }
-        // Otherwise we have to pull in fresh data..
-        val missingTotal = byteCount - transferredTotal
-        var read = 0L
-        while (true) {
-            val result = reader.read()
-            if (result.done) break // We reached EOF
-            val data = result.value?.toByteArray() ?: ByteArray(0)
-            val dataSize = data.size.toLong()
-            read += dataSize
-            when {
-                read > missingTotal -> {
-                    // First write the remaining data to fulfill consumer
-                    val toRead = missingTotal - read
-                    sink.write(data.sliceArray(0..<toRead.toInt()))
-                    // If we overfetched some data, we need to write it back to the buffer
-                    dataSize - toRead
-                    buffer.write(data.sliceArray(toRead.toInt()..<dataSize.toInt()))
-                }
-
-                else -> sink.write(data) // Otherwise just write the data
-            }
-        }
-        // Clamp read byte count between 0 and byteCount
-        return min(read, byteCount)
+        offset += readTotal
+        return readTotal
     }
 
     override suspend fun close() {
         check(!isClosed) { "OpfsFileSource is already closed" }
-        reader.cancel()
-        reader.closed.await()
         isClosed = true
     }
 
     override fun closeAbruptly() {
         check(!isClosed) { "OpfsFileSource is already closed" }
-        check(!isClosing) { "OpfsFileSource is already closing" }
-        reader.cancelAsync().finally {
-            isClosed = true
-        }
-        isClosing = true
+        isClosed = true
     }
 }

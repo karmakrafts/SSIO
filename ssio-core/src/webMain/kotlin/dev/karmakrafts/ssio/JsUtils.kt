@@ -23,10 +23,11 @@ import js.typedarrays.Int8Array
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.js
 
-@OptIn(ExperimentalWasmJsInterop::class)
 private fun checkIsNode(): Boolean = js("""typeof process !== 'undefined' && process.release.name === 'node'""")
+private fun checkHasByobReader(): Boolean = js("""typeof ReadableStreamBYOBReader !== 'undefined'""")
 
 internal val isNode: Boolean = checkIsNode()
+internal val hasByobReader: Boolean = checkHasByobReader()
 
 internal expect fun ByteArray.asInt8Array(): Int8Array<ArrayBuffer>
 internal expect fun Int8Array<ArrayBuffer>.asByteArray(): ByteArray

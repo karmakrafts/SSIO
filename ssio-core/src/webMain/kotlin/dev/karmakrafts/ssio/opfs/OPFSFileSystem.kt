@@ -134,16 +134,14 @@ internal object OPFSFileSystem : AbstractAsyncFileSystem() {
         }
 
     override suspend fun source(path: Path): AsyncRawSource {
-        val handle = getFileHandle(path, create = false).getOrThrow()
-        return OPFSFileSource(handle.getFile().stream().getReader())
+        return OPFSFileSource(getFileHandle(path, create = false).getOrThrow().getFile())
     }
 
     override suspend fun sink(path: Path, append: Boolean): AsyncRawSink {
         val handle = getFileHandle(path, create = !exists(path)).getOrThrow()
         val stream = handle.createWritable()
         if (append) { // If we append, seek to the tail of the file
-            val file = handle.getFile()
-            stream.seek(file.size)
+            stream.seek(handle.getFile().size)
         }
         return OPFSFileSink(stream)
     }

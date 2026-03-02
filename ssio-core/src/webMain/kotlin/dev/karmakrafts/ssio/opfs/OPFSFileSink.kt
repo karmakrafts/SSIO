@@ -19,9 +19,9 @@
 package dev.karmakrafts.ssio.opfs
 
 import dev.karmakrafts.ssio.api.AsyncRawSink
-import js.typedarrays.toInt8Array
+import dev.karmakrafts.ssio.asInt8Array
+import js.typedarrays.Int8Array
 import kotlinx.io.Buffer
-import kotlinx.io.readByteArray
 import web.fs.FileSystemWritableFileStream
 import web.fs.write
 import web.streams.close
@@ -31,16 +31,22 @@ import kotlin.math.min
 internal class OPFSFileSink( // @formatter:off
     private val stream: FileSystemWritableFileStream
 ) : AsyncRawSink { // @formatter:on
+    companion object {
+        private const val CHUNK_SIZE: Int = 4096
+    }
+
     private var isClosing: Boolean = false
     private var isClosed: Boolean = false
+    private var buffer: ByteArray = ByteArray(CHUNK_SIZE)
 
     override suspend fun write(source: Buffer, byteCount: Long) {
         check(!isClosed) { "OPFSFileSink is already closed" }
         var remaining = min(source.size, byteCount)
         while (remaining > 0) {
-            val toWrite = min(remaining, Int.MAX_VALUE.toLong()).toInt()
-            val data = source.readByteArray(toWrite).toInt8Array()
-            stream.write(data)
+            val toWrite = min(CHUNK_SIZE.toLong(), remaining).toInt()
+            val bytesRead = source.readAtMostTo(buffer, 0, toWrite)
+            if (bytesRead == -1) break
+            stream.write(Int8Array(buffer.asInt8Array().buffer, 0, bytesRead))
             remaining -= toWrite
         }
     }
