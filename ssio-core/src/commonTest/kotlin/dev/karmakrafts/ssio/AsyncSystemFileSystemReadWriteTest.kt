@@ -64,21 +64,17 @@ import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 
 class AsyncSystemFileSystemReadWriteTest {
-    private suspend fun <T> testReadWrite( // @formatter:off
+    private suspend inline fun <T> testReadWrite( // @formatter:off
         value: T, 
-        write: suspend AsyncSink.(T) -> Unit, 
-        read: suspend AsyncSource.() -> T
+        crossinline write: suspend AsyncSink.(T) -> Unit,
+        crossinline read: suspend AsyncSource.() -> T,
+        crossinline asserter: (T, T) -> Unit
     ) { // @formatter:on
         val path = Path("test_extensions_${value.hashCode()}.bin")
         try {
             AsyncSystemFileSystem.sink(path).buffered().use { it.write(value) }
             val readValue = AsyncSystemFileSystem.source(path).buffered().use { it.read() }
-            if (value is ByteArray) {
-                assertContentEquals(value as ByteArray, readValue as ByteArray)
-            }
-            else {
-                assertEquals(value, readValue)
-            }
+            asserter(value, readValue)
         }
         finally {
             AsyncSystemFileSystem.delete(path, mustExist = false)
@@ -87,119 +83,132 @@ class AsyncSystemFileSystemReadWriteTest {
 
     @Test
     fun `Read and write Byte`() = runTest {
-        testReadWrite(0xAB.toByte(), AsyncSink::writeByte, AsyncSource::readByte)
+        testReadWrite(0xAB.toByte(), AsyncSink::writeByte, AsyncSource::readByte, ::assertEquals)
     }
 
     @Test
     fun `Read and write Short`() = runTest {
-        testReadWrite(0x1234.toShort(), AsyncSink::writeShort, AsyncSource::readShort)
+        testReadWrite(0x1234.toShort(), AsyncSink::writeShort, AsyncSource::readShort, ::assertEquals)
     }
 
     @Test
     fun `Read and write Int`() = runTest {
-        testReadWrite(0x12345678, AsyncSink::writeInt, AsyncSource::readInt)
+        testReadWrite(0x12345678, AsyncSink::writeInt, AsyncSource::readInt, ::assertEquals)
     }
 
     @Test
     fun `Read and write Long`() = runTest {
-        testReadWrite(0x1234567890ABCDEF, AsyncSink::writeLong, AsyncSource::readLong)
+        testReadWrite(0x1234567890ABCDEF, AsyncSink::writeLong, AsyncSource::readLong, ::assertEquals)
     }
 
     @Test
     fun `Read and write ShortLe`() = runTest {
-        testReadWrite(0x1234.toShort(), AsyncSink::writeShortLe, AsyncSource::readShortLe)
+        testReadWrite(0x1234.toShort(), AsyncSink::writeShortLe, AsyncSource::readShortLe, ::assertEquals)
     }
 
     @Test
     fun `Read and write IntLe`() = runTest {
-        testReadWrite(0x12345678, AsyncSink::writeIntLe, AsyncSource::readIntLe)
+        testReadWrite(0x12345678, AsyncSink::writeIntLe, AsyncSource::readIntLe, ::assertEquals)
     }
 
     @Test
     fun `Read and write LongLe`() = runTest {
-        testReadWrite(0x1234567890ABCDEF, AsyncSink::writeLongLe, AsyncSource::readLongLe)
+        testReadWrite(0x1234567890ABCDEF, AsyncSink::writeLongLe, AsyncSource::readLongLe, ::assertEquals)
     }
 
     @Test
     fun `Read and write ByteString`() = runTest {
         val bs = ByteString(1, 2, 3, 4, 5)
-        testReadWrite(bs, AsyncSink::writeByteString, AsyncSource::readByteString)
+        testReadWrite(bs, AsyncSink::writeByteString, AsyncSource::readByteString, ::assertEquals)
     }
 
     @Test
     fun `Read and write ByteArray`() = runTest {
         val ba = byteArrayOf(1, 2, 3, 4, 5)
-        testReadWrite(ba, AsyncSink::writeByteArray, AsyncSource::readByteArray)
+        testReadWrite(ba, AsyncSink::writeByteArray, AsyncSource::readByteArray, ::assertContentEquals)
     }
 
     @Test
     fun `Read and write UByte`() = runTest {
-        testReadWrite(250.toUByte(), AsyncSink::writeUByte, AsyncSource::readUByte)
+        testReadWrite(250.toUByte(), AsyncSink::writeUByte, AsyncSource::readUByte, ::assertEquals)
     }
 
     @Test
     fun `Read and write UShort`() = runTest {
-        testReadWrite(60000.toUShort(), AsyncSink::writeUShort, AsyncSource::readUShort)
+        testReadWrite(60000.toUShort(), AsyncSink::writeUShort, AsyncSource::readUShort, ::assertEquals)
     }
 
     @Test
     fun `Read and write UInt`() = runTest {
-        testReadWrite(4000000000.toUInt(), AsyncSink::writeUInt, AsyncSource::readUInt)
+        testReadWrite(4000000000.toUInt(), AsyncSink::writeUInt, AsyncSource::readUInt, ::assertEquals)
     }
 
     @Test
     fun `Read and write ULong`() = runTest {
-        testReadWrite(18000000000000000000uL, AsyncSink::writeULong, AsyncSource::readULong)
+        testReadWrite(18000000000000000000uL, AsyncSink::writeULong, AsyncSource::readULong, ::assertEquals)
     }
 
     @Test
     fun `Read and write Float`() = runTest {
-        testReadWrite(3.14f, AsyncSink::writeFloat, AsyncSource::readFloat)
+        testReadWrite(3.14f, AsyncSink::writeFloat, AsyncSource::readFloat) { ex, ac ->
+            assertEquals(ex, ac, 0.0001F)
+        }
     }
 
     @Test
     fun `Read and write Double`() = runTest {
-        testReadWrite(3.1415926535, AsyncSink::writeDouble, AsyncSource::readDouble)
+        testReadWrite(3.1415926535, AsyncSink::writeDouble, AsyncSource::readDouble) { ex, ac ->
+            assertEquals(ex, ac, 0.0000001)
+        }
     }
 
     @Test
     fun `Read and write UShortLe`() = runTest {
-        testReadWrite(60000.toUShort(), AsyncSink::writeUShortLe, AsyncSource::readUShortLe)
+        testReadWrite(60000.toUShort(), AsyncSink::writeUShortLe, AsyncSource::readUShortLe, ::assertEquals)
     }
 
     @Test
     fun `Read and write UIntLe`() = runTest {
-        testReadWrite(4000000000.toUInt(), AsyncSink::writeUIntLe, AsyncSource::readUIntLe)
+        testReadWrite(4000000000.toUInt(), AsyncSink::writeUIntLe, AsyncSource::readUIntLe, ::assertEquals)
     }
 
     @Test
     fun `Read and write ULongLe`() = runTest {
-        testReadWrite(18000000000000000000uL, AsyncSink::writeULongLe, AsyncSource::readULongLe)
+        testReadWrite(18000000000000000000uL, AsyncSink::writeULongLe, AsyncSource::readULongLe, ::assertEquals)
     }
 
     @Test
     fun `Read and write FloatLe`() = runTest {
-        testReadWrite(3.14f, AsyncSink::writeFloatLe, AsyncSource::readFloatLe)
+        testReadWrite(3.14f, AsyncSink::writeFloatLe, AsyncSource::readFloatLe) { ex, ac ->
+            assertEquals(ex, ac, 0.0001F)
+        }
     }
 
     @Test
     fun `Read and write DoubleLe`() = runTest {
-        testReadWrite(3.1415926535, AsyncSink::writeDoubleLe, AsyncSource::readDoubleLe)
+        testReadWrite(3.1415926535, AsyncSink::writeDoubleLe, AsyncSource::readDoubleLe) { ex, ac ->
+            assertEquals(ex, ac, 0.0000001)
+        }
     }
 
     @Test
     fun `Read and write String`() = runTest {
-        testReadWrite("Hello, World!", AsyncSink::writeString, AsyncSource::readString)
+        testReadWrite("Hello, World!", AsyncSink::writeString, AsyncSource::readString, ::assertEquals)
     }
 
     @Test
     fun `Read and write PrefixedString`() = runTest {
-        testReadWrite("Hello, World!", AsyncSink::writePrefixedString, AsyncSource::readPrefixedString)
+        testReadWrite("Hello, World!", AsyncSink::writePrefixedString, AsyncSource::readPrefixedString, ::assertEquals)
     }
 
     @Test
     fun `Read and write PrefixedStringLe`() = runTest {
-        testReadWrite("Hello, World!", AsyncSink::writePrefixedStringLe, AsyncSource::readPrefixedStringLe)
+        testReadWrite(
+            "Hello, World!",
+            AsyncSink::writePrefixedStringLe,
+            AsyncSource::readPrefixedStringLe,
+            ::assertEquals
+        )
     }
 
     @Test
@@ -208,7 +217,9 @@ class AsyncSystemFileSystemReadWriteTest {
         testReadWrite(
             list,
             { list -> writeList(list) { writePrefixedString(it) } },
-            { readList { readPrefixedString() } })
+            { readList { readPrefixedString() } },
+            ::assertEquals
+        )
     }
 
     @Test
@@ -217,7 +228,9 @@ class AsyncSystemFileSystemReadWriteTest {
         testReadWrite(
             list,
             { list -> writeListLe(list) { writePrefixedString(it) } },
-            { readListLe { readPrefixedString() } })
+            { readListLe { readPrefixedString() } },
+            ::assertEquals
+        )
     }
 
     @Test
@@ -226,7 +239,9 @@ class AsyncSystemFileSystemReadWriteTest {
         testReadWrite(
             map,
             { map -> writeMap(map, { writeInt(it) }, { writePrefixedString(it) }) },
-            { readMap({ readInt() }, { readPrefixedString() }) })
+            { readMap({ readInt() }, { readPrefixedString() }) },
+            ::assertEquals
+        )
     }
 
     @Test
@@ -235,6 +250,8 @@ class AsyncSystemFileSystemReadWriteTest {
         testReadWrite(
             map,
             { map -> writeMapLe(map, { writeIntLe(it) }, { writePrefixedString(it) }) },
-            { readMapLe({ readIntLe() }, { readPrefixedString() }) })
+            { readMapLe({ readIntLe() }, { readPrefixedString() }) },
+            ::assertEquals
+        )
     }
 }

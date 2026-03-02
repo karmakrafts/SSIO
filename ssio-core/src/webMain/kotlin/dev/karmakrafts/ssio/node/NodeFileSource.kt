@@ -18,10 +18,10 @@ package dev.karmakrafts.ssio.node
 
 import dev.karmakrafts.ssio.api.AsyncRawSource
 import js.buffer.ArrayBuffer
+import js.buffer.toByteArray
 import js.promise.await
-import js.typedarrays.Uint8Array
-import js.typedarrays.toByteArray
 import kotlinx.io.Buffer
+import kotlin.math.min
 
 internal class NodeFileSource(
     private val handle: FileHandle
@@ -33,20 +33,23 @@ internal class NodeFileSource(
     private var isClosed: Boolean = false
     private var isClosing: Boolean = false
     private val buffer: ArrayBuffer = ArrayBuffer(CHUNK_SIZE)
+    private var offset: Long = 0L
 
     override suspend fun readAtMostTo(sink: Buffer, byteCount: Long): Long {
         check(!isClosed) { "AsyncRawSource is already closed" }
         var remaining = byteCount
-        var transferredTotal = 0L
+        var readTotal = 0L
         while (remaining > 0) {
-            val result = handle.read(buffer).await()
+            val chunkSize = min(CHUNK_SIZE.toLong(), remaining).toInt()
+            val result = handle.read(buffer, 0, chunkSize, offset).await()
             val bytesRead = result.bytesRead
-            if (bytesRead == 0) break
-            sink.write(Uint8Array(result.buffer, 0, bytesRead).toByteArray())
-            remaining -= bytesRead
-            transferredTotal += transferredTotal
+            if (bytesRead == 0) return -1L // We reached EOF
+            sink.write(result.buffer.toByteArray(), 0, bytesRead)
+            remaining -= chunkSize
+            readTotal += bytesRead
         }
-        return transferredTotal
+        offset += readTotal
+        return readTotal
     }
 
     override suspend fun close() {

@@ -52,19 +52,19 @@ internal external interface FileHandle : JsAny {
         buffer: B,
         offset: Int = definedExternally,
         length: Int = definedExternally,
-        position: Int = definedExternally
+        position: Long = definedExternally
     ): Promise<ReadResult<B>> // @formatter:on
 
     fun <B : JsAny> write( // @formatter:off
         buffer: B,
         offset: Int = definedExternally,
         length: Int = definedExternally,
-        position: Int = definedExternally
+        position: Long = definedExternally
     ): Promise<WriteResult<B>> // @formatter:on
 
     fun sync(): Promise<Nothing?>
-
     fun close(): Promise<Nothing?>
+    fun stat(): Promise<FsStats>
 }
 
 private external interface FsStatOptions : JsAny {
