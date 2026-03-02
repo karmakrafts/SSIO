@@ -44,7 +44,6 @@ internal external interface ReadResult<B : JsAny> : JsAny {
 
 internal external interface WriteResult<B : JsAny> : JsAny {
     val bytesWritten: Int
-    val buffer: B
 }
 
 internal external interface FileHandle : JsAny {
@@ -64,29 +63,20 @@ internal external interface FileHandle : JsAny {
 
     fun sync(): Promise<Nothing?>
     fun close(): Promise<Nothing?>
-    fun stat(): Promise<FsStats>
 }
 
-private external interface FsStatOptions : JsAny {
-    var bigint: Boolean
-}
+private external interface FsStatOptions : JsAny
 
 private external interface FsRmOptions : JsAny {
     var force: Boolean
-    var maxRetries: Int
-    var recursive: Boolean
-    var retryDelay: Int
 }
 
 private external interface FsReaddirOptions : JsAny {
-    var encoding: String
     var withFileTypes: Boolean
-    var recursive: Boolean
 }
 
 private external interface FsMkdirOptions : JsAny {
     var recursive: Boolean
-    var mode: String
 }
 
 internal external interface FsStats : JsAny {
@@ -100,8 +90,6 @@ private external interface FsConstants : JsAny {
 }
 
 private external interface FsDirEnt : JsAny {
-    val isDirectory: Boolean
-    val isFile: Boolean
     val name: String
     val parentPath: String
 }
