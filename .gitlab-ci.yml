@@ -139,7 +139,7 @@ test:linux:
     - *if-merge-request
     - *if-main
   script:
-    - gradle linuxX64Test jvmTest
+    - ./gradlew linuxX64Test jvmTest
   tags:
     - linux
     - shell
@@ -204,7 +204,7 @@ publish:maven:linux:
     - *if-release
   script:
     - |
-      gradle \
+      ./gradlew \
       publishLinux{X64,Arm64}PublicationToGitLabRepository \
       publishLinux{X64,Arm64}PublicationToSonatypeRepository
   tags:
