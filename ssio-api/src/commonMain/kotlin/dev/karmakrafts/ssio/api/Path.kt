@@ -69,13 +69,15 @@ expect fun KxioPath.toSsio(): Path
  */
 fun Path(base: Path, vararg segments: String): Path {
     var rawBase = base.toString()
-    if(rawBase.endsWith(Paths.separator)) rawBase = rawBase.dropLast(1)
     val cleanSegments = segments.filterNot(String::isEmpty)
     return Path(
         when {
             rawBase.isEmpty() -> cleanSegments.joinToString(Paths.separator)
             rawBase == Paths.separator -> "${Paths.separator}${cleanSegments.joinToString(Paths.separator)}"
-            else -> "$rawBase${Paths.separator}${cleanSegments.joinToString(Paths.separator)}"
+            else -> {
+                if(rawBase.endsWith(Paths.separator)) rawBase = rawBase.dropLast(1)
+                "$rawBase${Paths.separator}${cleanSegments.joinToString(Paths.separator)}"
+            }
         }
     )
 }
