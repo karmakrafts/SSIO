@@ -24,11 +24,13 @@ import dev.karmakrafts.ssio.api.AsyncRawSource
 import dev.karmakrafts.ssio.api.Path
 import dev.karmakrafts.ssio.api.div
 import dev.karmakrafts.ssio.api.getSegments
+import dev.karmakrafts.ssio.hasByobReader
 import js.disposable.use
 import js.iterable.IteratorReturnResult
 import js.objects.unsafeJso
 import js.promise.await
 import kotlinx.io.files.FileMetadata
+import web.file.File
 import web.fs.FileSystemDirectoryHandle
 import web.fs.FileSystemFileHandle
 import web.fs.FileSystemHandle
@@ -41,6 +43,9 @@ import web.fs.seek
 import web.fs.write
 import web.navigator.navigator
 import web.storage.getDirectory
+import web.streams.ReadableStreamBYOBReader
+import web.streams.ReadableStreamReaderMode
+import web.streams.byob
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.unsafeCast
 
@@ -51,6 +56,13 @@ import kotlin.js.unsafeCast
 internal object OPFSFileSystem : AbstractAsyncFileSystem() {
     private val workingDirectory: Path = Path("/")
     private val tempDirectory: Path = Path("/tmp")
+
+    private val sourceFactory: (File) -> AsyncRawSource = if (hasByobReader) { file ->
+        FastOPFSFileSource(file.stream().getReader(unsafeJso {
+            mode = ReadableStreamReaderMode.byob
+        }) as ReadableStreamBYOBReader)
+    }
+    else ::OPFSFileSource
 
     override suspend fun getWorkingDirectory(): Path = workingDirectory
     override suspend fun getTempDirectory(): Path = tempDirectory
@@ -133,16 +145,13 @@ internal object OPFSFileSystem : AbstractAsyncFileSystem() {
             }) { null }
         }
 
-    override suspend fun source(path: Path): AsyncRawSource {
-        return OPFSFileSource(getFileHandle(path, create = false).getOrThrow().getFile())
-    }
+    override suspend fun source(path: Path): AsyncRawSource =
+        sourceFactory(getFileHandle(path, create = false).getOrThrow().getFile())
 
     override suspend fun sink(path: Path, append: Boolean): AsyncRawSink {
         val handle = getFileHandle(path, create = !exists(path)).getOrThrow()
         val stream = handle.createWritable()
-        if (append) { // If we append, seek to the tail of the file
-            stream.seek(handle.getFile().size)
-        }
+        if (append) stream.seek(handle.getFile().size)
         return OPFSFileSink(stream)
     }
 
