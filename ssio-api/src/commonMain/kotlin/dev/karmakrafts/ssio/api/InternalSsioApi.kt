@@ -16,19 +16,6 @@
 
 package dev.karmakrafts.ssio.api
 
-import kotlin.experimental.ExperimentalNativeApi
-import kotlin.native.Platform as NativePlatform
-
-@InternalSsioApi
-@OptIn(ExperimentalNativeApi::class)
-actual val platform: Platform = when (NativePlatform.osFamily) {
-    OsFamily.WINDOWS -> Platform.WINDOWS
-    OsFamily.MACOSX -> Platform.MACOS
-    OsFamily.LINUX -> Platform.LINUX
-    OsFamily.IOS -> Platform.IOS
-    OsFamily.TVOS -> Platform.TVOS
-    OsFamily.WATCHOS -> Platform.WATCHOS
-    OsFamily.ANDROID -> Platform.ANDROID
-    OsFamily.WASM -> Platform.WASI
-    OsFamily.UNKNOWN -> Platform.UNKNOWN
-}
+@RequiresOptIn(message = "The API you are trying to use is internal and may change at any time")
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY, AnnotationTarget.TYPEALIAS)
+annotation class InternalSsioApi

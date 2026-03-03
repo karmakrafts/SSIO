@@ -28,8 +28,8 @@ import kotlinx.io.files.FileMetadata
  * [NoopFileSource] and [NoopFileSink] for file IO.
  */
 object AsyncNoopFileSystem : AsyncFileSystem {
-    override suspend fun getWorkingDirectory(): Path = Paths.root
-    override suspend fun getTempDirectory(): Path = Paths.root
+    override suspend fun getWorkingDirectory(): Path = Path("")
+    override suspend fun getTempDirectory(): Path = Path("")
     override suspend fun move(oldPath: Path, newPath: Path) = Unit
     override suspend fun delete(path: Path, mustExist: Boolean) = Unit
     override suspend fun createDirectories(path: Path, mustCreate: Boolean) = Unit

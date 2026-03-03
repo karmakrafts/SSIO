@@ -32,8 +32,8 @@ import kotlinx.io.files.FileMetadata
  * A simple graph based virtual file system implementation.
  */
 class AsyncVirtualFileSystem( // @formatter:off
-    private val workingDirectory: Path = Paths.root,
-    private val tempDirectory: Path = Paths.root / "tmp"
+    private val workingDirectory: Path = Path(Paths.separator),
+    private val tempDirectory: Path = workingDirectory / "tmp"
 ) : AsyncFileSystem, AsyncCloseable { // @formatter:on
     private val rootNode: VfsDirectoryNode = VfsDirectoryNode(Paths.separator)
 
@@ -128,7 +128,7 @@ class AsyncVirtualFileSystem( // @formatter:off
 
     override suspend fun resolve(path: Path): Path {
         return if (path.isAbsolute) path.normalize()
-        else (getWorkingDirectory() / path).normalize()
+        else getWorkingDirectory() / path.normalize()
     }
 
     override suspend fun metadataOrNull(path: Path): FileMetadata? =

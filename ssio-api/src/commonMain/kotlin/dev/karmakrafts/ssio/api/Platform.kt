@@ -16,7 +16,8 @@
 
 package dev.karmakrafts.ssio.api
 
-internal enum class Platform {
+@InternalSsioApi
+enum class Platform {
     // @formatter:off
     WINDOWS,
     LINUX,
@@ -45,4 +46,5 @@ internal enum class Platform {
         get() = this in apple
 }
 
-internal expect val platform: Platform
+@InternalSsioApi
+expect val platform: Platform

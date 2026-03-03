@@ -18,33 +18,6 @@ package dev.karmakrafts.ssio.api
 
 import kotlinx.io.files.Path as KxioPath
 
-actual class Path {
-    var value: String = ""
-
-    actual val isAbsolute: Boolean
-        get() = value.startsWith(Paths.separator)
-
-    actual val parent: Path?
-        get() {
-            if (Paths.separator !in value) return null
-            return Path(value.substringBeforeLast(Paths.separator))
-        }
-
-    actual val name: String
-        get() {
-            return if (Paths.separator in value) value.substringAfterLast(Paths.separator)
-            else value
-        }
-
-    actual override fun toString(): String = value
-    actual override fun equals(other: Any?): Boolean = other is Path && value == other.value
-    actual override fun hashCode(): Int = value.hashCode()
-}
-
-actual fun Path(path: String): Path = Path().apply {
-    value = path
-}
-
 @DelicateSsioApi
 actual fun Path.toKxio(): KxioPath = KxioPath(toString())
 

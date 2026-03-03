@@ -18,11 +18,14 @@
 
 package dev.karmakrafts.ssio.api
 
-import kotlinx.io.files.SystemPathSeparator
 import kotlin.jvm.JvmName
 
+@OptIn(InternalSsioApi::class)
 actual object Paths {
-    actual val separator: String = SystemPathSeparator.toString()
+    actual val separator: String = when {
+        platform.isWindows -> "\\"
+        else -> "/"
+    }
 
     actual val driveSeparator: String? = when {
         platform.isWindows -> ":"
@@ -32,5 +35,4 @@ actual object Paths {
     actual val currentDirectoryDelimiter: String = "."
     actual val parentDirectoryDelimiter: String = ".."
     actual val extensionDelimiter: String = "."
-    actual val root: Path = Path(separator)
 }

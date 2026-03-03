@@ -21,9 +21,5 @@ package dev.karmakrafts.ssio.api
 import kotlin.jvm.JvmName
 import kotlinx.io.files.Path as KxioPath
 
-actual typealias Path = KxioPath
-
-actual fun Path(path: String): Path = KxioPath(path)
-
-actual fun Path.toKxio(): KxioPath = this
-actual fun KxioPath.toSsio(): Path = this
+actual fun Path.toKxio(): KxioPath = KxioPath(toString())
+actual fun KxioPath.toSsio(): Path = Path(toString())

@@ -47,7 +47,4 @@ expect object Paths {
      * Will be `"."` on most platforms.
      */
     val extensionDelimiter: String
-
-    /** Root path of the current platform (e.g., `/` on Unix). */
-    val root: Path
 }

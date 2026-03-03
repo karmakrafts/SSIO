@@ -19,7 +19,8 @@ package dev.karmakrafts.ssio.api
 import oshi.PlatformEnum
 import oshi.SystemInfo
 
-internal actual val platform: Platform = when (SystemInfo.getCurrentPlatform()) {
+@InternalSsioApi
+actual val platform: Platform = when (SystemInfo.getCurrentPlatform()) {
     PlatformEnum.WINDOWS -> Platform.WINDOWS
     PlatformEnum.MACOS -> Platform.MACOS
     PlatformEnum.LINUX -> Platform.LINUX

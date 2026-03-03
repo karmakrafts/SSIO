@@ -48,6 +48,9 @@ class AsyncVirtualFileSystemTest {
             val root = vfs.resolve(Path(""))
             val relativePath = Path("foo") / "bar" / "test.txt"
             val absolutePath = vfs.resolve(relativePath)
+            println(root)
+            println(relativePath)
+            println(absolutePath)
             assertTrue(absolutePath.isAbsolute)
             assertEquals(root / relativePath, absolutePath)
         }
@@ -58,6 +61,8 @@ class AsyncVirtualFileSystemTest {
         AsyncVirtualFileSystem().use { vfs ->
             val relativePath = Path("foo") / "bar" / ".." / "test.txt"
             val absolutePath = vfs.resolve(relativePath)
+            println(relativePath)
+            println(absolutePath)
             assertTrue(absolutePath.isAbsolute)
             assertTrue("bar" !in absolutePath.toString())
         }

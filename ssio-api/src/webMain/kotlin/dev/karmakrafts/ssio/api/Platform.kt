@@ -17,7 +17,8 @@
 package dev.karmakrafts.ssio.api
 
 // TODO: we consider FreeBSD Linux right now for the sake of simplicity, change this
-internal actual val platform: Platform = if (isNode) when (getNodePlatform()) {
+@InternalSsioApi
+actual val platform: Platform = if (isNode) when (getNodePlatform()) {
     "darwin" -> Platform.MACOS
     "linux", "freebsd", "openbsd" -> Platform.LINUX
     "win32", "cygwin" -> Platform.WINDOWS

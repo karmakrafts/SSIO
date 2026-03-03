@@ -16,6 +16,7 @@
 
 package dev.karmakrafts.ssio.api
 
+import kotlin.jvm.JvmInline
 import kotlinx.io.files.Path as KxioPath
 
 /**
@@ -23,19 +24,24 @@ import kotlinx.io.files.Path as KxioPath
  *
  * Implementations are provided per platform via the `expect/actual` mechanism.
  */
-expect class Path {
-    /** True if this path is absolute. */
+@JvmInline
+value class Path(private val value: String) {
     val isAbsolute: Boolean
+        get() = value.startsWith(Paths.separator) || getDriveLetter() != null
 
-    /** Parent path, or null if this is the root or has no parent. */
     val parent: Path?
+        get() {
+            if (Paths.separator !in value) return null
+            return Path(value.substringBeforeLast(Paths.separator))
+        }
 
-    /** The last name element of this path. */
     val name: String
+        get() {
+            return if (Paths.separator in value) value.substringAfterLast(Paths.separator)
+            else value
+        }
 
-    override fun toString(): String
-    override fun equals(other: Any?): Boolean
-    override fun hashCode(): Int
+    override fun toString(): String = value
 }
 
 /**
@@ -53,16 +59,6 @@ expect fun Path.toKxio(): KxioPath
 expect fun KxioPath.toSsio(): Path
 
 /**
- * Create a new Path from the given path string.
- * The given string may be a relative or absolute path, and it may contain
- * elements like `.` and `..`, which will be retained.
- *
- * @param path The path string to create a new Path from.
- * @return A new Path instance containing the given path string.
- */
-expect fun Path(path: String): Path
-
-/**
  * Creates a new sub-path from the given base path and path segments.
  * The newly created sub-path will be normalized after concatenation.
  *
@@ -72,13 +68,14 @@ expect fun Path(path: String): Path
  * @return A new Path instance
  */
 fun Path(base: Path, vararg segments: String): Path {
-    val rawBase = base.toString()
+    var rawBase = base.toString()
+    if(rawBase.endsWith(Paths.separator)) rawBase = rawBase.dropLast(1)
     val cleanSegments = segments.filterNot(String::isEmpty)
     return Path(
         when {
             rawBase.isEmpty() -> cleanSegments.joinToString(Paths.separator)
             rawBase == Paths.separator -> "${Paths.separator}${cleanSegments.joinToString(Paths.separator)}"
-            else -> "$base${Paths.separator}${cleanSegments.joinToString(Paths.separator)}"
+            else -> "$rawBase${Paths.separator}${cleanSegments.joinToString(Paths.separator)}"
         }
     )
 }
