@@ -19,12 +19,12 @@
 package dev.karmakrafts.ssio.node
 
 import dev.karmakrafts.ssio.api.Paths
-import js.core.JsPrimitives.toKotlinString
 import js.import.import
 import js.objects.unsafeJso
 import js.promise.Promise
 import js.promise.await
 import js.promise.catch
+import js.string.JsStrings.toKotlinString
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
 import kotlin.js.JsArray

@@ -20,12 +20,12 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
-import liburing.fstat64
-import liburing.stat64
+import platform.posix.fstat
+import platform.posix.stat
 
 @OptIn(ExperimentalForeignApi::class)
 internal fun NativeFile.getSize(): Long = memScoped {
-    val stat = alloc<stat64>()
-    fstat64(fd, stat.ptr)
+    val stat = alloc<stat>()
+    fstat(fd, stat.ptr)
     stat.st_size
 }

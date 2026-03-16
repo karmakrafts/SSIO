@@ -139,10 +139,10 @@ test:linux:
     - *if-merge-request
     - *if-main
   script:
-    - ./gradlew linuxX64Test jvmTest
+    - gradle linuxX64Test jvmTest
   tags:
     - linux
-    - shell
+    - docker
     - amd64
 
 test:macos:
@@ -204,12 +204,12 @@ publish:maven:linux:
     - *if-release
   script:
     - |
-      ./gradlew \
+      gradle \
       publishLinux{X64,Arm64}PublicationToGitLabRepository \
       publishLinux{X64,Arm64}PublicationToSonatypeRepository
   tags:
     - linux
-    - shell
+    - docker
     - amd64
 
 publish:maven:apple:

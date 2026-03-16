@@ -5,7 +5,7 @@
 )](https://git.karmakrafts.dev/kk/ssio/-/packages)
 [![](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fdev%2Fkarmakrafts%2Fssio%2Fssio-core%2Fmaven-metadata.xml
 )](https://git.karmakrafts.dev/kk/ssio/-/packages)
-[![](https://img.shields.io/badge/2.3.20--Beta2-blue?logo=kotlin&label=kotlin)](https://kotlinlang.org/)
+[![](https://img.shields.io/badge/2.3.20-blue?logo=kotlin&label=kotlin)](https://kotlinlang.org/)
 [![](https://img.shields.io/badge/documentation-black?logo=kotlin)](https://docs.karmakrafts.dev/ssio-core)
 
 **S**treaming **S**uspend **I**nput **O**utput library for Kotlin Multiplatform.  
@@ -81,3 +81,32 @@ kotlin {
 ```
 
 Or, if you are only using Kotlin/JVM, add it to your top-level dependencies block instead.
+
+## How to build it
+
+In order to build SSIO, simply clone this project and run the `publishToMavenLocal` task:
+
+```shell
+./gradlew publishToMavenLocal
+```
+
+Or on Windows:
+
+```batch
+gradlew publishToMavenLocal
+```
+
+### Extra steps on Linux
+
+Since the library is built against `liburing` on Linux, you need to have Linux headers available  
+under `/usr/src/linux-headers`. If you need to install them, you can use the provided `install_linux_headers.sh`  
+script from the root of the repository.  
+This assumes a Debian based system and requires the following dependencies to be installed:
+
+#### Ubuntu/PopOS
+
+```
+build-essential make automake autoconf pkg-config pkgconf libtool gcc bison flex
+```
+
+Official build support for other distributions may be requested.
