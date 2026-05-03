@@ -19,7 +19,7 @@ oshi = "7.0.1" # https://github.com/oshi/oshi/releases
 filament = "2.1.1" # https://github.com/karmakrafts/Filament/releases
 stately = "2.1.0" # https://github.com/touchlab/Stately/releases
 
-liburing = "2.14.3" # https://git.karmakrafts.dev/kk/prebuilts/liburing/-/releases
+liburing = "2.14.5" # https://git.karmakrafts.dev/kk/prebuilts/liburing/-/releases
 
 [libraries]
 
