@@ -2,14 +2,14 @@
 
 ### Changed
 
-- Updated to Kotlin 2.3.21
-- Updated to Gradle 9.5.0
-- Updated to Android Gradle 9.2.0
-- Updated to Karma Conventions 1.16.1
-- Updated to Filament 2.1.1
+- Updated to Kotlin 2.4.0
+- Updated to Gradle 9.4.1
+- Updated to Android Gradle 9.2.1
+- Updated to Karma Conventions 1.18.0
+- Updated to Filament 2.2.0
 - Updated to Dokka 2.2.0
-- Updated to Kotlin Wrappers 2026.4.15
-- Updated to OSHI 7.0.1
+- Updated to Kotlin Wrappers 2026.6.3
+- Updated to OSHI 7.3.1
 
 ### Added
 

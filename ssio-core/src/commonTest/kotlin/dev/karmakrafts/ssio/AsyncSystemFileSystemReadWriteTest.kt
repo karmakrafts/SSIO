@@ -204,10 +204,7 @@ class AsyncSystemFileSystemReadWriteTest {
     @Test
     fun `Read and write PrefixedStringLe`() = runTest {
         testReadWrite(
-            "Hello, World!",
-            AsyncSink::writePrefixedStringLe,
-            AsyncSource::readPrefixedStringLe,
-            ::assertEquals
+            "Hello, World!", AsyncSink::writePrefixedStringLe, AsyncSource::readPrefixedStringLe, ::assertEquals
         )
     }
 

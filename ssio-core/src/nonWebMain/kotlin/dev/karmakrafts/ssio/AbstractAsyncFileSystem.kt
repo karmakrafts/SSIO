@@ -24,9 +24,9 @@ import dev.karmakrafts.ssio.api.normalize
 import dev.karmakrafts.ssio.api.platform
 import dev.karmakrafts.ssio.api.toKxio
 import dev.karmakrafts.ssio.api.toSsio
-import kotlinx.io.files.Path as KxioPath
 import kotlinx.io.files.FileMetadata
 import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.files.Path as KxioPath
 
 abstract class AbstractAsyncFileSystem : AsyncFileSystem {
     override suspend fun resolve(path: Path): Path {
