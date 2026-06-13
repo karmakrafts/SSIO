@@ -8,6 +8,12 @@
 [![](https://img.shields.io/badge/2.4.0-blue?logo=kotlin&label=kotlin)](https://kotlinlang.org/)
 [![](https://img.shields.io/badge/documentation-black?logo=kotlin)](https://docs.karmakrafts.dev/ssio-core)
 
+![](https://img.shields.io/badge/-JVM-blue?logo=kotlin&labelColor=black)
+![](https://img.shields.io/badge/-Android-green?logo=kotlin&labelColor=black)
+![](https://img.shields.io/badge/-Native-lightgray?logo=kotlin&labelColor=black)
+![](https://img.shields.io/badge/-JS-yellow?logo=kotlin&labelColor=black)
+![](https://img.shields.io/badge/-WASM/JS-orange?logo=kotlin&labelColor=black)
+
 **S**treaming **S**uspend **I**nput **O**utput library for Kotlin Multiplatform.  
 This is an async IO extension for [kotlinx.io](https://github.com/Kotlin/kotlinx-io) based on [the async API proposal](https://github.com/Kotlin/kotlinx-io/issues/163).
 
