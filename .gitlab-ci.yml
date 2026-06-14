@@ -171,14 +171,27 @@ test:windows:
 
 # ------------------------------ Publish
 
+publish:maven:initStagingRepo:
+  stage: publish
+  rules:
+    - *if-main
+    - *if-release
+  script:
+    - ./gradlew initializeSonatypeStagingRepository
+  tags:
+    - macos
+
 publish:maven:jvmAndAndroid:
   stage: publish
+  needs:
+    - publish:maven:initStagingRepo
   rules:
     - *if-main
     - *if-release
   script:
     - |
       ./gradlew \
+      findSonatypeStagingRepository \
       publish{Jvm,Android}PublicationToGitLabRepository \
       publish{Jvm,Android}PublicationToSonatypeRepository
   tags:
@@ -186,12 +199,15 @@ publish:maven:jvmAndAndroid:
 
 publish:maven:web:
   stage: publish
+  needs:
+    - publish:maven:initStagingRepo
   rules:
     - *if-main
     - *if-release
   script:
     - |
       ./gradlew \
+      findSonatypeStagingRepository \
       publish{Js,WasmJs}PublicationToGitLabRepository \
       publish{Js,WasmJs}PublicationToSonatypeRepository
   tags:
@@ -199,12 +215,15 @@ publish:maven:web:
 
 publish:maven:linux:
   stage: publish
+  needs:
+    - publish:maven:initStagingRepo
   rules:
     - *if-main
     - *if-release
   script:
     - |
       gradle \
+      findSonatypeStagingRepository \
       publishLinux{X64,Arm64}PublicationToGitLabRepository \
       publishLinux{X64,Arm64}PublicationToSonatypeRepository
   tags:
@@ -214,12 +233,15 @@ publish:maven:linux:
 
 publish:maven:apple:
   stage: publish
+  needs:
+    - publish:maven:initStagingRepo
   rules:
     - *if-main
     - *if-release
   script:
     - |
       ./gradlew \
+      findSonatypeStagingRepository \
       publish{MacosArm64,IosArm64,IosSimulatorArm64,TvosArm64,TvosSimulatorArm64,WatchosArm64,WatchosArm32,WatchosSimulatorArm64}PublicationToGitLabRepository \
       publish{MacosArm64,IosArm64,IosSimulatorArm64,TvosArm64,TvosSimulatorArm64,WatchosArm64,WatchosArm32,WatchosSimulatorArm64}PublicationToSonatypeRepository
   tags:
@@ -227,12 +249,17 @@ publish:maven:apple:
 
 publish:maven:windows:
   stage: publish
+  needs:
+    - publish:maven:initStagingRepo
   rules:
     - *if-main
     - *if-release
   script:
     - |
-      ./gradlew publishMingwX64PublicationToGitLabRepository publishMingwX64PublicationToSonatypeRepository
+      ./gradlew \
+      findSonatypeStagingRepository \
+      publishMingwX64PublicationToGitLabRepository \
+      publishMingwX64PublicationToSonatypeRepository
   tags:
     - windows
     - shell
@@ -241,6 +268,7 @@ publish:maven:windows:
 publish:maven:finalize:
   stage: publish
   needs:
+    - publish:maven:initStagingRepo
     - publish:maven:linux
     - publish:maven:apple
     - publish:maven:windows
@@ -251,7 +279,7 @@ publish:maven:finalize:
       ./gradlew \
       publishKotlinMultiplatformPublicationToGitLabRepository \
       publishKotlinMultiplatformPublicationToSonatypeRepository \
-      closeAndReleaseStagingRepositories
+      closeAndReleaseSonatypeStagingRepository
   tags:
     - macos
 

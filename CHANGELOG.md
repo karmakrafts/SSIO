@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Changed
+
+- Fixed broken Maven Central publication, due to mismatched staging repositories
+
 ## [1.3.0]
 
 ### Changed
