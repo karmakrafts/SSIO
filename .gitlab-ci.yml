@@ -177,7 +177,7 @@ publish:maven:initStagingRepo:
     - *if-main
     - *if-release
   script:
-    - ./gradlew initializeSonatypeStagingRepository
+    - ./gradlew closeStagingRepositories initializeSonatypeStagingRepository
   tags:
     - macos
 
