@@ -256,9 +256,9 @@ publish:maven:windows:
     - *if-release
   script:
     - |
-      ./gradlew \
-      findSonatypeStagingRepository \
-      publishMingwX64PublicationToGitLabRepository \
+      ./gradlew `
+      findSonatypeStagingRepository `
+      publishMingwX64PublicationToGitLabRepository `
       publishMingwX64PublicationToSonatypeRepository
   tags:
     - windows
