@@ -16,6 +16,7 @@
 
 @file:OptIn(ExperimentalKotlinGradlePluginApi::class)
 
+import dev.karmakrafts.conventions.configureJava
 import dev.karmakrafts.conventions.kotlin.defaultCompilerOptions
 import dev.karmakrafts.conventions.kotlin.withJvm
 import dev.karmakrafts.conventions.kotlin.withLinux
@@ -29,6 +30,8 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlinx.benchmark)
 }
+
+configureJava(libs.versions.javaCompile, libs.versions.javaTarget)
 
 kotlin {
     defaultCompilerOptions()

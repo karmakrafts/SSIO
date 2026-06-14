@@ -1,6 +1,7 @@
 [versions]
 
-java = "21"
+javaCompile = "25"
+javaTarget = "21"
 
 androidGradle = "9.2.1" # https://developer.android.com/reference/tools/gradle-api
 androidMinSdk = "26"

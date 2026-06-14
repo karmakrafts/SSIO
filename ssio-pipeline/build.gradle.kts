@@ -36,7 +36,7 @@ plugins {
     `maven-publish`
 }
 
-configureJava(libs.versions.java)
+configureJava(libs.versions.javaCompile, libs.versions.javaTarget)
 
 configureDokka {
     withJava()

@@ -49,7 +49,7 @@ plugins {
 val liburingPackage: GitLabPackage =
     gitlab().project("kk/prebuilts/liburing").packageRegistry["generic/build", libs.versions.liburing]
 
-configureJava(libs.versions.java)
+configureJava(libs.versions.javaCompile, libs.versions.javaTarget)
 
 configureDokka {
     withJava()
